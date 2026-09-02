@@ -77,14 +77,18 @@ function startDashboard(client) {
   app.get('/auth/callback', (req, res, next) => {
     passport.authenticate('discord', (err, user, info) => {
       if (err) {
-        console.error('Auth error:', err.message);
-        return res.redirect('/auth/error?msg=' + encodeURIComponent(err.message || 'Authentication failed'));
+        console.error('Auth ERROR:', err);
+        return res.redirect('/auth/error?msg=' + encodeURIComponent(err.message || err.toString() || 'Authentication failed'));
       }
       if (!user) {
-        return res.redirect('/auth/error?msg=' + encodeURIComponent(info?.message || 'Login cancelled. Please authorize the app.'));
+        console.error('Auth NO USER:', info);
+        return res.redirect('/auth/error?msg=' + encodeURIComponent(info?.message || info?.toString() || 'Login cancelled. Please authorize the app.'));
       }
       req.logIn(user, (err) => {
-        if (err) return res.redirect('/auth/error?msg=' + encodeURIComponent('Session creation failed'));
+        if (err) {
+          console.error('Session ERROR:', err);
+          return res.redirect('/auth/error?msg=' + encodeURIComponent('Session creation failed: ' + err.message));
+        }
         return res.redirect('/dashboard');
       });
     })(req, res, next);
@@ -368,6 +372,12 @@ function startDashboard(client) {
 
   app.get('/api/guilds/:guildId/settings', (req, res) => res.json(getGuildSettings(req.params.guildId)));
   app.get('/api/guilds/:guildId/stats', (req, res) => res.json(getGuildStats(req.params.guildId)));
+
+  // Global error handler
+  app.use((err, req, res, next) => {
+    console.error('Express error:', err);
+    res.redirect('/auth/error?msg=' + encodeURIComponent(err.message || 'Server error'));
+  });
 
   const port = client.config.port || 3000;
   app.listen(port, () => {
