@@ -1,56 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Discord Bot Dashboard</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <nav>
-    <a href="/" class="logo">🤖 Bot Dashboard</a>
-    <div class="nav-right">
+  <div class="navbar">
+    <a href="/" class="logo">&#129302; Bot Dashboard</a>
+    <div class="navbar-right">
       <% if (user) { %>
-        <span><%= user.username %></span>
-        <a href="/dashboard" class="btn primary">Dashboard</a>
-        <a href="/auth/logout" class="btn secondary small">Logout</a>
+        <a href="/dashboard" class="btn btn-primary btn-sm">Dashboard</a>
       <% } else { %>
-        <a href="/auth/login" class="btn primary">Login with Discord</a>
+        <a href="/auth/login" class="btn btn-primary btn-sm">Login</a>
       <% } %>
     </div>
-  </nav>
+  </div>
 
   <div class="hero">
-    <h1>🤖 Discord Bot Dashboard</h1>
-    <p>Full-featured bot with complete web-based configuration</p>
-    <div class="stats">
+    <h1>Discord Bot</h1>
+    <p>Full-featured bot with a powerful web dashboard for customization</p>
+    <div class="hero-stats">
       <div class="stat"><span id="guilds">0</span><p>Guilds</p></div>
       <div class="stat"><span id="users">0</span><p>Users</p></div>
       <div class="stat"><span id="commands">0</span><p>Commands</p></div>
     </div>
-    <div class="buttons">
+    <div style="display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap;">
       <% if (user) { %>
-        <a href="/dashboard" class="btn primary">Open Dashboard</a>
+        <a href="/dashboard" class="btn btn-primary" style="font-size:1rem;padding:0.7rem 2rem;">Open Dashboard</a>
       <% } else { %>
-        <a href="/auth/login" class="btn primary">Login with Discord</a>
+        <a href="/auth/login" class="btn btn-primary" style="font-size:1rem;padding:0.7rem 2rem;">Login with Discord</a>
       <% } %>
-      <a href="https://discord.com/api/oauth2/authorize?client_id=<%= bot.config.clientId %>&permissions=8&scope=bot%20applications.commands" class="btn secondary" target="_blank">Add to Server</a>
+      <a href="https://discord.com/api/oauth2/authorize?client_id=<%= bot.config.clientId %>&permissions=8&scope=bot%20applications.commands" target="_blank" class="btn btn-secondary" style="font-size:1rem;padding:0.7rem 2rem;">Add to Server</a>
     </div>
   </div>
 
-  <div class="features">
-    <div class="feature"><h3>🛡️ Moderation</h3><p>Kick, ban, mute, warn, purge, slowmode, lock/unlock, nickname</p></div>
-    <div class="feature"><h3>👋 Welcome/Goodbye</h3><p>Custom messages with embeds, images, auto-roles</p></div>
-    <div class="feature"><h3>🔨 Auto-Moderation</h3><p>Anti-spam, anti-link, anti-raid, bad word filter</p></div>
-    <div class="feature"><h3>📊 Leveling System</h3><p>XP and levels with leaderboard and progress bars</p></div>
-    <div class="feature"><h3>⭐ Starboard</h3><p>Star messages with configurable threshold</p></div>
-    <div class="feature"><h3>📋 Logging</h3><p>Message edits, deletes, joins, bans, voice activity</p></div>
-    <div class="feature"><h3>🔗 Invite Tracker</h3><p>Track who invites the most members</p></div>
-    <div class="feature"><h3>🎨 Embed Builder</h3><p>Build and send custom embeds from the dashboard</p></div>
-    <div class="feature"><h3>⚡ Custom Commands</h3><p>Create your own bot commands easily</p></div>
-    <div class="feature"><h3>🎭 Reaction Roles</h3><p>Self-assignable roles via emoji reactions</p></div>
-    <div class="feature"><h3>📊 Polls</h3><p>Multi-option interactive polls</p></div>
-    <div class="feature"><h3>🌐 Web Dashboard</h3><p>Configure everything from this web panel</p></div>
+  <div class="features-grid">
+    <div class="feature-card"><h3>&#128737; Moderation</h3><p>Kick, ban, mute, warn, purge, slowmode, lock/unlock</p></div>
+    <div class="feature-card"><h3>&#128075; Welcome/Goodbye</h3><p>Custom embeds, images, auto-roles on join</p></div>
+    <div class="feature-card"><h3>&#128293; Auto-Moderation</h3><p>Anti-spam, anti-link, anti-raid, bad words</p></div>
+    <div class="feature-card"><h3>&#128200; Leveling</h3><p>XP system, leaderboards, level-up messages</p></div>
+    <div class="feature-card"><h3>&#11088; Starboard</h3><p>Feature best messages with star reactions</p></div>
+    <div class="feature-card"><h3>&#128203; Logging</h3><p>Message edits, deletes, joins, bans</p></div>
+    <div class="feature-card"><h3>&#128279; Invite Tracker</h3><p>See who invites the most members</p></div>
+    <div class="feature-card"><h3>&#127912; Embed Builder</h3><p>Build and send custom embeds live</p></div>
+    <div class="feature-card"><h3>&#9889; Custom Commands</h3><p>Create your own bot commands</p></div>
+    <div class="feature-card"><h3>&#127917; Reaction Roles</h3><p>Self-assignable roles via emoji</p></div>
+    <div class="feature-card"><h3>&#128202; Polls</h3><p>Interactive polls with reactions</p></div>
+    <div class="feature-card"><h3>&#127760; Web Dashboard</h3><p>Configure everything online</p></div>
   </div>
 
   <script>

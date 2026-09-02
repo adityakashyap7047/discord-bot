@@ -26,6 +26,7 @@ function startDashboard(client) {
     secret: client.config.sessionSecret || 'discord-bot-secret',
     resave: false,
     saveUninitialized: false,
+    cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 } // 7 days
   }));
 
   app.use(passport.initialize());
@@ -34,10 +35,23 @@ function startDashboard(client) {
   passport.serializeUser((user, done) => done(null, user));
   passport.deserializeUser((obj, done) => done(null, obj));
 
+  // Detect if running on Render or localhost
+  const isProduction = process.env.RENDER || process.env.NODE_ENV === 'production';
+  const publicUrl = process.env.RENDER_EXTERNAL_URL || process.env.PUBLIC_URL || '';
+
+  // Auto-detect callback URL
+  let callbackURL = client.config.callbackURL;
+  if (isProduction && publicUrl) {
+    callbackURL = publicUrl + '/auth/callback';
+  }
+
+  console.log(`🔗 OAuth Callback URL: ${callbackURL}`);
+  console.log(`🌐 Public URL: ${publicUrl || 'http://localhost:' + client.config.port}`);
+
   passport.use(new DiscordStrategy({
     clientID: client.config.clientId,
     clientSecret: client.config.clientSecret,
-    callbackURL: client.config.callbackURL,
+    callbackURL: callbackURL,
     scope: ['identify', 'guilds'],
   }, (accessToken, refreshToken, profile, done) => {
     return done(null, profile);
@@ -58,16 +72,16 @@ function startDashboard(client) {
     next();
   }
 
-  // Auth
-  app.get('/auth/login', passport.authenticate('discord', { prompt: 'none' }));
+  // ============ AUTH ============
+  app.get('/auth/login', passport.authenticate('discord', { prompt: 'consent' }));
   app.get('/auth/callback', (req, res, next) => {
     passport.authenticate('discord', (err, user, info) => {
       if (err) {
-        console.error('Auth error:', err);
+        console.error('Auth error:', err.message);
         return res.redirect('/auth/error?msg=' + encodeURIComponent(err.message || 'Authentication failed'));
       }
       if (!user) {
-        return res.redirect('/auth/error?msg=' + encodeURIComponent(info?.message || 'Login was cancelled or failed. Make sure you added the Redirect URI in the Discord Developer Portal.'));
+        return res.redirect('/auth/error?msg=' + encodeURIComponent(info?.message || 'Login cancelled. Please authorize the app.'));
       }
       req.logIn(user, (err) => {
         if (err) return res.redirect('/auth/error?msg=' + encodeURIComponent('Session creation failed'));
@@ -76,29 +90,38 @@ function startDashboard(client) {
     })(req, res, next);
   });
   app.get('/auth/error', (req, res) => {
-    const msg = req.query.msg || 'Authentication failed';
-    res.render('auth-error', { message: msg, bot: client });
+    res.render('auth-error', { message: req.query.msg || 'Authentication failed', bot: client, publicUrl });
   });
   app.get('/auth/logout', (req, res) => { req.logout(() => res.redirect('/')); });
 
-  // Home
-  app.get('/', (req, res) => res.render('home', { user: req.user, bot: client }));
+  // ============ HOME ============
+  app.get('/', (req, res) => res.render('home', { user: req.user, bot: client, publicUrl }));
 
-  // Dashboard - server list
+  // ============ DASHBOARD ============
   app.get('/dashboard', isAuthenticated, (req, res) => {
-    const mutualGuilds = req.user.guilds.filter(g => client.guilds.cache.has(g.id) && (parseInt(g.permissions) & 0x20) === 0x20);
-    res.render('dashboard', { user: req.user, guilds: mutualGuilds });
+    // Show ALL guilds the user has Manage Server in
+    const allGuilds = req.user.guilds || [];
+    const botGuilds = client.guilds.cache;
+
+    const guildsWithAccess = allGuilds.filter(g => {
+      const hasManageServer = (parseInt(g.permissions) & 0x20) === 0x20;
+      return hasManageServer;
+    }).map(g => ({
+      ...g,
+      botInServer: botGuilds.has(g.id),
+    }));
+
+    res.render('dashboard', { user: req.user, guilds: guildsWithAccess, bot: client });
   });
 
-  // ============ SETTINGS PAGE ============
+  // ============ SETTINGS ============
   app.get('/dashboard/:guildId', isAuthenticated, hasPermission, (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
     const channels = g.channels.cache.filter(c => c.type === 0).sort((a, b) => a.position - b.position).map(c => ({ id: c.id, name: c.name }));
     const roles = g.roles.cache.filter(r => r.id !== g.id && !r.managed).sort((a, b) => b.position - a.position).map(r => ({ id: r.id, name: r.name, color: r.hexColor }));
-    const categories = g.channels.cache.filter(c => c.type === 4).sort((a, b) => a.position - b.position).map(c => ({ id: c.id, name: c.name }));
     const stats = getGuildStats(g.id);
-    res.render('server', { user: req.user, guild: g, settings, channels, roles, categories, stats, currentPage: 'settings' });
+    res.render('server', { user: req.user, guild: g, settings, channels, roles, stats, currentPage: 'settings' });
   });
 
   app.post('/dashboard/:guildId/update', isAuthenticated, hasPermission, (req, res) => {
@@ -122,7 +145,7 @@ function startDashboard(client) {
     res.redirect(`/dashboard/${req.guild.id}?saved=true`);
   });
 
-  // ============ WELCOME PAGE ============
+  // ============ WELCOME ============
   app.get('/dashboard/:guildId/welcome', isAuthenticated, hasPermission, (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
@@ -150,10 +173,10 @@ function startDashboard(client) {
       boostChannel: s.boostChannel || null,
       welcomeRoles: s.welcomeRoles ? (Array.isArray(s.welcomeRoles) ? s.welcomeRoles : [s.welcomeRoles]) : [],
     });
-    res.redirect(`/dashboard/${req.guild.id}?saved=true`);
+    res.redirect(`/dashboard/${req.guild.id}/welcome?saved=true`);
   });
 
-  // ============ MODERATION PAGE ============
+  // ============ MODERATION ============
   app.get('/dashboard/:guildId/moderation', isAuthenticated, hasPermission, (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
@@ -178,7 +201,7 @@ function startDashboard(client) {
     res.redirect(`/dashboard/${req.guild.id}/moderation?saved=true`);
   });
 
-  // ============ LOGGING PAGE ============
+  // ============ LOGGING ============
   app.get('/dashboard/:guildId/logging', isAuthenticated, hasPermission, (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
@@ -200,7 +223,7 @@ function startDashboard(client) {
     res.redirect(`/dashboard/${req.guild.id}/logging?saved=true`);
   });
 
-  // ============ ROLES PAGE ============
+  // ============ ROLES ============
   app.get('/dashboard/:guildId/roles', isAuthenticated, hasPermission, (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
@@ -218,7 +241,7 @@ function startDashboard(client) {
     res.redirect(`/dashboard/${req.guild.id}/roles?saved=true`);
   });
 
-  // ============ COMMANDS PAGE ============
+  // ============ COMMANDS ============
   app.get('/dashboard/:guildId/commands', isAuthenticated, hasPermission, (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
@@ -236,7 +259,7 @@ function startDashboard(client) {
     res.redirect(`/dashboard/${req.guild.id}/commands?saved=true`);
   });
 
-  // ============ EMBED BUILDER ============
+  // ============ EMBEDS ============
   app.get('/dashboard/:guildId/embeds', isAuthenticated, hasPermission, (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
@@ -246,8 +269,8 @@ function startDashboard(client) {
   });
 
   app.post('/dashboard/:guildId/embeds/add', isAuthenticated, hasPermission, (req, res) => {
-    const { name, title, description, color, channel, thumbnail, image, footer, author } = req.body;
-    addEmbed(req.guild.id, name, { title, description, color, thumbnail, image, footer, author }, req.user.id);
+    const { name, title, description, color, footer } = req.body;
+    addEmbed(req.guild.id, name, { title, description, color, footer }, req.user.id);
     res.redirect(`/dashboard/${req.guild.id}/embeds?saved=true`);
   });
 
@@ -256,9 +279,7 @@ function startDashboard(client) {
     const ch = req.guild.channels.cache.get(channel);
     if (ch) {
       const embed = new (require('discord.js').EmbedBuilder)()
-        .setTitle(title || '')
-        .setDescription(description || '')
-        .setColor(color || '#0099ff');
+        .setTitle(title || '').setDescription(description || '').setColor(color || '#5865f2');
       if (thumbnail) embed.setThumbnail(thumbnail);
       if (image) embed.setImage(image);
       if (footer) embed.setFooter({ text: footer });
@@ -273,7 +294,7 @@ function startDashboard(client) {
     res.redirect(`/dashboard/${req.guild.id}/embeds?saved=true`);
   });
 
-  // ============ INVITES PAGE ============
+  // ============ INVITES ============
   app.get('/dashboard/:guildId/invites', isAuthenticated, hasPermission, (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
@@ -290,7 +311,7 @@ function startDashboard(client) {
     res.redirect(`/dashboard/${req.guild.id}/invites?saved=true`);
   });
 
-  // ============ LEVELS PAGE ============
+  // ============ LEVELS ============
   app.get('/dashboard/:guildId/levels', isAuthenticated, hasPermission, (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
@@ -308,7 +329,7 @@ function startDashboard(client) {
     res.redirect(`/dashboard/${req.guild.id}/levels?saved=true`);
   });
 
-  // ============ STARBORD PAGE ============
+  // ============ STARBORD ============
   app.get('/dashboard/:guildId/starboard', isAuthenticated, hasPermission, (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
@@ -325,7 +346,7 @@ function startDashboard(client) {
     res.redirect(`/dashboard/${req.guild.id}/starboard?saved=true`);
   });
 
-  // ============ REACTION ROLES PAGE ============
+  // ============ REACTION ROLES ============
   app.get('/dashboard/:guildId/reactionroles', isAuthenticated, hasPermission, (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
@@ -335,7 +356,7 @@ function startDashboard(client) {
     res.render('reactionroles', { user: req.user, guild: g, settings, reactionRoles: rr, channels, roles, currentPage: 'reactionroles' });
   });
 
-  // ============ API ROUTES ============
+  // ============ API ============
   app.get('/api/stats', (req, res) => {
     res.json({
       guilds: client.guilds.cache.size,
@@ -347,27 +368,11 @@ function startDashboard(client) {
 
   app.get('/api/guilds/:guildId/settings', (req, res) => res.json(getGuildSettings(req.params.guildId)));
   app.get('/api/guilds/:guildId/stats', (req, res) => res.json(getGuildStats(req.params.guildId)));
-  app.get('/api/guilds/:guildId/warnings', (req, res) => res.json(getWarnings(req.params.guildId, req.query.userId)));
-  app.get('/api/guilds/:guildId/logs', (req, res) => res.json(getLogs(req.params.guildId, req.query.type, parseInt(req.query.limit) || 50)));
-  app.get('/api/guilds/:guildId/leaderboard', (req, res) => res.json(getLeaderboard(req.params.guildId)));
-  app.get('/api/guilds/:guildId/invites', (req, res) => res.json(getInvites(req.params.guildId)));
-  app.get('/api/guilds/:guildId/embeds', (req, res) => res.json(getEmbeds(req.params.guildId)));
-  app.get('/api/guilds/:guildId/custom-commands', (req, res) => res.json(getCustomCommands(req.params.guildId)));
-
-  app.post('/api/guilds/:guildId/warnings/clear', (req, res) => {
-    clearWarnings(req.params.guildId, req.body.userId);
-    res.json({ success: true });
-  });
-
-  app.post('/api/guilds/:guildId/warnings/add', (req, res) => {
-    const { userId, moderatorId, reason } = req.body;
-    addWarning(req.params.guildId, userId, moderatorId, reason);
-    res.json({ success: true });
-  });
 
   const port = client.config.port || 3000;
   app.listen(port, () => {
-    console.log(`🌐 Dashboard running on http://localhost:${port}`);
+    console.log(`\n🌐 Dashboard: ${publicUrl || 'http://localhost:' + port}`);
+    console.log(`🤖 Bot: ${client.user ? 'Connected' : 'Connecting...'}\n`);
   });
 }
 
