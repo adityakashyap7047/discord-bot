@@ -3,75 +3,34 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Logging - <%= guild.name %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="navbar">
-    <a href="/" class="logo">&#129302; Bot Dashboard</a>
-    <div class="navbar-right"><div class="user"><span><%= user.username %></span></div></div>
-  </div>
+  <div class="nav"><a href="/" class="logo"><span>&#129302; Bot</span></a><div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div></div>
   <div class="layout" data-guild="<%= guild.id %>">
     <%- include('partials/sidebar') %>
     <div class="main">
       <h1>&#128203; Logging</h1>
-      <p class="subtitle">Track what happens in your server.</p>
-
+      <p class="sub">Track what happens in your server.</p>
       <div class="card">
-        <div class="card-header"><h2>&#128196; Log Channel</h2></div>
-        <div class="field">
-          <label>Channel for logs</label>
-          <select data-auto="logChannel">
-            <option value="">Select channel</option>
-            <% channels.forEach(ch => { %>
-              <option value="<%= ch.id %>" <%= settings.logChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option>
-            <% }); %>
-          </select>
-        </div>
+        <div class="card-h"><h2>&#128196; Log Channel</h2></div>
+        <div class="field"><label>Channel for logs</label><select data-auto="logChannel"><option value="">Select</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.logChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option><% }); %></select></div>
       </div>
-
       <div class="card">
-        <div class="card-header"><h2>&#128196; What to Log</h2></div>
-        <div class="switch-row">
-          <div class="info"><div class="title">&#128465; Message Deletes</div><div class="desc">Log when messages are deleted</div></div>
-          <label class="switch"><input type="checkbox" <%= settings.logMessages ? 'checked' : '' %> data-auto="logMessages"><span class="slider"></span></label>
-        </div>
-        <div class="switch-row">
-          <div class="info"><div class="title">&#9999; Message Edits</div><div class="desc">Log when messages are edited</div></div>
-          <label class="switch"><input type="checkbox" <%= settings.logEdits ? 'checked' : '' %> data-auto="logEdits"><span class="slider"></span></label>
-        </div>
-        <div class="switch-row">
-          <div class="info"><div class="title">&#128100; Member Joins/Leaves</div><div class="desc">Track member activity</div></div>
-          <label class="switch"><input type="checkbox" <%= settings.logJoins ? 'checked' : '' %> data-auto="logJoins"><span class="slider"></span></label>
-        </div>
-        <div class="switch-row">
-          <div class="info"><div class="title">&#128683; Bans/Unbans</div><div class="desc">Log moderation actions</div></div>
-          <label class="switch"><input type="checkbox" <%= settings.logBans ? 'checked' : '' %> data-auto="logBans"><span class="slider"></span></label>
-        </div>
-        <div class="switch-row">
-          <div class="info"><div class="title">&#127908; Voice Channel Activity</div><div class="desc">Track voice joins/leaves/moves</div></div>
-          <label class="switch"><input type="checkbox" <%= settings.voiceChannelLog ? 'checked' : '' %> data-auto="voiceChannelLog"><span class="slider"></span></label>
-        </div>
+        <div class="card-h"><h2>&#128196; What to Log</h2></div>
+        <div class="sw"><div class="info"><div class="t">&#128465; Message Deletes</div><div class="d">Log deleted messages</div></div><label class="toggle"><input type="checkbox" <%= settings.logMessages ? 'checked' : '' %> data-auto="logMessages"><span class="sl"></span></label></div>
+        <div class="sw"><div class="info"><div class="t">&#9999; Message Edits</div><div class="d">Log edited messages</div></div><label class="toggle"><input type="checkbox" <%= settings.logEdits ? 'checked' : '' %> data-auto="logEdits"><span class="sl"></span></label></div>
+        <div class="sw"><div class="info"><div class="t">&#128100; Member Joins/Leaves</div><div class="d">Track member activity</div></div><label class="toggle"><input type="checkbox" <%= settings.logJoins ? 'checked' : '' %> data-auto="logJoins"><span class="sl"></span></label></div>
+        <div class="sw"><div class="info"><div class="t">&#128683; Bans/Unbans</div><div class="d">Log moderation actions</div></div><label class="toggle"><input type="checkbox" <%= settings.logBans ? 'checked' : '' %> data-auto="logBans"><span class="sl"></span></label></div>
+        <div class="sw"><div class="info"><div class="t">&#127908; Voice Activity</div><div class="d">Track voice joins/leaves</div></div><label class="toggle"><input type="checkbox" <%= settings.voiceChannelLog ? 'checked' : '' %> data-auto="voiceChannelLog"><span class="sl"></span></label></div>
       </div>
-
       <div class="card">
-        <div class="card-header"><h2>&#128209; Recent Logs</h2><span class="badge badge-blue"><%= logs.length %> entries</span></div>
-        <% if (!logs.length) { %>
-          <div class="empty"><div class="icon">&#128203;</div><h3>No logs yet</h3></div>
-        <% } else { %>
-          <table class="tbl">
-            <thead><tr><th>Type</th><th>Target</th><th>Moderator</th><th>Reason</th><th>Time</th></tr></thead>
-            <tbody>
-              <% logs.forEach(log => { %>
-                <tr>
-                  <td><span class="badge badge-blue"><%= log.type %></span></td>
-                  <td><%= log.targetId %></td>
-                  <td><%= log.moderatorId || '-' %></td>
-                  <td><%= log.reason || '-' %></td>
-                  <td style="color:var(--text3);font-size:0.8rem;"><%= new Date(log.timestamp).toLocaleString() %></td>
-                </tr>
-              <% }); %>
-            </tbody>
-          </table>
+        <div class="card-h"><h2>&#128209; Recent Logs</h2><span class="badge b-blue"><%= logs.length %></span></div>
+        <% if (!logs.length) { %><div class="empty"><div class="ic">&#128203;</div><h3>No logs yet</h3></div><% } else { %>
+          <table class="tbl"><thead><tr><th>Type</th><th>Target</th><th>Moderator</th><th>Reason</th><th>Time</th></tr></thead><tbody>
+          <% logs.forEach(log => { %><tr><td><span class="badge b-blue"><%= log.type %></span></td><td><%= log.targetId %></td><td><%= log.moderatorId || '-' %></td><td><%= log.reason || '-' %></td><td style="color:var(--text3);font-size:0.78rem;"><%= new Date(log.timestamp).toLocaleString() %></td></tr><% }); %>
+          </tbody></table>
         <% } %>
       </div>
     </div>

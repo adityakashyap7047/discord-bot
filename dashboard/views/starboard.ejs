@@ -3,39 +3,21 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Starboard - <%= guild.name %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="navbar">
-    <a href="/" class="logo">&#129302; Bot Dashboard</a>
-    <div class="navbar-right"><div class="user"><span><%= user.username %></span></div></div>
-  </div>
+  <div class="nav"><a href="/" class="logo"><span>&#129302; Bot</span></a><div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div></div>
   <div class="layout" data-guild="<%= guild.id %>">
     <%- include('partials/sidebar') %>
     <div class="main">
       <h1>&#11088; Starboard</h1>
-      <p class="subtitle">Feature the best messages with stars.</p>
-
+      <p class="sub">Feature the best messages with stars.</p>
       <div class="card">
-        <div class="card-header"><h2>&#11088; Settings</h2><span class="badge <%= settings.starboardEnabled ? 'badge-green' : 'badge-red' %>"><%= settings.starboardEnabled ? 'Enabled' : 'Disabled' %></span></div>
-        <div class="switch-row">
-          <div class="info"><div class="title">Enable Starboard</div><div class="desc">Star messages to feature them</div></div>
-          <label class="switch"><input type="checkbox" <%= settings.starboardEnabled ? 'checked' : '' %> data-auto="starboardEnabled"><span class="slider"></span></label>
-        </div>
-        <div class="field" style="margin-top:1rem;">
-          <label>Starboard Channel</label>
-          <select data-auto="starboardChannel">
-            <option value="">Select channel</option>
-            <% channels.forEach(ch => { %>
-              <option value="<%= ch.id %>" <%= settings.starboardChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option>
-            <% }); %>
-          </select>
-        </div>
-        <div class="field">
-          <label>Star Threshold</label>
-          <input type="number" value="<%= settings.starboardThreshold || 3 %>" min="1" max="50" data-auto="starboardThreshold">
-          <small>Number of &#11088; reactions needed</small>
-        </div>
+        <div class="card-h"><h2>&#11088; Settings</h2><span class="badge <%= settings.starboardEnabled ? 'b-green' : 'b-red' %>"><%= settings.starboardEnabled ? 'ON' : 'OFF' %></span></div>
+        <div class="sw"><div class="info"><div class="t">Enable Starboard</div><div class="d">Star messages to feature them</div></div><label class="toggle"><input type="checkbox" <%= settings.starboardEnabled ? 'checked' : '' %> data-auto="starboardEnabled"><span class="sl"></span></label></div>
+        <div class="field" style="margin-top:1rem;"><label>Channel</label><select data-auto="starboardChannel"><option value="">Select</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.starboardChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option><% }); %></select></div>
+        <div class="field"><label>Star Threshold</label><input type="number" value="<%= settings.starboardThreshold || 3 %>" min="1" max="50" data-auto="starboardThreshold"><small>Reactions needed to star</small></div>
       </div>
     </div>
   </div>

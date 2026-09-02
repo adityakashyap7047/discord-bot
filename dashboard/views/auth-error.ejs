@@ -3,29 +3,26 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login Error</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="navbar">
-    <a href="/" class="logo">&#129302; Bot Dashboard</a>
-  </div>
-  <div class="main" style="max-width:500px;margin:4rem auto;text-align:center;">
+  <div class="nav"><a href="/" class="logo"><span>&#129302; Bot</span></a></div>
+  <div class="main" style="max-width:500px;margin:5rem auto;text-align:center;">
     <div class="card" style="padding:3rem;">
-      <div style="font-size:4rem;margin-bottom:1rem;">&#128683;</div>
-      <h1 style="margin-bottom:0.5rem;">Login Failed</h1>
-      <p style="color:var(--text2);margin-bottom:1.5rem;">Something went wrong during authentication.</p>
-
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1.5rem;text-align:left;font-size:0.85rem;color:var(--text2);line-height:1.8;">
+      <div style="font-size:3.5rem;margin-bottom:1rem;opacity:0.7;">&#128683;</div>
+      <h1 style="margin-bottom:0.3rem;">Login Failed</h1>
+      <p style="color:var(--text2);margin-bottom:1.5rem;font-size:0.9rem;">Something went wrong during authentication.</p>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:1rem;margin-bottom:1.5rem;text-align:left;font-size:0.83rem;color:var(--text2);line-height:2;">
         <strong style="color:var(--text);">&#9888; Common causes:</strong><br>
         &#8226; You cancelled the Discord authorization<br>
         &#8226; The bot does not have access to your server<br>
         &#8226; A temporary Discord API issue<br>
-        &#8226; Session expired — try logging in again
+        &#8226; Session expired — try again
       </div>
-
       <div style="display:flex;gap:0.8rem;justify-content:center;">
-        <a href="/auth/login" class="btn btn-primary">&#128260; Try Again</a>
-        <a href="/" class="btn btn-secondary">&#127968; Home</a>
+        <a href="/auth/login" class="btn btn-p">&#128260; Try Again</a>
+        <a href="/" class="btn btn-s">&#127968; Home</a>
       </div>
     </div>
   </div>

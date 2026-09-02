@@ -2,75 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invite Tracker - <%= guild.name %></title>
+  <title>Invites - <%= guild.name %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="navbar">
-    <a href="/" class="logo">&#129302; Bot Dashboard</a>
-    <div class="navbar-right"><div class="user"><span><%= user.username %></span></div></div>
-  </div>
+  <div class="nav"><a href="/" class="logo"><span>&#129302; Bot</span></a><div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div></div>
   <div class="layout" data-guild="<%= guild.id %>">
     <%- include('partials/sidebar') %>
     <div class="main">
       <h1>&#128279; Invite Tracker</h1>
-      <p class="subtitle">Track who invites the most members.</p>
-
+      <p class="sub">Track who invites the most members.</p>
       <div class="card">
-        <div class="card-header"><h2>&#128279; Settings</h2><span class="badge <%= settings.inviteTracker ? 'badge-green' : 'badge-red' %>"><%= settings.inviteTracker ? 'Enabled' : 'Disabled' %></span></div>
-        <div class="switch-row">
-          <div class="info"><div class="title">Enable Invite Tracking</div><div class="desc">Track which users invite new members</div></div>
-          <label class="switch"><input type="checkbox" <%= settings.inviteTracker ? 'checked' : '' %> data-auto="inviteTracker"><span class="slider"></span></label>
-        </div>
-        <div class="field" style="margin-top:1rem;">
-          <label>Invite Log Channel</label>
-          <select data-auto="inviteLogChannel">
-            <option value="">Select channel</option>
-            <% channels.forEach(ch => { %>
-              <option value="<%= ch.id %>" <%= settings.inviteLogChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option>
-            <% }); %>
-          </select>
-        </div>
+        <div class="card-h"><h2>&#128279; Settings</h2><span class="badge <%= settings.inviteTracker ? 'b-green' : 'b-red' %>"><%= settings.inviteTracker ? 'ON' : 'OFF' %></span></div>
+        <div class="sw"><div class="info"><div class="t">Enable Invite Tracking</div><div class="d">Track which users invite new members</div></div><label class="toggle"><input type="checkbox" <%= settings.inviteTracker ? 'checked' : '' %> data-auto="inviteTracker"><span class="sl"></span></label></div>
+        <div class="field" style="margin-top:1rem;"><label>Log Channel</label><select data-auto="inviteLogChannel"><option value="">Select</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.inviteLogChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option><% }); %></select></div>
       </div>
-
       <div class="card">
-        <div class="card-header"><h2>&#127942; Leaderboard</h2><span class="badge badge-blue"><%= leaderboard.length %> users</span></div>
-        <% if (!leaderboard.length) { %>
-          <div class="empty"><div class="icon">&#128279;</div><h3>No invite data yet</h3></div>
-        <% } else { %>
-          <table class="tbl">
-            <thead><tr><th>#</th><th>User</th><th>Invites</th></tr></thead>
-            <tbody>
-              <% leaderboard.forEach((e, i) => { %>
-                <tr>
-                  <td><strong><%= i + 1 %></strong></td>
-                  <td><%= e.userId %></td>
-                  <td><span class="badge badge-green"><%= e.uses %></span></td>
-                </tr>
-              <% }); %>
-            </tbody>
-          </table>
-        <% } %>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><h2>&#128203; Active Invites</h2><span class="badge badge-blue"><%= Object.keys(invites).length %></span></div>
-        <% if (!Object.keys(invites).length) { %>
-          <div class="empty"><h3>No tracked invites</h3></div>
-        <% } else { %>
-          <table class="tbl">
-            <thead><tr><th>Code</th><th>Inviter</th><th>Uses</th><th>Created</th></tr></thead>
-            <tbody>
-              <% Object.entries(invites).forEach(([code, data]) => { %>
-                <tr>
-                  <td><strong><%= code %></strong></td>
-                  <td><%= data.inviterId %></td>
-                  <td><%= data.uses %></td>
-                  <td style="color:var(--text3);font-size:0.8rem;"><%= new Date(data.created).toLocaleDateString() %></td>
-                </tr>
-              <% }); %>
-            </tbody>
-          </table>
+        <div class="card-h"><h2>&#127942; Leaderboard</h2><span class="badge b-blue"><%= leaderboard.length %></span></div>
+        <% if (!leaderboard.length) { %><div class="empty"><div class="ic">&#128279;</div><h3>No data yet</h3></div><% } else { %>
+          <table class="tbl"><thead><tr><th>#</th><th>User</th><th>Invites</th></tr></thead><tbody>
+          <% leaderboard.forEach((e, i) => { %><tr><td><strong><%= i + 1 %></strong></td><td><%= e.userId %></td><td><span class="badge b-green"><%= e.uses %></span></td></tr><% }); %>
+          </tbody></table>
         <% } %>
       </div>
     </div>

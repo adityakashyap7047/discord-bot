@@ -2,58 +2,42 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Select Server</title>
+  <title>Select Server</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="navbar">
-    <a href="/" class="logo">&#129302; Bot Dashboard</a>
-    <div class="navbar-right">
-      <div class="user">
-        <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=64" alt="" style="width:24px;height:24px;border-radius:50%;">
-        <span><%= user.username %></span>
+  <div class="nav">
+    <a href="/" class="logo"><span>&#129302; Bot</span></a>
+    <div class="nav-r">
+      <div style="display:flex;align-items:center;gap:0.5rem;">
+        <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=64" class="avatar" alt="">
+        <span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span>
       </div>
-      <a href="/auth/logout" class="btn btn-secondary btn-sm">Logout</a>
+      <a href="/auth/logout" class="btn btn-s btn-sm">Logout</a>
     </div>
   </div>
   <div class="main" style="max-width:900px;margin:2rem auto;">
     <h1>Select a Server</h1>
-    <p class="subtitle">Choose a server to configure. You need Manage Server permission.</p>
-
-    <!-- Bot not in your server? -->
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.2rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <strong>Don't see your server?</strong>
-        <span style="color:var(--text2);font-size:0.85rem;"> Make sure the bot is in the server first.</span>
-      </div>
-      <a href="https://discord.com/api/oauth2/authorize?client_id=<%= bot.config.clientId %>&permissions=8&scope=bot%20applications.commands" target="_blank" class="btn btn-primary btn-sm">Add Bot to Server</a>
+    <p class="sub">Choose a server to configure. You need Manage Server permission.</p>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.2rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.8rem;">
+      <span style="font-size:0.88rem;"><strong>Don't see your server?</strong> <span style="color:var(--text2);">Add the bot first.</span></span>
+      <a href="https://discord.com/api/oauth2/authorize?client_id=<%= bot.config.clientId %>&permissions=8&scope=bot%20applications.commands" target="_blank" class="btn btn-p btn-sm">Add Bot</a>
     </div>
-
-    <div class="server-grid">
+    <div class="sg">
       <% guilds.forEach(g => { %>
-        <div class="server-card" style="<%= !g.botInServer ? 'opacity:0.5;' : '' %>">
-          <% if (g.icon) { %>
-            <img src="https://cdn.discordapp.com/icons/<%= g.id %>/<%= g.icon %>.png?size=128" alt="">
-          <% } else { %>
-            <div class="placeholder"><%= g.name.charAt(0) %></div>
-          <% } %>
+        <div class="sc" style="<%= !g.botInServer ? 'opacity:0.4;' : '' %>">
+          <% if (g.icon) { %><img src="https://cdn.discordapp.com/icons/<%= g.id %>/<%= g.icon %>.png?size=128" alt=""><% } else { %><div class="ph"><%= g.name.charAt(0) %></div><% } %>
           <h3><%= g.name %></h3>
           <% if (g.botInServer) { %>
-            <a href="/dashboard/<%= g.id %>" class="btn btn-primary btn-sm" style="margin-top:0.8rem;width:100%;">Configure</a>
+            <a href="/dashboard/<%= g.id %>" class="btn btn-p btn-sm" style="margin-top:0.8rem;width:100%;justify-content:center;">Configure</a>
           <% } else { %>
-            <a href="https://discord.com/api/oauth2/authorize?client_id=<%= bot.config.clientId %>&permissions=8&scope=bot%20applications.commands&guild_id=<%= g.id %>" target="_blank" class="btn btn-secondary btn-sm" style="margin-top:0.8rem;width:100%;">Add Bot First</a>
+            <a href="https://discord.com/api/oauth2/authorize?client_id=<%= bot.config.clientId %>&permissions=8&scope=bot%20applications.commands&guild_id=<%= g.id %>" target="_blank" class="btn btn-s btn-sm" style="margin-top:0.8rem;width:100%;justify-content:center;">Add Bot</a>
           <% } %>
         </div>
       <% }); %>
     </div>
-    <% if (!guilds.length) { %>
-      <div class="empty">
-        <div class="icon">&#128194;</div>
-        <h3>No servers found</h3>
-        <p>You need Manage Server permission on a server.</p>
-        <a href="https://discord.com/api/oauth2/authorize?client_id=<%= bot.config.clientId %>&permissions=8&scope=bot%20applications.commands" target="_blank" class="btn btn-primary" style="margin-top:1rem;">Add Bot to a Server</a>
-      </div>
-    <% } %>
+    <% if (!guilds.length) { %><div class="empty"><div class="ic">&#128194;</div><h3>No servers found</h3><p>You need Manage Server permission on a server.</p><a href="https://discord.com/api/oauth2/authorize?client_id=<%= bot.config.clientId %>&permissions=8&scope=bot%20applications.commands" target="_blank" class="btn btn-p" style="margin-top:1rem;">Add Bot to a Server</a></div><% } %>
   </div>
 </body>
 </html>

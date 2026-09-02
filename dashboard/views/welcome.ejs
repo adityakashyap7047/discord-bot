@@ -2,136 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome & Goodbye - <%= guild.name %></title>
+  <title>Welcome - <%= guild.name %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="navbar">
-    <a href="/" class="logo">&#129302; Bot Dashboard</a>
-    <div class="navbar-right"><div class="user"><span><%= user.username %></span></div></div>
+  <div class="nav">
+    <a href="/" class="logo"><span>&#129302; Bot</span></a>
+    <div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div>
   </div>
   <div class="layout" data-guild="<%= guild.id %>">
     <%- include('partials/sidebar') %>
     <div class="main">
       <h1>&#128075; Welcome & Goodbye</h1>
-      <p class="subtitle">Configure welcome and goodbye messages. All changes auto-save.</p>
+      <p class="sub">Configure welcome and goodbye messages. All changes auto-save.</p>
 
-      <!-- WELCOME -->
       <div class="card">
-        <div class="card-header">
-          <h2>&#128075; Welcome Message</h2>
-          <span class="badge <%= settings.welcomeEnabled ? 'badge-green' : 'badge-red' %>"><%= settings.welcomeEnabled ? 'Enabled' : 'Disabled' %></span>
+        <div class="card-h"><h2>&#128075; Welcome</h2><span class="badge <%= settings.welcomeEnabled ? 'b-green' : 'b-red' %>"><%= settings.welcomeEnabled ? 'ON' : 'OFF' %></span></div>
+        <div class="sw"><div class="info"><div class="t">Enable Welcome</div><div class="d">Send a message when someone joins</div></div><label class="toggle"><input type="checkbox" <%= settings.welcomeEnabled ? 'checked' : '' %> data-auto="welcomeEnabled"><span class="sl"></span></label></div>
+        <div class="field" style="margin-top:1rem;"><label>Channel</label><select data-auto="welcomeChannel"><option value="">Select</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.welcomeChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option><% }); %></select></div>
+        <div class="field"><label>Message</label><textarea rows="3" data-auto="welcomeMessage"><%= settings.welcomeMessage || '' %></textarea><small>Variables: <code>{user}</code> mention, <code>{server}</code> server, <code>{memberCount}</code> count</small></div>
+        <div class="row r3">
+          <div class="field"><label>Color</label><input type="color" value="<%= settings.welcomeColor || '#00ff00' %>" data-auto="welcomeColor"></div>
+          <div class="field"><label><input type="checkbox" <%= settings.welcomeEmbed ? 'checked' : '' %> data-auto="welcomeEmbed"> Embed</label></div>
+          <div class="field"><label>Image</label><input type="text" value="<%= settings.welcomeImage || '' %>" placeholder="https://..." data-auto="welcomeImage"></div>
         </div>
-        <div class="switch-row">
-          <div class="info"><div class="title">Enable Welcome Messages</div><div class="desc">Send a message when a new member joins</div></div>
-          <label class="switch"><input type="checkbox" <%= settings.welcomeEnabled ? 'checked' : '' %> data-auto="welcomeEnabled"><span class="slider"></span></label>
-        </div>
-        <div class="field" style="margin-top:1rem;">
-          <label>Channel</label>
-          <select data-auto="welcomeChannel">
-            <option value="">Select channel</option>
-            <% channels.forEach(ch => { %>
-              <option value="<%= ch.id %>" <%= settings.welcomeChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option>
-            <% }); %>
-          </select>
-        </div>
-        <div class="field">
-          <label>Message</label>
-          <textarea rows="3" data-auto="welcomeMessage" data-preview=".welcome-preview .msg-content"><%= settings.welcomeMessage || '' %></textarea>
-          <small>Variables: <code>{user}</code> mention, <code>{server}</code> server name, <code>{memberCount}</code> total members</small>
-        </div>
-        <div class="row row-3">
-          <div class="field">
-            <label>Embed Color</label>
-            <input type="color" value="<%= settings.welcomeColor || '#00ff00' %>" data-auto="welcomeColor">
-          </div>
-          <div class="field">
-            <label><input type="checkbox" <%= settings.welcomeEmbed ? 'checked' : '' %> data-auto="welcomeEmbed"> Send as Embed</label>
-          </div>
-          <div class="field">
-            <label>Image URL</label>
-            <input type="text" value="<%= settings.welcomeImage || '' %>" placeholder="https://..." data-auto="welcomeImage">
-          </div>
-        </div>
-        <div class="field">
-          <label>Auto-assign Roles on Join</label>
-          <select multiple style="height:80px;" data-auto="welcomeRoles">
-            <% roles.forEach(r => { %>
-              <option value="<%= r.id %>" <%= (settings.welcomeRoles || []).includes(r.id) ? 'selected' : '' %>><%= r.name %></option>
-            <% }); %>
-          </select>
-          <small>Hold Ctrl/Cmd to select multiple</small>
-        </div>
-
-        <!-- LIVE PREVIEW -->
-        <div style="margin-top:1rem;">
-          <label style="font-weight:500;font-size:0.88rem;margin-bottom:0.5rem;display:block;">&#128065; Live Preview</label>
-          <div class="msg-preview">
-            <div class="msg-header">
-              <div class="msg-avatar">B</div>
-              <div><div class="msg-name">Bot</div></div>
-              <div class="msg-time">Today at <%= new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) %></div>
-            </div>
-            <div class="msg-content welcome-preview"><strong style="color:#5865f2;">@WelcomeUser</strong> <%= (settings.welcomeMessage || '').replace('{user}', '').replace('{server}', guild.name).replace('{memberCount}', guild.memberCount) %></div>
-          </div>
+        <div class="field"><label>Auto-assign Roles</label><select multiple style="height:80px;" data-auto="welcomeRoles"><% roles.forEach(r => { %><option value="<%= r.id %>" <%= (settings.welcomeRoles || []).includes(r.id) ? 'selected' : '' %>><%= r.name %></option><% }); %></select><small>Hold Ctrl/Cmd for multiple</small></div>
+        <div style="margin-top:1rem;"><label style="font-weight:500;font-size:0.85rem;display:block;margin-bottom:0.5rem;">&#128065; Preview</label>
+          <div class="msg-pre"><div class="mh"><div class="ma">B</div><div><div class="mn">Bot</div></div><div class="mt">Today</div></div><div class="mc"><strong style="color:var(--accent2);">@User</strong> <%= (settings.welcomeMessage || '').replace('{user}','').replace('{server}',guild.name).replace('{memberCount}',guild.memberCount) %></div></div>
         </div>
       </div>
 
-      <!-- GOODBYE -->
       <div class="card">
-        <div class="card-header">
-          <h2>&#128075; Goodbye Message</h2>
-          <span class="badge <%= settings.goodbyeEnabled ? 'badge-green' : 'badge-red' %>"><%= settings.goodbyeEnabled ? 'Enabled' : 'Disabled' %></span>
-        </div>
-        <div class="switch-row">
-          <div class="info"><div class="title">Enable Goodbye Messages</div><div class="desc">Send a message when a member leaves</div></div>
-          <label class="switch"><input type="checkbox" <%= settings.goodbyeEnabled ? 'checked' : '' %> data-auto="goodbyeEnabled"><span class="slider"></span></label>
-        </div>
-        <div class="field" style="margin-top:1rem;">
-          <label>Channel</label>
-          <select data-auto="goodbyeChannel">
-            <option value="">Select channel</option>
-            <% channels.forEach(ch => { %>
-              <option value="<%= ch.id %>" <%= settings.goodbyeChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option>
-            <% }); %>
-          </select>
-        </div>
-        <div class="field">
-          <label>Message</label>
-          <textarea rows="3" data-auto="goodbyeMessage"><%= settings.goodbyeMessage || '' %></textarea>
-          <small>Variables: <code>{user}</code> username, <code>{server}</code> server name, <code>{memberCount}</code> remaining members</small>
-        </div>
-        <div class="row row-3">
-          <div class="field">
-            <label>Embed Color</label>
-            <input type="color" value="<%= settings.goodbyeColor || '#ff0000' %>" data-auto="goodbyeColor">
-          </div>
-          <div class="field">
-            <label><input type="checkbox" <%= settings.goodbyeEmbed ? 'checked' : '' %> data-auto="goodbyeEmbed"> Send as Embed</label>
-          </div>
-          <div class="field">
-            <label>Image URL</label>
-            <input type="text" value="<%= settings.goodbyeImage || '' %>" placeholder="https://..." data-auto="goodbyeImage">
-          </div>
+        <div class="card-h"><h2>&#128075; Goodbye</h2><span class="badge <%= settings.goodbyeEnabled ? 'b-green' : 'b-red' %>"><%= settings.goodbyeEnabled ? 'ON' : 'OFF' %></span></div>
+        <div class="sw"><div class="info"><div class="t">Enable Goodbye</div><div class="d">Send a message when someone leaves</div></div><label class="toggle"><input type="checkbox" <%= settings.goodbyeEnabled ? 'checked' : '' %> data-auto="goodbyeEnabled"><span class="sl"></span></label></div>
+        <div class="field" style="margin-top:1rem;"><label>Channel</label><select data-auto="goodbyeChannel"><option value="">Select</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.goodbyeChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option><% }); %></select></div>
+        <div class="field"><label>Message</label><textarea rows="3" data-auto="goodbyeMessage"><%= settings.goodbyeMessage || '' %></textarea></div>
+        <div class="row r3">
+          <div class="field"><label>Color</label><input type="color" value="<%= settings.goodbyeColor || '#ff0000' %>" data-auto="goodbyeColor"></div>
+          <div class="field"><label><input type="checkbox" <%= settings.goodbyeEmbed ? 'checked' : '' %> data-auto="goodbyeEmbed"> Embed</label></div>
+          <div class="field"><label>Image</label><input type="text" value="<%= settings.goodbyeImage || '' %>" placeholder="https://..." data-auto="goodbyeImage"></div>
         </div>
       </div>
 
-      <!-- BOOST -->
       <div class="card">
-        <div class="card-header"><h2>&#128142; Server Boost</h2></div>
-        <div class="field">
-          <label>Boost Message</label>
-          <textarea rows="2" placeholder="&#127881; {user} boosted the server!" data-auto="boostMessage"><%= settings.boostMessage || '' %></textarea>
-        </div>
-        <div class="field">
-          <label>Boost Channel</label>
-          <select data-auto="boostChannel">
-            <option value="">Select channel</option>
-            <% channels.forEach(ch => { %>
-              <option value="<%= ch.id %>" <%= settings.boostChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option>
-            <% }); %>
-          </select>
-        </div>
+        <div class="card-h"><h2>&#128142; Server Boost</h2></div>
+        <div class="field"><label>Boost Message</label><textarea rows="2" data-auto="boostMessage"><%= settings.boostMessage || '' %></textarea></div>
+        <div class="field"><label>Channel</label><select data-auto="boostChannel"><option value="">Select</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.boostChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option><% }); %></select></div>
       </div>
     </div>
   </div>

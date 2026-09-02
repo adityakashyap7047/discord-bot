@@ -3,51 +3,26 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Roles - <%= guild.name %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="navbar">
-    <a href="/" class="logo">&#129302; Bot Dashboard</a>
-    <div class="navbar-right"><div class="user"><span><%= user.username %></span></div></div>
-  </div>
+  <div class="nav"><a href="/" class="logo"><span>&#129302; Bot</span></a><div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div></div>
   <div class="layout" data-guild="<%= guild.id %>">
     <%- include('partials/sidebar') %>
     <div class="main">
       <h1>&#127917; Roles</h1>
-      <p class="subtitle">Manage server roles and auto-role settings.</p>
-
+      <p class="sub">Manage server roles and auto-role settings.</p>
       <div class="card">
-        <div class="card-header"><h2>&#127991; Auto Role</h2></div>
-        <div class="switch-row">
-          <div class="info"><div class="title">Enable Auto Role</div><div class="desc">Auto-assign a role when members join</div></div>
-          <label class="switch"><input type="checkbox" <%= settings.autoroleEnabled ? 'checked' : '' %> data-auto="autoroleEnabled"><span class="slider"></span></label>
-        </div>
-        <div class="field" style="margin-top:1rem;">
-          <label>Role</label>
-          <select data-auto="autoroleId">
-            <option value="">None</option>
-            <% roles.forEach(r => { %>
-              <option value="<%= r.id %>" <%= settings.autoroleId === r.id ? 'selected' : '' %>><%= r.name %></option>
-            <% }); %>
-          </select>
-        </div>
+        <div class="card-h"><h2>&#127991; Auto Role</h2></div>
+        <div class="sw"><div class="info"><div class="t">Enable Auto Role</div><div class="d">Auto-assign when members join</div></div><label class="toggle"><input type="checkbox" <%= settings.autoroleEnabled ? 'checked' : '' %> data-auto="autoroleEnabled"><span class="sl"></span></label></div>
+        <div class="field" style="margin-top:1rem;"><label>Role</label><select data-auto="autoroleId"><option value="">None</option><% roles.forEach(r => { %><option value="<%= r.id %>" <%= settings.autoroleId === r.id ? 'selected' : '' %>><%= r.name %></option><% }); %></select></div>
       </div>
-
       <div class="card">
-        <div class="card-header"><h2>&#128101; All Roles</h2><span class="badge badge-blue"><%= roles.length %></span></div>
-        <table class="tbl">
-          <thead><tr><th></th><th>Name</th><th>Members</th><th>ID</th></tr></thead>
-          <tbody>
-            <% roles.forEach(r => { %>
-              <tr>
-                <td><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:<%= r.color %>;"></span></td>
-                <td><strong><%= r.name %></strong></td>
-                <td><%= r.members %></td>
-                <td style="color:var(--text3);font-size:0.8rem;font-family:monospace;"><%= r.id %></td>
-              </tr>
-            <% }); %>
-          </tbody>
-        </table>
+        <div class="card-h"><h2>&#128101; All Roles</h2><span class="badge b-blue"><%= roles.length %></span></div>
+        <table class="tbl"><thead><tr><th></th><th>Name</th><th>Members</th><th>ID</th></tr></thead><tbody>
+        <% roles.forEach(r => { %><tr><td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:<%= r.color %>;"></span></td><td><strong><%= r.name %></strong></td><td><%= r.members %></td><td style="color:var(--text3);font-size:0.78rem;font-family:monospace;"><%= r.id %></td></tr><% }); %>
+        </tbody></table>
       </div>
     </div>
   </div>

@@ -3,30 +3,31 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Settings - <%= guild.name %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="navbar">
-    <a href="/" class="logo">&#129302; Bot Dashboard</a>
-    <div class="navbar-right"><div class="user"><span><%= user.username %></span></div></div>
+  <div class="nav">
+    <a href="/" class="logo"><span>&#129302; Bot</span></a>
+    <div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div>
   </div>
   <div class="layout" data-guild="<%= guild.id %>">
     <%- include('partials/sidebar') %>
     <div class="main">
       <h1>&#9881; General Settings</h1>
-      <p class="subtitle">Configure basic bot settings. Changes save automatically.</p>
+      <p class="sub">Changes save automatically when you toggle them.</p>
 
-      <div class="stats-row">
-        <div class="stat-box"><div class="num"><%= guild.memberCount %></div><div class="lbl">Members</div></div>
-        <div class="stat-box"><div class="num"><%= guild.channels.cache.size %></div><div class="lbl">Channels</div></div>
-        <div class="stat-box"><div class="num"><%= guild.roles.cache.size %></div><div class="lbl">Roles</div></div>
-        <div class="stat-box"><div class="num"><%= stats.warnings %></div><div class="lbl">Warnings</div></div>
-        <div class="stat-box"><div class="num"><%= stats.customCommands %></div><div class="lbl">Commands</div></div>
-        <div class="stat-box"><div class="num"><%= stats.levels %></div><div class="lbl">Leveled</div></div>
+      <div class="stats">
+        <div class="stat"><div class="n"><%= guild.memberCount %></div><div class="l">Members</div></div>
+        <div class="stat"><div class="n"><%= guild.channels.cache.size %></div><div class="l">Channels</div></div>
+        <div class="stat"><div class="n"><%= guild.roles.cache.size %></div><div class="l">Roles</div></div>
+        <div class="stat"><div class="n"><%= stats.warnings %></div><div class="l">Warnings</div></div>
+        <div class="stat"><div class="n"><%= stats.customCommands %></div><div class="l">Commands</div></div>
+        <div class="stat"><div class="n"><%= stats.levels %></div><div class="l">Leveled</div></div>
       </div>
 
       <div class="card">
-        <div class="card-header"><h2>&#128295; General</h2><span class="badge badge-green">Auto-saves</span></div>
+        <div class="card-h"><h2>&#128295; General</h2><span class="badge b-green">Auto-saves</span></div>
         <div class="field">
           <label>Bot Prefix</label>
           <input type="text" value="<%= settings.prefix || '!' %>" style="width:80px;" data-auto="prefix">
@@ -35,25 +36,20 @@
       </div>
 
       <div class="card">
-        <div class="card-header"><h2>&#127991; Auto Role</h2></div>
-        <div class="switch-row">
-          <div class="info"><div class="title">Enable Auto Role</div><div class="desc">Assign a role to new members automatically</div></div>
-          <label class="switch"><input type="checkbox" <%= settings.autoroleEnabled ? 'checked' : '' %> data-auto="autoroleEnabled"><span class="slider"></span></label>
+        <div class="card-h"><h2>&#127991; Auto Role</h2></div>
+        <div class="sw">
+          <div class="info"><div class="t">Enable Auto Role</div><div class="d">Assign a role to new members automatically</div></div>
+          <label class="toggle"><input type="checkbox" <%= settings.autoroleEnabled ? 'checked' : '' %> data-auto="autoroleEnabled"><span class="sl"></span></label>
         </div>
         <div class="field" style="margin-top:1rem;">
           <label>Role to Assign</label>
-          <select data-auto="autoroleId">
-            <option value="">None</option>
-            <% roles.forEach(r => { %>
-              <option value="<%= r.id %>" <%= settings.autoroleId === r.id ? 'selected' : '' %>><%= r.name %></option>
-            <% }); %>
-          </select>
+          <select data-auto="autoroleId"><option value="">None</option><% roles.forEach(r => { %><option value="<%= r.id %>" <%= settings.autoroleId === r.id ? 'selected' : '' %>><%= r.name %></option><% }); %></select>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-header"><h2>&#128196; Server Info</h2></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;font-size:0.85rem;">
+        <div class="card-h"><h2>&#128196; Server Info</h2></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;font-size:0.83rem;">
           <div><span style="color:var(--text3);">Server ID:</span> <strong><%= guild.id %></strong></div>
           <div><span style="color:var(--text3);">Owner:</span> <strong><%= guild.ownerId %></strong></div>
           <div><span style="color:var(--text3);">Boost Level:</span> <strong><%= guild.premiumTier || 0 %></strong></div>

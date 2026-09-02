@@ -3,60 +3,30 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Moderation - <%= guild.name %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="navbar">
-    <a href="/" class="logo">&#129302; Bot Dashboard</a>
-    <div class="navbar-right"><div class="user"><span><%= user.username %></span></div></div>
-  </div>
+  <div class="nav"><a href="/" class="logo"><span>&#129302; Bot</span></a><div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div></div>
   <div class="layout" data-guild="<%= guild.id %>">
     <%- include('partials/sidebar') %>
     <div class="main">
       <h1>&#128737; Moderation</h1>
-      <p class="subtitle">Auto-moderation and moderation tools. Toggle features on/off instantly.</p>
-
+      <p class="sub">Auto-moderation and moderation tools. Toggle features on/off instantly.</p>
       <div class="card">
-        <div class="card-header"><h2>&#128293; Auto-Moderation</h2><span class="badge <%= settings.autoMod || settings.antiSpam || settings.antiLink ? 'badge-green' : 'badge-red' %>"><%= settings.autoMod || settings.antiSpam || settings.antiLink ? 'Active' : 'Inactive' %></span></div>
-        <div class="switch-row">
-          <div class="info"><div class="title">&#128172; Bad Word Filter</div><div class="desc">Delete messages with banned words</div></div>
-          <label class="switch"><input type="checkbox" <%= settings.autoMod ? 'checked' : '' %> data-auto="autoMod"><span class="slider"></span></label>
-        </div>
-        <div class="switch-row">
-          <div class="info"><div class="title">&#9889; Anti-Spam</div><div class="desc">Prevent message flooding</div></div>
-          <label class="switch"><input type="checkbox" <%= settings.antiSpam ? 'checked' : '' %> data-auto="antiSpam"><span class="slider"></span></label>
-        </div>
-        <div class="switch-row">
-          <div class="info"><div class="title">&#128279; Anti-Link</div><div class="desc">Block links from non-mods</div></div>
-          <label class="switch"><input type="checkbox" <%= settings.antiLink ? 'checked' : '' %> data-auto="antiLink"><span class="slider"></span></label>
-        </div>
-        <div class="switch-row">
-          <div class="info"><div class="title">&#128163; Anti-Raid</div><div class="desc">Protect against mass-join raids</div></div>
-          <label class="switch"><input type="checkbox" <%= settings.antiRaid ? 'checked' : '' %> data-auto="antiRaid"><span class="slider"></span></label>
-        </div>
-        <div class="row row-2" style="margin-top:1rem;">
-          <div class="field">
-            <label>Flood Limit (messages)</label>
-            <input type="number" value="<%= settings.floodLimit || 5 %>" min="2" max="20" data-auto="floodLimit">
-          </div>
-          <div class="field">
-            <label>Flood Timeframe (seconds)</label>
-            <input type="number" value="<%= settings.floodTimeframe || 5 %>" min="2" max="30" data-auto="floodTimeframe">
-          </div>
+        <div class="card-h"><h2>&#128293; Auto-Moderation</h2><span class="badge <%= settings.autoMod || settings.antiSpam || settings.antiLink ? 'b-green' : 'b-red' %>"><%= settings.autoMod || settings.antiSpam || settings.antiLink ? 'Active' : 'Off' %></span></div>
+        <div class="sw"><div class="info"><div class="t">&#128172; Bad Word Filter</div><div class="d">Delete messages with banned words</div></div><label class="toggle"><input type="checkbox" <%= settings.autoMod ? 'checked' : '' %> data-auto="autoMod"><span class="sl"></span></label></div>
+        <div class="sw"><div class="info"><div class="t">&#9889; Anti-Spam</div><div class="d">Prevent message flooding</div></div><label class="toggle"><input type="checkbox" <%= settings.antiSpam ? 'checked' : '' %> data-auto="antiSpam"><span class="sl"></span></label></div>
+        <div class="sw"><div class="info"><div class="t">&#128279; Anti-Link</div><div class="d">Block links from non-mods</div></div><label class="toggle"><input type="checkbox" <%= settings.antiLink ? 'checked' : '' %> data-auto="antiLink"><span class="sl"></span></label></div>
+        <div class="sw"><div class="info"><div class="t">&#128163; Anti-Raid</div><div class="d">Protect against mass-join raids</div></div><label class="toggle"><input type="checkbox" <%= settings.antiRaid ? 'checked' : '' %> data-auto="antiRaid"><span class="sl"></span></label></div>
+        <div class="row r2" style="margin-top:1rem;">
+          <div class="field"><label>Flood Limit (msgs)</label><input type="number" value="<%= settings.floodLimit || 5 %>" min="2" max="20" data-auto="floodLimit"></div>
+          <div class="field"><label>Flood Timeframe (sec)</label><input type="number" value="<%= settings.floodTimeframe || 5 %>" min="2" max="30" data-auto="floodTimeframe"></div>
         </div>
       </div>
-
       <div class="card">
-        <div class="card-header"><h2>&#128263; Mute Role</h2></div>
-        <div class="field">
-          <label>Role assigned when muting users</label>
-          <select data-auto="mutedRole">
-            <option value="">None</option>
-            <% roles.forEach(r => { %>
-              <option value="<%= r.id %>" <%= settings.mutedRole === r.id ? 'selected' : '' %>><%= r.name %></option>
-            <% }); %>
-          </select>
-        </div>
+        <div class="card-h"><h2>&#128263; Mute Role</h2></div>
+        <div class="field"><label>Role assigned when muting</label><select data-auto="mutedRole"><option value="">None</option><% roles.forEach(r => { %><option value="<%= r.id %>" <%= settings.mutedRole === r.id ? 'selected' : '' %>><%= r.name %></option><% }); %></select></div>
       </div>
     </div>
   </div>

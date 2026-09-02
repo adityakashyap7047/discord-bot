@@ -3,75 +3,42 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Embed Builder - <%= guild.name %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="navbar">
-    <a href="/" class="logo">&#129302; Bot Dashboard</a>
-    <div class="navbar-right"><div class="user"><span><%= user.username %></span></div></div>
-  </div>
+  <div class="nav"><a href="/" class="logo"><span>&#129302; Bot</span></a><div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div></div>
   <div class="layout" data-guild="<%= guild.id %>">
     <%- include('partials/sidebar') %>
     <div class="main">
       <h1>&#127912; Embed Builder</h1>
-      <p class="subtitle">Create and send custom embeds.</p>
-
+      <p class="sub">Create and send custom embeds.</p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
-        <!-- Builder -->
         <div class="card">
-          <div class="card-header"><h2>&#9999; Build</h2></div>
+          <div class="card-h"><h2>&#9999; Build</h2></div>
           <form action="/dashboard/<%= guild.id %>/embeds/send" method="POST">
-            <div class="field">
-              <label>Send to</label>
-              <select name="channel" required>
-                <option value="">Select channel</option>
-                <% channels.forEach(ch => { %><option value="<%= ch.id %>">#<%= ch.name %></option><% }); %>
-              </select>
-            </div>
-            <div class="field"><label>Title</label><input type="text" name="title" id="eTitle" placeholder="Embed title" oninput="upd()"></div>
-            <div class="field"><label>Description</label><textarea name="description" id="eDesc" rows="4" placeholder="Embed description" oninput="upd()"></textarea></div>
-            <div class="row row-2">
-              <div class="field"><label>Color</label><input type="color" name="color" id="eColor" value="#5865f2" oninput="upd()"></div>
-              <div class="field"><label>Footer</label><input type="text" name="footer" id="eFooter" placeholder="Footer" oninput="upd()"></div>
+            <div class="field"><label>Send to</label><select name="channel" required><option value="">Select</option><% channels.forEach(ch => { %><option value="<%= ch.id %>">#<%= ch.name %></option><% }); %></select></div>
+            <div class="field"><label>Title</label><input type="text" name="title" id="eT" placeholder="Title" oninput="up()"></div>
+            <div class="field"><label>Description</label><textarea name="description" id="eD" rows="4" placeholder="Description" oninput="up()"></textarea></div>
+            <div class="row r2">
+              <div class="field"><label>Color</label><input type="color" name="color" id="eC" value="#6366f1" oninput="up()"></div>
+              <div class="field"><label>Footer</label><input type="text" name="footer" id="eF" placeholder="Footer" oninput="up()"></div>
             </div>
             <div class="field"><label>Author</label><input type="text" name="author" placeholder="Author name"></div>
-            <div class="field"><label>Thumbnail URL</label><input type="text" name="thumbnail" placeholder="https://..."></div>
-            <div class="field"><label>Image URL</label><input type="text" name="image" placeholder="https://..."></div>
-            <div style="display:flex;gap:0.5rem;">
-              <button type="submit" class="btn btn-primary">&#128640; Send</button>
-              <button type="button" class="btn btn-secondary" onclick="saveTpl()">&#128190; Save Template</button>
-            </div>
+            <div class="field"><label>Thumbnail</label><input type="text" name="thumbnail" placeholder="https://..."></div>
+            <div class="field"><label>Image</label><input type="text" name="image" placeholder="https://..."></div>
+            <div style="display:flex;gap:0.5rem;"><button type="submit" class="btn btn-p">&#128640; Send</button><button type="button" class="btn btn-s" onclick="sv()">&#128190; Save</button></div>
           </form>
         </div>
-
-        <!-- Preview + Templates -->
         <div>
           <div class="card">
-            <div class="card-header"><h2>&#128065; Preview</h2></div>
-            <div class="embed-live" id="ePreview">
-              <div class="e-title" id="pTitle">Embed Title</div>
-              <div class="e-desc" id="pDesc">Description...</div>
-              <div class="e-footer" id="pFooter"></div>
-            </div>
+            <div class="card-h"><h2>&#128065; Preview</h2></div>
+            <div class="embed-live" id="eP"><div class="et" id="pT">Title</div><div class="ed" id="pD">Description...</div><div class="ef" id="pF"></div></div>
           </div>
-
           <div class="card">
-            <div class="card-header"><h2>&#128190; Templates</h2><span class="badge badge-blue"><%= embeds.length %></span></div>
-            <% if (!embeds.length) { %>
-              <div class="empty"><h3>No templates saved</h3></div>
-            <% } else { %>
-              <% embeds.forEach(e => { %>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border);">
-                  <div>
-                    <strong><%= e.name %></strong>
-                    <div style="font-size:0.78rem;color:var(--text3);"><%= e.embedData.title || 'No title' %></div>
-                  </div>
-                  <div style="display:flex;gap:0.3rem;">
-                    <button class="btn btn-secondary btn-sm" onclick="loadTpl('<%= e.name %>','<%= (e.embedData.title||'').replace(/'/g,"\\'") %>','<%= (e.embedData.description||'').replace(/'/g,"\\'") %>','<%= e.embedData.color||'#5865f2' %>','<%= (e.embedData.footer||'').replace(/'/g,"\\'") %>')">&#9998;</button>
-                    <form action="/dashboard/<%= guild.id %>/embeds/remove" method="POST" style="display:inline;"><input type="hidden" name="name" value="<%= e.name %>"><button type="submit" class="btn btn-danger btn-sm">&#128465;</button></form>
-                  </div>
-                </div>
-              <% }); %>
+            <div class="card-h"><h2>&#128190; Templates</h2><span class="badge b-blue"><%= embeds.length %></span></div>
+            <% if (!embeds.length) { %><div class="empty"><h3>No templates</h3></div><% } else { %>
+              <% embeds.forEach(e => { %><div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border);"><div><strong><%= e.name %></strong><div style="font-size:0.76rem;color:var(--text3);"><%= e.embedData.title || '' %></div></div><div style="display:flex;gap:0.3rem;"><button class="btn btn-s btn-sm" onclick="ld('<%= (e.embedData.title||'').replace(/'/g,"\\'") %>','<%= (e.embedData.description||'').replace(/'/g,"\\'") %>','<%= e.embedData.color||'#6366f1' %>','<%= (e.embedData.footer||'').replace(/'/g,"\\'") %>')">&#9998;</button><form action="/dashboard/<%= guild.id %>/embeds/remove" method="POST" style="display:inline;"><input type="hidden" name="name" value="<%= e.name %>"><button type="submit" class="btn btn-d btn-sm">&#128465;</button></form></div></div><% }); %>
             <% } %>
           </div>
         </div>
@@ -80,27 +47,9 @@
   </div>
   <script src="/js/dashboard.js"></script>
   <script>
-    function upd(){
-      document.getElementById('pTitle').textContent=document.getElementById('eTitle').value||'Embed Title';
-      document.getElementById('pDesc').textContent=document.getElementById('eDesc').value||'Description...';
-      document.getElementById('pFooter').textContent=document.getElementById('eFooter').value;
-      document.getElementById('ePreview').style.borderLeftColor=document.getElementById('eColor').value;
-    }
-    function loadTpl(n,t,d,c,f){
-      document.getElementById('eTitle').value=t;
-      document.getElementById('eDesc').value=d;
-      document.getElementById('eColor').value=c;
-      document.getElementById('eFooter').value=f;
-      upd();
-    }
-    function saveTpl(){
-      const n=prompt('Template name:');
-      if(!n)return;
-      const f=document.createElement('form');
-      f.method='POST';f.action='/dashboard/<%= guild.id %>/embeds/add';
-      f.innerHTML=`<input type="hidden" name="name" value="${n}"><input type="hidden" name="title" value="${document.getElementById('eTitle').value}"><input type="hidden" name="description" value="${document.getElementById('eDesc').value}"><input type="hidden" name="color" value="${document.getElementById('eColor').value}"><input type="hidden" name="footer" value="${document.getElementById('eFooter').value}">`;
-      document.body.appendChild(f);f.submit();
-    }
+    function up(){document.getElementById('pT').textContent=document.getElementById('eT').value||'Title';document.getElementById('pD').textContent=document.getElementById('eD').value||'Description...';document.getElementById('pF').textContent=document.getElementById('eF').value;document.getElementById('eP').style.borderLeftColor=document.getElementById('eC').value}
+    function ld(t,d,c,f){document.getElementById('eT').value=t;document.getElementById('eD').value=d;document.getElementById('eC').value=c;document.getElementById('eF').value=f;up()}
+    function sv(){const n=prompt('Template name:');if(!n)return;const f=document.createElement('form');f.method='POST';f.action='/dashboard/<%= guild.id %>/embeds/add';f.innerHTML=`<input type="hidden" name="name" value="${n}"><input type="hidden" name="title" value="${document.getElementById('eT').value}"><input type="hidden" name="description" value="${document.getElementById('eD').value}"><input type="hidden" name="color" value="${document.getElementById('eC').value}"><input type="hidden" name="footer" value="${document.getElementById('eF').value}">`;document.body.appendChild(f);f.submit()}
   </script>
 </body>
 </html>
