@@ -9,24 +9,18 @@
   <div class="navbar">
     <a href="/" class="logo">&#129302; Bot Dashboard</a>
   </div>
-  <div class="main" style="max-width:600px;margin:4rem auto;text-align:center;">
+  <div class="main" style="max-width:500px;margin:4rem auto;text-align:center;">
     <div class="card" style="padding:3rem;">
       <div style="font-size:4rem;margin-bottom:1rem;">&#128683;</div>
       <h1 style="margin-bottom:0.5rem;">Login Failed</h1>
-      <p style="color:var(--text2);margin-bottom:1.5rem;"><%= message %></p>
+      <p style="color:var(--text2);margin-bottom:1.5rem;">Something went wrong during authentication.</p>
 
-      <div class="card" style="background:var(--bg);text-align:left;margin-bottom:1.5rem;">
-        <h2 style="font-size:0.9rem;margin-bottom:0.8rem;">&#128221; To fix this, make sure:</h2>
-        <ol style="font-size:0.85rem;color:var(--text2);padding-left:1.2rem;line-height:2;">
-          <li>Go to <a href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</a></li>
-          <li>Select your application</li>
-          <li>Go to <strong>OAuth2</strong> section</li>
-          <li>Under <strong>Redirects</strong>, add:<br>
-            <code style="background:var(--bg3);padding:0.3rem 0.6rem;border-radius:4px;display:inline-block;margin-top:0.3rem;">http://localhost:3000/auth/callback</code>
-          </li>
-          <li>Click <strong>Save Changes</strong></li>
-          <li>Make sure <strong>Client ID</strong> and <strong>Client Secret</strong> in <code>.env</code> are correct</li>
-        </ol>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1.5rem;text-align:left;font-size:0.85rem;color:var(--text2);line-height:1.8;">
+        <strong style="color:var(--text);">&#9888; Common causes:</strong><br>
+        &#8226; You cancelled the Discord authorization<br>
+        &#8226; The bot does not have access to your server<br>
+        &#8226; A temporary Discord API issue<br>
+        &#8226; Session expired — try logging in again
       </div>
 
       <div style="display:flex;gap:0.8rem;justify-content:center;">
