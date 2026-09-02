@@ -98,6 +98,9 @@ function startDashboard(client) {
       }
     }
     updateGuildSettings(req.guild.id, updates);
+    if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
+      return res.json({ success: true });
+    }
     res.redirect(`/dashboard/${req.guild.id}?saved=true`);
   });
 

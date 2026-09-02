@@ -1,72 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Moderation - <%= guild.name %></title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <nav>
-    <a href="/" class="logo">🤖 Bot</a>
-    <div class="nav-right"><span><%= user.username %></span><a href="/auth/logout" class="btn secondary small">Logout</a></div>
-  </nav>
-  <div class="layout">
+  <div class="navbar">
+    <a href="/" class="logo">&#129302; Bot Dashboard</a>
+    <div class="navbar-right"><div class="user"><span><%= user.username %></span></div></div>
+  </div>
+  <div class="layout" data-guild="<%= guild.id %>">
     <%- include('partials/sidebar') %>
     <div class="main">
-      <h1>🛡️ Moderation Settings</h1>
-      <p style="color:var(--text-secondary);margin-bottom:1.5rem;">Configure auto-moderation and moderation logging.</p>
+      <h1>&#128737; Moderation</h1>
+      <p class="subtitle">Auto-moderation and moderation tools. Toggle features on/off instantly.</p>
 
-      <form action="/dashboard/<%= guild.id %>/moderation" method="POST">
-        <div class="card">
-          <h2>🔨 Auto-Moderation</h2>
+      <div class="card">
+        <div class="card-header"><h2>&#128293; Auto-Moderation</h2><span class="badge <%= settings.autoMod || settings.antiSpam || settings.antiLink ? 'badge-green' : 'badge-red' %>"><%= settings.autoMod || settings.antiSpam || settings.antiLink ? 'Active' : 'Inactive' %></span></div>
+        <div class="switch-row">
+          <div class="info"><div class="title">&#128172; Bad Word Filter</div><div class="desc">Delete messages with banned words</div></div>
+          <label class="switch"><input type="checkbox" <%= settings.autoMod ? 'checked' : '' %> data-auto="autoMod"><span class="slider"></span></label>
+        </div>
+        <div class="switch-row">
+          <div class="info"><div class="title">&#9889; Anti-Spam</div><div class="desc">Prevent message flooding</div></div>
+          <label class="switch"><input type="checkbox" <%= settings.antiSpam ? 'checked' : '' %> data-auto="antiSpam"><span class="slider"></span></label>
+        </div>
+        <div class="switch-row">
+          <div class="info"><div class="title">&#128279; Anti-Link</div><div class="desc">Block links from non-mods</div></div>
+          <label class="switch"><input type="checkbox" <%= settings.antiLink ? 'checked' : '' %> data-auto="antiLink"><span class="slider"></span></label>
+        </div>
+        <div class="switch-row">
+          <div class="info"><div class="title">&#128163; Anti-Raid</div><div class="desc">Protect against mass-join raids</div></div>
+          <label class="switch"><input type="checkbox" <%= settings.antiRaid ? 'checked' : '' %> data-auto="antiRaid"><span class="slider"></span></label>
+        </div>
+        <div class="row row-2" style="margin-top:1rem;">
           <div class="field">
-            <label><input type="checkbox" name="autoMod" <%= settings.autoMod ? 'checked' : '' %>> Bad Word Filter</label>
-            <small>Automatically deletes messages containing banned words</small>
+            <label>Flood Limit (messages)</label>
+            <input type="number" value="<%= settings.floodLimit || 5 %>" min="2" max="20" data-auto="floodLimit">
           </div>
           <div class="field">
-            <label><input type="checkbox" name="antiSpam" <%= settings.antiSpam ? 'checked' : '' %>> Anti-Spam</label>
-            <small>Prevents users from sending too many messages quickly</small>
-          </div>
-          <div class="field">
-            <label><input type="checkbox" name="antiLink" <%= settings.antiLink ? 'checked' : '' %>> Anti-Link</label>
-            <small>Prevents non-moderators from posting links</small>
-          </div>
-          <div class="field">
-            <label><input type="checkbox" name="antiRaid" <%= settings.antiRaid ? 'checked' : '' %>> Anti-Raid</label>
-            <small>Protects against mass-join raids</small>
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label>Flood Limit (messages)</label>
-              <input type="number" name="floodLimit" value="<%= settings.floodLimit || 5 %>" min="2" max="20">
-              <small>Max messages in timeframe before action</small>
-            </div>
-            <div class="field">
-              <label>Flood Timeframe (seconds)</label>
-              <input type="number" name="floodTimeframe" value="<%= settings.floodTimeframe || 5 %>" min="2" max="30">
-              <small>Time window for flood detection</small>
-            </div>
+            <label>Flood Timeframe (seconds)</label>
+            <input type="number" value="<%= settings.floodTimeframe || 5 %>" min="2" max="30" data-auto="floodTimeframe">
           </div>
         </div>
+      </div>
 
-        <div class="card">
-          <h2>🔇 Mute Settings</h2>
-          <div class="field">
-            <label>Muted Role</label>
-            <select name="mutedRole">
-              <option value="">None</option>
-              <% roles.forEach(r => { %>
-                <option value="<%= r.id %>" <%= settings.mutedRole === r.id ? 'selected' : '' %>><%= r.name %></option>
-              <% }); %>
-            </select>
-            <small>Role assigned when a user is muted</small>
-          </div>
+      <div class="card">
+        <div class="card-header"><h2>&#128263; Mute Role</h2></div>
+        <div class="field">
+          <label>Role assigned when muting users</label>
+          <select data-auto="mutedRole">
+            <option value="">None</option>
+            <% roles.forEach(r => { %>
+              <option value="<%= r.id %>" <%= settings.mutedRole === r.id ? 'selected' : '' %>><%= r.name %></option>
+            <% }); %>
+          </select>
         </div>
-
-        <button type="submit" class="btn primary">Save Moderation Settings</button>
-      </form>
+      </div>
     </div>
   </div>
+  <script src="/js/dashboard.js"></script>
 </body>
 </html>

@@ -1,97 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Embed Builder - <%= guild.name %></title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <nav>
-    <a href="/" class="logo">🤖 Bot</a>
-    <div class="nav-right"><span><%= user.username %></span><a href="/auth/logout" class="btn secondary small">Logout</a></div>
-  </nav>
-  <div class="layout">
+  <div class="navbar">
+    <a href="/" class="logo">&#129302; Bot Dashboard</a>
+    <div class="navbar-right"><div class="user"><span><%= user.username %></span></div></div>
+  </div>
+  <div class="layout" data-guild="<%= guild.id %>">
     <%- include('partials/sidebar') %>
     <div class="main">
-      <h1>🎨 Embed Builder</h1>
-      <p style="color:var(--text-secondary);margin-bottom:1.5rem;">Create and send custom embeds to any channel.</p>
+      <h1>&#127912; Embed Builder</h1>
+      <p class="subtitle">Create and send custom embeds.</p>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
-        <div>
-          <div class="card">
-            <h2>✏️ Build Embed</h2>
-            <form action="/dashboard/<%= guild.id %>/embeds/send" method="POST">
-              <div class="field">
-                <label>Send to Channel</label>
-                <select name="channel" required>
-                  <option value="">Select channel</option>
-                  <% channels.forEach(ch => { %>
-                    <option value="<%= ch.id %>">#<%= ch.name %></option>
-                  <% }); %>
-                </select>
-              </div>
-              <div class="field">
-                <label>Title</label>
-                <input type="text" name="title" id="embedTitle" placeholder="Embed title" oninput="updatePreview()">
-              </div>
-              <div class="field">
-                <label>Description</label>
-                <textarea name="description" id="embedDesc" rows="4" placeholder="Embed description" oninput="updatePreview()"></textarea>
-              </div>
-              <div class="field-row">
-                <div class="field">
-                  <label>Color</label>
-                  <input type="color" name="color" id="embedColor" value="#0099ff" oninput="updatePreview()">
-                </div>
-                <div class="field">
-                  <label>Footer</label>
-                  <input type="text" name="footer" id="embedFooter" placeholder="Footer text" oninput="updatePreview()">
-                </div>
-              </div>
-              <div class="field">
-                <label>Author</label>
-                <input type="text" name="author" placeholder="Author name">
-              </div>
-              <div class="field">
-                <label>Thumbnail URL</label>
-                <input type="text" name="thumbnail" placeholder="https://...">
-              </div>
-              <div class="field">
-                <label>Image URL</label>
-                <input type="text" name="image" placeholder="https://...">
-              </div>
-              <div style="display:flex;gap:0.5rem;">
-                <button type="submit" class="btn primary">Send Embed</button>
-                <button type="button" class="btn secondary" onclick="saveEmbed()">Save Template</button>
-              </div>
-            </form>
-          </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
+        <!-- Builder -->
+        <div class="card">
+          <div class="card-header"><h2>&#9999; Build</h2></div>
+          <form action="/dashboard/<%= guild.id %>/embeds/send" method="POST">
+            <div class="field">
+              <label>Send to</label>
+              <select name="channel" required>
+                <option value="">Select channel</option>
+                <% channels.forEach(ch => { %><option value="<%= ch.id %>">#<%= ch.name %></option><% }); %>
+              </select>
+            </div>
+            <div class="field"><label>Title</label><input type="text" name="title" id="eTitle" placeholder="Embed title" oninput="upd()"></div>
+            <div class="field"><label>Description</label><textarea name="description" id="eDesc" rows="4" placeholder="Embed description" oninput="upd()"></textarea></div>
+            <div class="row row-2">
+              <div class="field"><label>Color</label><input type="color" name="color" id="eColor" value="#5865f2" oninput="upd()"></div>
+              <div class="field"><label>Footer</label><input type="text" name="footer" id="eFooter" placeholder="Footer" oninput="upd()"></div>
+            </div>
+            <div class="field"><label>Author</label><input type="text" name="author" placeholder="Author name"></div>
+            <div class="field"><label>Thumbnail URL</label><input type="text" name="thumbnail" placeholder="https://..."></div>
+            <div class="field"><label>Image URL</label><input type="text" name="image" placeholder="https://..."></div>
+            <div style="display:flex;gap:0.5rem;">
+              <button type="submit" class="btn btn-primary">&#128640; Send</button>
+              <button type="button" class="btn btn-secondary" onclick="saveTpl()">&#128190; Save Template</button>
+            </div>
+          </form>
         </div>
+
+        <!-- Preview + Templates -->
         <div>
           <div class="card">
-            <h2>👁️ Live Preview</h2>
-            <div class="embed-preview" id="embedPreview">
-              <div class="title" id="previewTitle">Embed Title</div>
-              <div class="desc" id="previewDesc">Embed description will appear here...</div>
-              <div class="footer" id="previewFooter"></div>
+            <div class="card-header"><h2>&#128065; Preview</h2></div>
+            <div class="embed-live" id="ePreview">
+              <div class="e-title" id="pTitle">Embed Title</div>
+              <div class="e-desc" id="pDesc">Description...</div>
+              <div class="e-footer" id="pFooter"></div>
             </div>
           </div>
 
           <div class="card">
-            <h2>💾 Saved Templates</h2>
-            <% if (embeds.length === 0) { %>
-              <div class="empty"><p>No saved templates.</p></div>
+            <div class="card-header"><h2>&#128190; Templates</h2><span class="badge badge-blue"><%= embeds.length %></span></div>
+            <% if (!embeds.length) { %>
+              <div class="empty"><h3>No templates saved</h3></div>
             <% } else { %>
               <% embeds.forEach(e => { %>
-                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid var(--border);">
-                  <span><strong><%= e.name %></strong> <span style="color:var(--text-secondary);font-size:0.8rem;"><%= e.embedData.title || 'No title' %></span></span>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border);">
+                  <div>
+                    <strong><%= e.name %></strong>
+                    <div style="font-size:0.78rem;color:var(--text3);"><%= e.embedData.title || 'No title' %></div>
+                  </div>
                   <div style="display:flex;gap:0.3rem;">
-                    <button class="btn secondary small" onclick="loadEmbed('<%= e.name %>','<%= e.embedData.title || '' %>','<%= (e.embedData.description || '').replace(/'/g, "\\'") %>','<%= e.embedData.color || '#0099ff' %>','<%= e.embedData.footer || '' %>')">Load</button>
-                    <form action="/dashboard/<%= guild.id %>/embeds/remove" method="POST" style="display:inline;">
-                      <input type="hidden" name="name" value="<%= e.name %>">
-                      <button type="submit" class="btn danger small">✕</button>
-                    </form>
+                    <button class="btn btn-secondary btn-sm" onclick="loadTpl('<%= e.name %>','<%= (e.embedData.title||'').replace(/'/g,"\\'") %>','<%= (e.embedData.description||'').replace(/'/g,"\\'") %>','<%= e.embedData.color||'#5865f2' %>','<%= (e.embedData.footer||'').replace(/'/g,"\\'") %>')">&#9998;</button>
+                    <form action="/dashboard/<%= guild.id %>/embeds/remove" method="POST" style="display:inline;"><input type="hidden" name="name" value="<%= e.name %>"><button type="submit" class="btn btn-danger btn-sm">&#128465;</button></form>
                   </div>
                 </div>
               <% }); %>
@@ -101,30 +78,28 @@
       </div>
     </div>
   </div>
-
+  <script src="/js/dashboard.js"></script>
   <script>
-    function updatePreview() {
-      document.getElementById('previewTitle').textContent = document.getElementById('embedTitle').value || 'Embed Title';
-      document.getElementById('previewDesc').textContent = document.getElementById('embedDesc').value || 'Embed description...';
-      document.getElementById('previewFooter').textContent = document.getElementById('embedFooter').value;
-      document.querySelector('.embed-preview').style.borderLeftColor = document.getElementById('embedColor').value;
+    function upd(){
+      document.getElementById('pTitle').textContent=document.getElementById('eTitle').value||'Embed Title';
+      document.getElementById('pDesc').textContent=document.getElementById('eDesc').value||'Description...';
+      document.getElementById('pFooter').textContent=document.getElementById('eFooter').value;
+      document.getElementById('ePreview').style.borderLeftColor=document.getElementById('eColor').value;
     }
-    function loadEmbed(name, title, desc, color, footer) {
-      document.getElementById('embedTitle').value = title;
-      document.getElementById('embedDesc').value = desc;
-      document.getElementById('embedColor').value = color;
-      document.getElementById('embedFooter').value = footer;
-      updatePreview();
+    function loadTpl(n,t,d,c,f){
+      document.getElementById('eTitle').value=t;
+      document.getElementById('eDesc').value=d;
+      document.getElementById('eColor').value=c;
+      document.getElementById('eFooter').value=f;
+      upd();
     }
-    function saveEmbed() {
-      const name = prompt('Template name:');
-      if (!name) return;
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = '/dashboard/<%= guild.id %>/embeds/add';
-      form.innerHTML = `<input type="hidden" name="name" value="${name}"><input type="hidden" name="title" value="${document.getElementById('embedTitle').value}"><input type="hidden" name="description" value="${document.getElementById('embedDesc').value}"><input type="hidden" name="color" value="${document.getElementById('embedColor').value}"><input type="hidden" name="footer" value="${document.getElementById('embedFooter').value}">`;
-      document.body.appendChild(form);
-      form.submit();
+    function saveTpl(){
+      const n=prompt('Template name:');
+      if(!n)return;
+      const f=document.createElement('form');
+      f.method='POST';f.action='/dashboard/<%= guild.id %>/embeds/add';
+      f.innerHTML=`<input type="hidden" name="name" value="${n}"><input type="hidden" name="title" value="${document.getElementById('eTitle').value}"><input type="hidden" name="description" value="${document.getElementById('eDesc').value}"><input type="hidden" name="color" value="${document.getElementById('eColor').value}"><input type="hidden" name="footer" value="${document.getElementById('eFooter').value}">`;
+      document.body.appendChild(f);f.submit();
     }
   </script>
 </body>

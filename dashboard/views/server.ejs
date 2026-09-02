@@ -1,70 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Settings - <%= guild.name %></title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <nav>
-    <a href="/" class="logo">🤖 Bot</a>
-    <div class="nav-right"><span><%= user.username %></span><a href="/auth/logout" class="btn secondary small">Logout</a></div>
-  </nav>
-  <div class="layout">
+  <div class="navbar">
+    <a href="/" class="logo">&#129302; Bot Dashboard</a>
+    <div class="navbar-right"><div class="user"><span><%= user.username %></span></div></div>
+  </div>
+  <div class="layout" data-guild="<%= guild.id %>">
     <%- include('partials/sidebar') %>
     <div class="main">
-      <% if (typeof saved !== 'undefined' && saved) { %><div class="alert success">Settings saved successfully!</div><% } %>
-      <h1>⚙️ General Settings</h1>
-      <p style="color:var(--text-secondary);margin-bottom:1.5rem;">Configure basic bot settings for this server.</p>
+      <h1>&#9881; General Settings</h1>
+      <p class="subtitle">Configure basic bot settings. Changes save automatically.</p>
 
-      <div class="stats-grid">
-        <div class="stat-card"><div class="number"><%= stats.warnings %></div><div class="label">Warnings</div></div>
-        <div class="stat-card"><div class="number"><%= stats.customCommands %></div><div class="label">Custom Commands</div></div>
-        <div class="stat-card"><div class="number"><%= stats.reactionRoles %></div><div class="label">Reaction Roles</div></div>
-        <div class="stat-card"><div class="number"><%= stats.levels %></div><div class="label">Leveled Users</div></div>
-        <div class="stat-card"><div class="number"><%= guild.memberCount %></div><div class="label">Members</div></div>
-        <div class="stat-card"><div class="number"><%= guild.channels.cache.size %></div><div class="label">Channels</div></div>
+      <div class="stats-row">
+        <div class="stat-box"><div class="num"><%= guild.memberCount %></div><div class="lbl">Members</div></div>
+        <div class="stat-box"><div class="num"><%= guild.channels.cache.size %></div><div class="lbl">Channels</div></div>
+        <div class="stat-box"><div class="num"><%= guild.roles.cache.size %></div><div class="lbl">Roles</div></div>
+        <div class="stat-box"><div class="num"><%= stats.warnings %></div><div class="lbl">Warnings</div></div>
+        <div class="stat-box"><div class="num"><%= stats.customCommands %></div><div class="lbl">Commands</div></div>
+        <div class="stat-box"><div class="num"><%= stats.levels %></div><div class="lbl">Leveled</div></div>
       </div>
 
-      <form action="/dashboard/<%= guild.id %>/update" method="POST">
-        <div class="card">
-          <h2>🔧 General</h2>
-          <div class="field">
-            <label>Bot Prefix</label>
-            <input type="text" name="prefix" value="<%= settings.prefix || '!' %>" maxlength="5" style="width:100px;">
-            <small>The prefix for text commands (default: !)</small>
-          </div>
+      <div class="card">
+        <div class="card-header"><h2>&#128295; General</h2><span class="badge badge-green">Auto-saves</span></div>
+        <div class="field">
+          <label>Bot Prefix</label>
+          <input type="text" value="<%= settings.prefix || '!' %>" style="width:80px;" data-auto="prefix">
+          <small>The prefix for text commands</small>
         </div>
+      </div>
 
-        <div class="card">
-          <h2>🏷️ Auto Role</h2>
-          <div class="field">
-            <label>
-              <input type="checkbox" name="autoroleEnabled" <%= settings.autoroleEnabled ? 'checked' : '' %>> Enable Auto Role
-            </label>
-          </div>
-          <div class="field">
-            <label>Role to assign to new members</label>
-            <select name="autoroleId">
-              <option value="">None</option>
-              <% roles.forEach(r => { %>
-                <option value="<%= r.id %>" <%= settings.autoroleId === r.id ? 'selected' : '' %>><%= r.name %></option>
-              <% }); %>
-            </select>
-          </div>
+      <div class="card">
+        <div class="card-header"><h2>&#127991; Auto Role</h2></div>
+        <div class="switch-row">
+          <div class="info"><div class="title">Enable Auto Role</div><div class="desc">Assign a role to new members automatically</div></div>
+          <label class="switch"><input type="checkbox" <%= settings.autoroleEnabled ? 'checked' : '' %> data-auto="autoroleEnabled"><span class="slider"></span></label>
         </div>
-
-        <div class="card">
-          <h2>⚡ Disabled Commands</h2>
-          <div class="field">
-            <small>Select commands to disable in this server (not yet implemented)</small>
-          </div>
+        <div class="field" style="margin-top:1rem;">
+          <label>Role to Assign</label>
+          <select data-auto="autoroleId">
+            <option value="">None</option>
+            <% roles.forEach(r => { %>
+              <option value="<%= r.id %>" <%= settings.autoroleId === r.id ? 'selected' : '' %>><%= r.name %></option>
+            <% }); %>
+          </select>
         </div>
+      </div>
 
-        <button type="submit" class="btn primary" style="margin-top:1rem;">Save Settings</button>
-      </form>
+      <div class="card">
+        <div class="card-header"><h2>&#128196; Server Info</h2></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;font-size:0.85rem;">
+          <div><span style="color:var(--text3);">Server ID:</span> <strong><%= guild.id %></strong></div>
+          <div><span style="color:var(--text3);">Owner:</span> <strong><%= guild.ownerId %></strong></div>
+          <div><span style="color:var(--text3);">Boost Level:</span> <strong><%= guild.premiumTier || 0 %></strong></div>
+          <div><span style="color:var(--text3);">Boosts:</span> <strong><%= guild.premiumSubscriptionCount || 0 %></strong></div>
+          <div><span style="color:var(--text3);">Verification:</span> <strong><%= guild.verificationLevel %></strong></div>
+          <div><span style="color:var(--text3);">Emojis:</span> <strong><%= guild.emojis.cache.size %></strong></div>
+        </div>
+      </div>
     </div>
   </div>
+  <script src="/js/dashboard.js"></script>
 </body>
 </html>

@@ -1,37 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Select Server - Dashboard</title>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Select Server</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <nav>
-    <a href="/" class="logo">🤖 Bot Dashboard</a>
-    <div class="nav-right">
-      <span><%= user.username %></span>
-      <a href="/auth/logout" class="btn secondary small">Logout</a>
+  <div class="navbar">
+    <a href="/" class="logo">&#129302; Bot Dashboard</a>
+    <div class="navbar-right">
+      <div class="user"><img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=64" alt=""><span><%= user.username %></span></div>
+      <a href="/auth/logout" class="btn btn-secondary btn-sm">Logout</a>
     </div>
-  </nav>
-  <div class="main" style="max-width:1000px;margin:2rem auto;padding:0 2rem;">
+  </div>
+  <div class="main" style="max-width:900px;margin:2rem auto;">
     <h1>Select a Server</h1>
-    <p style="color:var(--text-secondary);margin-bottom:2rem;">Choose a server where you have Manage Server permissions.</p>
+    <p class="subtitle">Choose a server where you have Manage Server permissions.</p>
     <div class="server-grid">
-      <% guilds.forEach(guild => { %>
-        <a href="/dashboard/<%= guild.id %>" class="server-card">
-          <% if (guild.icon) { %>
-            <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png?size=128" class="server-icon" alt="">
+      <% guilds.forEach(g => { %>
+        <a href="/dashboard/<%= g.id %>" class="server-card">
+          <% if (g.icon) { %>
+            <img src="https://cdn.discordapp.com/icons/<%= g.id %>/<%= g.icon %>.png?size=128" alt="">
           <% } else { %>
-            <div class="server-icon-placeholder"><%= guild.name.charAt(0) %></div>
+            <div class="placeholder"><%= g.name.charAt(0) %></div>
           <% } %>
-          <h3><%= guild.name %></h3>
+          <h3><%= g.name %></h3>
         </a>
       <% }); %>
     </div>
-    <% if (guilds.length === 0) { %>
-      <div class="empty"><h3>No servers found</h3><p>Make sure the bot is in your server and you have Manage Server permissions.</p></div>
-    <% } %>
+    <% if (!guilds.length) { %><div class="empty"><div class="icon">&#128194;</div><h3>No servers found</h3><p>The bot must be in your server and you need Manage Server permission.</p></div><% } %>
   </div>
 </body>
 </html>

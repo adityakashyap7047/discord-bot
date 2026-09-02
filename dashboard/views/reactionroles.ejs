@@ -1,54 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reaction Roles - <%= guild.name %></title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <nav>
-    <a href="/" class="logo">🤖 Bot</a>
-    <div class="nav-right"><span><%= user.username %></span><a href="/auth/logout" class="btn secondary small">Logout</a></div>
-  </nav>
-  <div class="layout">
+  <div class="navbar">
+    <a href="/" class="logo">&#129302; Bot Dashboard</a>
+    <div class="navbar-right"><div class="user"><span><%= user.username %></span></div></div>
+  </div>
+  <div class="layout" data-guild="<%= guild.id %>">
     <%- include('partials/sidebar') %>
     <div class="main">
-      <h1>🎭 Reaction Roles</h1>
-      <p style="color:var(--text-secondary);margin-bottom:1.5rem;">Create reaction role messages for self-assignable roles.</p>
+      <h1>&#127917; Reaction Roles</h1>
+      <p class="subtitle">Self-assignable roles via emoji reactions.</p>
 
       <div class="card">
-        <h2>ℹ️ How to Create</h2>
-        <p style="color:var(--text-secondary);font-size:0.9rem;">
-          1. Use <code>reactionrole #channel &lt;messageId&gt; &lt;emoji&gt; @role</code> in Discord<br>
-          2. The bot will add the reaction to the message<br>
-          3. When users react, they get the role; when they unreact, the role is removed
-        </p>
+        <div class="card-header"><h2>&#128221; How to Create</h2></div>
+        <div style="font-size:0.88rem;color:var(--text2);line-height:1.8;">
+          <p>1. Send a message in the channel where you want reaction roles</p>
+          <p>2. Copy the message ID (enable Developer Mode in Discord settings)</p>
+          <p>3. Use in Discord: <code style="background:var(--bg);padding:0.2rem 0.5rem;border-radius:4px;">reactionrole #channel &lt;messageId&gt; &#127917; @role</code></p>
+          <p>4. The bot adds the reaction and assigns the role on click</p>
+        </div>
       </div>
 
       <div class="card">
-        <h2>📋 Active Reaction Roles</h2>
-        <% if (reactionRoles.length === 0) { %>
-          <div class="empty"><p>No reaction roles configured yet. Use the command in Discord to set one up.</p></div>
+        <div class="card-header"><h2>&#128101; Active Reaction Roles</h2><span class="badge badge-blue"><%= reactionRoles.length %></span></div>
+        <% if (!reactionRoles.length) { %>
+          <div class="empty"><div class="icon">&#127917;</div><h3>No reaction roles yet</h3></div>
         <% } else { %>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Channel</th><th>Message ID</th><th>Emoji</th><th>Role</th></tr></thead>
-              <tbody>
-                <% reactionRoles.forEach(rr => { %>
-                  <tr>
-                    <td><%= rr.channelId %></td>
-                    <td><%= rr.messageId %></td>
-                    <td><%= rr.emoji %></td>
-                    <td><%= rr.roleId %></td>
-                  </tr>
-                <% }); %>
-              </tbody>
-            </table>
-          </div>
+          <table class="tbl">
+            <thead><tr><th>Channel</th><th>Message</th><th>Emoji</th><th>Role</th></tr></thead>
+            <tbody>
+              <% reactionRoles.forEach(rr => { %>
+                <tr>
+                  <td><%= rr.channelId %></td>
+                  <td style="font-family:monospace;font-size:0.8rem;"><%= rr.messageId %></td>
+                  <td><%= rr.emoji %></td>
+                  <td><%= rr.roleId %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
         <% } %>
       </div>
     </div>
   </div>
+  <script src="/js/dashboard.js"></script>
 </body>
 </html>
