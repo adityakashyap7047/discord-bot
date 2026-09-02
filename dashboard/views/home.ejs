@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord Bot Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="hero">
+    <h1>🤖 Discord Bot</h1>
+    <p>A fully-featured Discord bot with web dashboard</p>
+    <div class="stats" id="stats">
+      <div class="stat"><span id="guilds">0</span><p>Guilds</p></div>
+      <div class="stat"><span id="users">0</span><p>Users</p></div>
+      <div class="stat"><span id="commands">0</span><p>Commands</p></div>
+    </div>
+    <div class="buttons">
+      <% if (user) { %>
+        <a href="/dashboard" class="btn primary">Dashboard</a>
+      <% } else { %>
+        <a href="/auth/login" class="btn primary">Login with Discord</a>
+      <% } %>
+      <a href="https://discord.com/api/oauth2/authorize?client_id=<%= bot.config.clientId %>&permissions=8&scope=bot%20applications.commands" class="btn secondary" target="_blank">Add to Server</a>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="feature">
+      <h3>🛡️ Moderation</h3>
+      <p>Kick, ban, mute, warn, purge, slowmode, lock/unlock channels</p>
+    </div>
+    <div class="feature">
+      <h3>👋 Welcome/Goodbye</h3>
+      <p>Customizable welcome and goodbye messages with auto-roles</p>
+    </div>
+    <div class="feature">
+      <h3>🔨 Auto-Moderation</h3>
+      <p>Anti-spam, anti-link, bad word filtering</p>
+    </div>
+    <div class="feature">
+      <h3>⭐ Reaction Roles</h3>
+      <p>Create reaction role messages for self-assignment</p>
+    </div>
+    <div class="feature">
+      <h3>📊 Leveling System</h3>
+      <p>XP and leveling with progress bars</p>
+    </div>
+    <div class="feature">
+      <h3>📝 Custom Commands</h3>
+      <p>Create your own bot commands from the dashboard</p>
+    </div>
+    <div class="feature">
+      <h3>📊 Polls</h3>
+      <p>Create interactive polls with emoji reactions</p>
+    </div>
+    <div class="feature">
+      <h3>📋 Logging</h3>
+      <p>Track message edits, deletes, and moderation actions</p>
+    </div>
+    <div class="feature">
+      <h3>🌐 Web Dashboard</h3>
+      <p>Configure everything from this web panel</p>
+    </div>
+  </div>
+
+  <script>
+    fetch('/api/stats').then(r=>r.json()).then(d=>{
+      document.getElementById('guilds').textContent=d.guilds;
+      document.getElementById('users').textContent=d.users.toLocaleString();
+      document.getElementById('commands').textContent=d.commands;
+    });
+  </script>
+</body>
+</html>

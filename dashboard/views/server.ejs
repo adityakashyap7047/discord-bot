@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - <%= guild.name %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">🤖 Bot</a>
+    <div class="nav-right">
+      <a href="/dashboard" class="btn small">← Back</a>
+      <span><%= guild.name %></span>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1>⚙️ Settings for <%= guild.name %></h1>
+
+    <form action="/dashboard/<%= guild.id %>/update" method="POST" class="settings-form">
+
+      <!-- General -->
+      <div class="settings-section">
+        <h2>🔧 General</h2>
+        <div class="field">
+          <label>Bot Prefix</label>
+          <input type="text" name="prefix" value="<%= settings.prefix || '!' %>" maxlength="5">
+        </div>
+      </div>
+
+      <!-- Welcome -->
+      <div class="settings-section">
+        <h2>👋 Welcome System</h2>
+        <div class="field">
+          <label>
+            <input type="checkbox" name="welcomeEnabled" <%= settings.welcomeEnabled ? 'checked' : '' %>>
+            Enable Welcome Messages
+          </label>
+        </div>
+        <div class="field">
+          <label>Welcome Channel</label>
+          <select name="welcomeChannel">
+            <option value="">None</option>
+            <% channels.forEach(ch => { %>
+              <option value="<%= ch.id %>" <%= settings.welcomeChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="field">
+          <label>Welcome Message</label>
+          <textarea name="welcomeMessage" rows="2"><%= settings.welcomeMessage || 'Welcome {user} to {server}!' %></textarea>
+          <small>Variables: {user}, {server}, {memberCount}</small>
+        </div>
+      </div>
+
+      <!-- Goodbye -->
+      <div class="settings-section">
+        <h2>👋 Goodbye System</h2>
+        <div class="field">
+          <label>
+            <input type="checkbox" name="goodbyeEnabled" <%= settings.goodbyeEnabled ? 'checked' : '' %>>
+            Enable Goodbye Messages
+          </label>
+        </div>
+        <div class="field">
+          <label>Goodbye Channel</label>
+          <select name="goodbyeChannel">
+            <option value="">None</option>
+            <% channels.forEach(ch => { %>
+              <option value="<%= ch.id %>" <%= settings.goodbyeChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option>
+            <% }); %>
+          </select>
+        </div>
+        <div class="field">
+          <label>Goodbye Message</label>
+          <textarea name="goodbyeMessage" rows="2"><%= settings.goodbyeMessage || 'Goodbye {user}!' %></textarea>
+          <small>Variables: {user}, {server}, {memberCount}</small>
+        </div>
+      </div>
+
+      <!-- Logging -->
+      <div class="settings-section">
+        <h2>📋 Logging</h2>
+        <div class="field">
+          <label>Mod Log Channel</label>
+          <select name="modLogChannel">
+            <option value="">None</option>
+            <% channels.forEach(ch => { %>
+              <option value="<%= ch.id %>" <%= settings.modLogChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option>
+            <% }); %>
+          </select>
+        </div>
+      </div>
+
+      <!-- Auto Role -->
+      <div class="settings-section">
+        <h2>🏷️ Auto Role</h2>
+        <div class="field">
+          <label>Auto-assign Role</label>
+          <select name="autoRole">
+            <option value="">None</option>
+            <% roles.forEach(r => { %>
+              <option value="<%= r.id %>" <%= settings.autoRole === r.id ? 'selected' : '' %>><%= r.name %></option>
+            <% }); %>
+          </select>
+        </div>
+      </div>
+
+      <!-- Auto Moderation -->
+      <div class="settings-section">
+        <h2>🛡️ Auto-Moderation</h2>
+        <div class="field">
+          <label>
+            <input type="checkbox" name="autoMod" <%= settings.autoMod ? 'checked' : '' %>>
+            Bad Word Filter
+          </label>
+        </div>
+        <div class="field">
+          <label>
+            <input type="checkbox" name="antiSpam" <%= settings.antiSpam ? 'checked' : '' %>>
+            Anti-Spam (5 msgs in 5s)
+          </label>
+        </div>
+        <div class="field">
+          <label>
+            <input type="checkbox" name="antiLink" <%= settings.antiLink ? 'checked' : '' %>>
+            Anti-Link (non-mod users)
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn primary">Save Settings</button>
+    </form>
+  </div>
+</body>
+</html>

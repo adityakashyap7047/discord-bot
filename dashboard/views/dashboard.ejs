@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Select Server</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">🤖 Bot</a>
+    <div class="nav-right">
+      <span>Welcome, <%= user.username %></span>
+      <a href="/auth/logout" class="btn small">Logout</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1>Select a Server</h1>
+    <p>Choose a server where you have Manage Server permissions.</p>
+
+    <div class="server-grid">
+      <% guilds.forEach(guild => { %>
+        <a href="/dashboard/<%= guild.id %>" class="server-card">
+          <% if (guild.icon) { %>
+            <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png" alt="<%= guild.name %>" class="server-icon">
+          <% } else { %>
+            <div class="server-icon-placeholder"><%= guild.name.charAt(0) %></div>
+          <% } %>
+          <h3><%= guild.name %></h3>
+          <p>ID: <%= guild.id %></p>
+        </a>
+      <% }); %>
+    </div>
+
+    <% if (guilds.length === 0) { %>
+      <div class="empty">
+        <p>No servers found. Make sure the bot is in your server and you have Manage Server permissions.</p>
+        <a href="https://discord.com/api/oauth2/authorize?client_id=<%= bot.config.clientId %>&permissions=8&scope=bot%20applications.commands" class="btn primary">Add Bot to Server</a>
+      </div>
+    <% } %>
+  </div>
+</body>
+</html>
