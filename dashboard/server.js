@@ -364,6 +364,27 @@ function startDashboard(client) {
     res.render('reactionroles', { user: req.user, guild: g, settings, reactionRoles: rr, channels, roles, currentPage: 'reactionroles' });
   });
 
+  // ============ BOT SERVERS ============
+  app.get('/dashboard/servers', isAuthenticated, (req, res) => {
+    const botGuilds = client.guilds.cache.map(g => ({
+      id: g.id,
+      name: g.name,
+      icon: g.icon,
+      memberCount: g.memberCount,
+      owner: g.ownerId,
+      createdAt: g.createdTimestamp,
+      boostLevel: g.premiumTier || 0,
+      boosts: g.premiumSubscriptionCount || 0,
+      channels: g.channels.cache.size,
+      roles: g.roles.cache.size,
+      inviteUrl: `https://discord.com/oauth2/authorize?client_id=${client.config.clientId}&permissions=8&scope=bot%20applications.commands&guild_id=${g.id}`,
+    })).sort((a, b) => b.memberCount - a.memberCount);
+
+    const totalMembers = botGuilds.reduce((a, g) => a + g.memberCount, 0);
+
+    res.render('servers', { user: req.user, guilds: botGuilds, totalMembers, bot: client });
+  });
+
   // ============ API ============
   app.get('/api/stats', (req, res) => {
     res.json({

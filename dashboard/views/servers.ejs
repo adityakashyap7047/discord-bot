@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Servers - Bot Boy NOTIX</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="nav">
+    <a href="/" class="logo"><span>&#129302; Bot Boy NOTIX</span></a>
+    <div class="nav-r">
+      <a href="/dashboard" class="btn btn-s btn-sm">&#8592; Dashboard</a>
+      <span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span>
+    </div>
+  </div>
+  <div class="main" style="max-width:1100px;margin:2rem auto;">
+    <h1>&#127760; All Servers</h1>
+    <p class="sub">Every server where Bot Boy NOTIX is active.</p>
+
+    <div class="stats">
+      <div class="stat"><div class="n"><%= guilds.length %></div><div class="l">Servers</div></div>
+      <div class="stat"><div class="n"><%= totalMembers.toLocaleString() %></div><div class="l">Total Members</div></div>
+      <div class="stat"><div class="n"><%= Math.round(totalMembers / guilds.length) || 0 %></div><div class="l">Avg Members</div></div>
+      <div class="stat"><div class="n"><%= guilds[0] ? guilds[0].memberCount : 0 %></div><div class="l">Largest Server</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>&#128203; Server List</h2><span class="badge b-blue"><%= guilds.length %></span></div>
+
+      <% if (!guilds.length) { %>
+        <div class="empty"><div class="ic">&#127760;</div><h3>Not in any servers</h3><p>Add the bot to a server first.</p></div>
+      <% } else { %>
+        <table class="tbl">
+          <thead><tr><th>Server</th><th>Members</th><th>Channels</th><th>Roles</th><th>Boosts</th><th>Actions</th></tr></thead>
+          <tbody>
+          <% guilds.forEach(g => { %>
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:0.7rem;">
+                  <% if (g.icon) { %>
+                    <img src="https://cdn.discordapp.com/icons/<%= g.id %>/<%= g.icon %>.png?size=64" style="width:36px;height:36px;border-radius:10px;">
+                  <% } else { %>
+                    <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--pink));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;"><%= g.name.charAt(0) %></div>
+                  <% } %>
+                  <div>
+                    <div style="font-weight:600;font-size:0.88rem;"><%= g.name %></div>
+                    <div style="font-size:0.7rem;color:var(--text3);font-family:monospace;"><%= g.id %></div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge b-green"><%= g.memberCount.toLocaleString() %></span></td>
+              <td><%= g.channels %></td>
+              <td><%= g.roles %></td>
+              <td><% if (g.boosts > 0) { %><span class="badge b-blue">Lv<%= g.boostLevel %> (<%= g.boosts %>)</span><% } else { %><span style="color:var(--text3);">-</span><% } %></td>
+              <td>
+                <div style="display:flex;gap:0.4rem;">
+                  <a href="/dashboard/<%= g.id %>" class="btn btn-p btn-sm">&#9881; Configure</a>
+                  <a href="<%= g.inviteUrl %>" target="_blank" class="btn btn-s btn-sm">&#128279; Invite</a>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>
