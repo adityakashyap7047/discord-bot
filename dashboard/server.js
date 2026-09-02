@@ -38,7 +38,7 @@ function startDashboard(client) {
     clientID: client.config.clientId,
     clientSecret: client.config.clientSecret,
     callbackURL: client.config.callbackURL,
-    scope: ['identify', 'guilds', 'guilds.manage'],
+    scope: ['identify', 'guilds'],
   }, (accessToken, refreshToken, profile, done) => {
     return done(null, profile);
   }));
@@ -59,8 +59,26 @@ function startDashboard(client) {
   }
 
   // Auth
-  app.get('/auth/login', passport.authenticate('discord'));
-  app.get('/auth/callback', passport.authenticate('discord', { failureRedirect: '/' }), (req, res) => res.redirect('/dashboard'));
+  app.get('/auth/login', passport.authenticate('discord', { prompt: 'none' }));
+  app.get('/auth/callback', (req, res, next) => {
+    passport.authenticate('discord', (err, user, info) => {
+      if (err) {
+        console.error('Auth error:', err);
+        return res.redirect('/auth/error?msg=' + encodeURIComponent(err.message || 'Authentication failed'));
+      }
+      if (!user) {
+        return res.redirect('/auth/error?msg=' + encodeURIComponent(info?.message || 'Login was cancelled or failed. Make sure you added the Redirect URI in the Discord Developer Portal.'));
+      }
+      req.logIn(user, (err) => {
+        if (err) return res.redirect('/auth/error?msg=' + encodeURIComponent('Session creation failed'));
+        return res.redirect('/dashboard');
+      });
+    })(req, res, next);
+  });
+  app.get('/auth/error', (req, res) => {
+    const msg = req.query.msg || 'Authentication failed';
+    res.render('auth-error', { message: msg, bot: client });
+  });
   app.get('/auth/logout', (req, res) => { req.logout(() => res.redirect('/')); });
 
   // Home
