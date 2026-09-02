@@ -1,0 +1,24 @@
+<div class="sidebar">
+  <div style="padding:0 1.2rem 1rem;border-bottom:1px solid var(--border);margin-bottom:0.5rem;">
+    <div style="display:flex;align-items:center;gap:0.5rem;">
+      <% if (guild.icon) { %>
+        <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png?size=64" style="width:32px;height:32px;border-radius:50%;">
+      <% } %>
+      <div>
+        <div style="font-weight:600;font-size:0.9rem;"><%= guild.name %></div>
+        <a href="/dashboard" style="font-size:0.75rem;">← All Servers</a>
+      </div>
+    </div>
+  </div>
+  <a href="/dashboard/<%= guild.id %>" class="<%= currentPage === 'settings' ? 'active' : '' %>">⚙️ General Settings</a>
+  <a href="/dashboard/<%= guild.id %>/welcome" class="<%= currentPage === 'welcome' ? 'active' : '' %>">👋 Welcome / Goodbye</a>
+  <a href="/dashboard/<%= guild.id %>/moderation" class="<%= currentPage === 'moderation' ? 'active' : '' %>">🛡️ Moderation</a>
+  <a href="/dashboard/<%= guild.id %>/logging" class="<%= currentPage === 'logging' ? 'active' : '' %>">📋 Logging</a>
+  <a href="/dashboard/<%= guild.id %>/roles" class="<%= currentPage === 'roles' ? 'active' : '' %>">🎭 Roles</a>
+  <a href="/dashboard/<%= guild.id %>/levels" class="<%= currentPage === 'levels' ? 'active' : '' %>">📊 Level System</a>
+  <a href="/dashboard/<%= guild.id %>/starboard" class="<%= currentPage === 'starboard' ? 'active' : '' %>">⭐ Starboard</a>
+  <a href="/dashboard/<%= guild.id %>/invites" class="<%= currentPage === 'invites' ? 'active' : '' %>">🔗 Invite Tracker</a>
+  <a href="/dashboard/<%= guild.id %>/commands" class="<%= currentPage === 'commands' ? 'active' : '' %>">⚡ Custom Commands</a>
+  <a href="/dashboard/<%= guild.id %>/embeds" class="<%= currentPage === 'embeds' ? 'active' : '' %>">🎨 Embed Builder</a>
+  <a href="/dashboard/<%= guild.id %>/reactionroles" class="<%= currentPage === 'reactionroles' ? 'active' : '' %>">🎭 Reaction Roles</a>
+</div>

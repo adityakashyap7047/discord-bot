@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logging - <%= guild.name %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">🤖 Bot</a>
+    <div class="nav-right"><span><%= user.username %></span><a href="/auth/logout" class="btn secondary small">Logout</a></div>
+  </nav>
+  <div class="layout">
+    <%- include('partials/sidebar') %>
+    <div class="main">
+      <h1>📋 Logging</h1>
+      <p style="color:var(--text-secondary);margin-bottom:1.5rem;">Configure what events are logged and where.</p>
+
+      <form action="/dashboard/<%= guild.id %>/logging" method="POST">
+        <div class="card">
+          <h2>📋 Log Settings</h2>
+          <div class="field">
+            <label>Log Channel</label>
+            <select name="logChannel">
+              <option value="">Select channel</option>
+              <% channels.forEach(ch => { %>
+                <option value="<%= ch.id %>" <%= settings.logChannel === ch.id ? 'selected' : '' %>#<%= ch.name %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="field"><label><input type="checkbox" name="logMessages" <%= settings.logMessages ? 'checked' : '' %>> Log Message Deletes</label></div>
+          <div class="field"><label><input type="checkbox" name="logEdits" <%= settings.logEdits ? 'checked' : '' %>> Log Message Edits</label></div>
+          <div class="field"><label><input type="checkbox" name="logJoins" <%= settings.logJoins ? 'checked' : '' %>> Log Member Joins/Leaves</label></div>
+          <div class="field"><label><input type="checkbox" name="logBans" <%= settings.logBans ? 'checked' : '' %>> Log Bans/Unbans</label></div>
+          <div class="field"><label><input type="checkbox" name="voiceChannelLog" <%= settings.voiceChannelLog ? 'checked' : '' %>> Log Voice Channel Activity</label></div>
+        </div>
+        <button type="submit" class="btn primary">Save Logging Settings</button>
+      </form>
+
+      <div class="card" style="margin-top:1.5rem;">
+        <h2>📜 Recent Logs</h2>
+        <% if (logs.length === 0) { %>
+          <div class="empty"><p>No logs yet.</p></div>
+        <% } else { %>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Type</th><th>Moderator</th><th>Target</th><th>Reason</th><th>Time</th></tr></thead>
+              <tbody>
+                <% logs.forEach(log => { %>
+                  <tr>
+                    <td><span class="badge info"><%= log.type %></span></td>
+                    <td><%= log.moderatorId %></td>
+                    <td><%= log.targetId %></td>
+                    <td><%= log.reason || '-' %></td>
+                    <td><%= new Date(log.timestamp).toLocaleString() %></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

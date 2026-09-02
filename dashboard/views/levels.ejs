@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Level System - <%= guild.name %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">🤖 Bot</a>
+    <div class="nav-right"><span><%= user.username %></span><a href="/auth/logout" class="btn secondary small">Logout</a></div>
+  </nav>
+  <div class="layout">
+    <%- include('partials/sidebar') %>
+    <div class="main">
+      <h1>📊 Level System</h1>
+      <p style="color:var(--text-secondary);margin-bottom:1.5rem;">Configure XP and leveling for active members.</p>
+
+      <form action="/dashboard/<%= guild.id %>/levels" method="POST">
+        <div class="card">
+          <h2>📊 Level Settings</h2>
+          <div class="field">
+            <label><input type="checkbox" name="levelSystem" <%= settings.levelSystem ? 'checked' : '' %>> Enable Level System</label>
+            <small>Members gain XP by chatting</small>
+          </div>
+          <div class="field">
+            <label>Level-Up Channel</label>
+            <select name="levelChannel">
+              <option value="">Announce in current channel</option>
+              <% channels.forEach(ch => { %>
+                <option value="<%= ch.id %>" <%= settings.levelChannel === ch.id ? 'selected' : '' %>#<%= ch.name %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="field">
+            <label>Level-Up Message</label>
+            <textarea name="levelUpMessage" rows="2"><%= settings.levelUpMessage || '' %></textarea>
+            <small>Variables: {user} (mention), {level} (new level), {xp} (current XP)</small>
+          </div>
+          <button type="submit" class="btn primary">Save Level Settings</button>
+        </div>
+      </form>
+
+      <div class="card">
+        <h2>🏆 Leaderboard</h2>
+        <% if (leaderboard.length === 0) { %>
+          <div class="empty"><p>No leveled users yet.</p></div>
+        <% } else { %>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>User</th><th>Level</th><th>XP</th></tr></thead>
+              <tbody>
+                <% leaderboard.forEach((entry, i) => { %>
+                  <tr>
+                    <td><strong><%= i + 1 %></strong></td>
+                    <td><%= entry.userId %></td>
+                    <td><span class="badge info">Level <%= entry.level %></span></td>
+                    <td><%= entry.xp %> / <%= entry.level * 100 %></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

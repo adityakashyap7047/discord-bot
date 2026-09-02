@@ -5,10 +5,10 @@ module.exports = {
   name: Events.MessageDelete,
   once: false,
   async execute(message, client) {
-    if (!message.guild || !message.content) return;
+    if (!message.guild || !message.content || message.author.bot) return;
     const settings = getGuildSettings(message.guild.id);
-    if (!settings.modLogChannel) return;
-    const channel = message.guild.channels.cache.get(settings.modLogChannel);
+    if (!settings.logChannel || !settings.logMessages) return;
+    const channel = message.guild.channels.cache.get(settings.logChannel);
     if (!channel) return;
 
     const embed = new EmbedBuilder()
@@ -17,9 +17,12 @@ module.exports = {
       .addFields(
         { name: 'Author', value: `${message.author.tag} (${message.author.id})`, inline: true },
         { name: 'Channel', value: `<#${message.channel.id}>`, inline: true },
-        { name: 'Content', value: message.content.slice(0, 1024) || 'No content' },
+        { name: 'Content', value: message.content.slice(0, 1024) || 'No text content' },
       )
       .setTimestamp();
+    if (message.attachments.size > 0) {
+      embed.addFields({ name: 'Attachments', value: message.attachments.map(a => a.url).join('\n').slice(0, 1024) });
+    }
     channel.send({ embeds: [embed] });
   },
 };

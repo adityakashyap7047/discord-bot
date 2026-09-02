@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moderation - <%= guild.name %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">🤖 Bot</a>
+    <div class="nav-right"><span><%= user.username %></span><a href="/auth/logout" class="btn secondary small">Logout</a></div>
+  </nav>
+  <div class="layout">
+    <%- include('partials/sidebar') %>
+    <div class="main">
+      <h1>🛡️ Moderation Settings</h1>
+      <p style="color:var(--text-secondary);margin-bottom:1.5rem;">Configure auto-moderation and moderation logging.</p>
+
+      <form action="/dashboard/<%= guild.id %>/moderation" method="POST">
+        <div class="card">
+          <h2>🔨 Auto-Moderation</h2>
+          <div class="field">
+            <label><input type="checkbox" name="autoMod" <%= settings.autoMod ? 'checked' : '' %>> Bad Word Filter</label>
+            <small>Automatically deletes messages containing banned words</small>
+          </div>
+          <div class="field">
+            <label><input type="checkbox" name="antiSpam" <%= settings.antiSpam ? 'checked' : '' %>> Anti-Spam</label>
+            <small>Prevents users from sending too many messages quickly</small>
+          </div>
+          <div class="field">
+            <label><input type="checkbox" name="antiLink" <%= settings.antiLink ? 'checked' : '' %>> Anti-Link</label>
+            <small>Prevents non-moderators from posting links</small>
+          </div>
+          <div class="field">
+            <label><input type="checkbox" name="antiRaid" <%= settings.antiRaid ? 'checked' : '' %>> Anti-Raid</label>
+            <small>Protects against mass-join raids</small>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Flood Limit (messages)</label>
+              <input type="number" name="floodLimit" value="<%= settings.floodLimit || 5 %>" min="2" max="20">
+              <small>Max messages in timeframe before action</small>
+            </div>
+            <div class="field">
+              <label>Flood Timeframe (seconds)</label>
+              <input type="number" name="floodTimeframe" value="<%= settings.floodTimeframe || 5 %>" min="2" max="30">
+              <small>Time window for flood detection</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🔇 Mute Settings</h2>
+          <div class="field">
+            <label>Muted Role</label>
+            <select name="mutedRole">
+              <option value="">None</option>
+              <% roles.forEach(r => { %>
+                <option value="<%= r.id %>" <%= settings.mutedRole === r.id ? 'selected' : '' %>><%= r.name %></option>
+              <% }); %>
+            </select>
+            <small>Role assigned when a user is muted</small>
+          </div>
+        </div>
+
+        <button type="submit" class="btn primary">Save Moderation Settings</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

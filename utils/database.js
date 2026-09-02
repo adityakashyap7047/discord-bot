@@ -11,7 +11,22 @@ function ensureDir() {
 function loadDB() {
   ensureDir();
   if (!fs.existsSync(DB_FILE)) {
-    const initial = { guild_settings: {}, warnings: [], reaction_roles: [], custom_commands: [], level_system: [], starboard: [], reminders: [] };
+    const initial = {
+      guild_settings: {},
+      warnings: [],
+      reaction_roles: [],
+      custom_commands: [],
+      level_system: [],
+      starboard: [],
+      reminders: [],
+      invites: {},
+      tempbans: [],
+      logs: [],
+      embeds: [],
+      autoroles: [],
+      goodbye_config: {},
+      welcome_config: {},
+    };
     fs.writeFileSync(DB_FILE, JSON.stringify(initial, null, 2));
     return initial;
   }
@@ -28,19 +43,52 @@ function getGuildSettings(guildId) {
   if (!db.guild_settings[guildId]) {
     db.guild_settings[guildId] = {
       guildId,
-      welcomeChannel: null,
-      welcomeMessage: 'Welcome {user} to {server}!',
-      goodbyeChannel: null,
-      goodbyeMessage: 'Goodbye {user}!',
-      goodbyeEnabled: false,
+      prefix: '!',
       welcomeEnabled: false,
+      welcomeChannel: null,
+      welcomeMessage: 'Welcome {user} to {server}! You are member #{memberCount}.',
+      welcomeEmbed: false,
+      welcomeColor: '#00ff00',
+      welcomeImage: '',
+      goodbyeEnabled: false,
+      goodbyeChannel: null,
+      goodbyeMessage: 'Goodbye {user}! We will miss you.',
+      goodbyeEmbed: false,
+      goodbyeColor: '#ff0000',
+      goodbyeImage: '',
       modLogChannel: null,
+      modLogEnabled: false,
       autoRole: null,
+      autoRoleEnabled: false,
       autoMod: false,
       antiSpam: false,
       antiLink: false,
+      antiRaid: false,
       mutedRole: null,
-      prefix: '!',
+      logChannel: null,
+      logMessages: false,
+      logJoins: false,
+      logBans: false,
+      logEdits: false,
+      starboardChannel: null,
+      starboardEnabled: false,
+      starboardThreshold: 3,
+      levelSystem: false,
+      levelChannel: null,
+      levelUpMessage: '🎉 {user} leveled up to **Level {level}**!',
+      inviteTracker: false,
+      inviteLogChannel: null,
+      autoroleEnabled: false,
+      autoroleId: null,
+      voiceChannelLog: false,
+      floodLimit: 5,
+      floodTimeframe: 5,
+      welcomeRoles: [],
+      boostMessage: '',
+      boostChannel: null,
+      customReactions: [],
+      disabledCommands: [],
+      commandAliases: {},
     };
     saveDB(db);
   }
@@ -51,6 +99,13 @@ function updateGuildSetting(guildId, key, value) {
   const db = loadDB();
   if (!db.guild_settings[guildId]) getGuildSettings(guildId);
   db.guild_settings[guildId][key] = value;
+  saveDB(db);
+}
+
+function updateGuildSettings(guildId, updates) {
+  const db = loadDB();
+  if (!db.guild_settings[guildId]) getGuildSettings(guildId);
+  Object.assign(db.guild_settings[guildId], updates);
   saveDB(db);
 }
 
@@ -65,9 +120,26 @@ function getWarnings(guildId, userId) {
   return db.warnings.filter(w => w.guildId === guildId && w.userId === userId);
 }
 
+function clearWarnings(guildId, userId) {
+  const db = loadDB();
+  db.warnings = db.warnings.filter(w => !(w.guildId === guildId && w.userId === userId));
+  saveDB(db);
+}
+
 function addReactionRole(guildId, channelId, messageId, emoji, roleId) {
   const db = loadDB();
   db.reaction_roles.push({ guildId, channelId, messageId, emoji, roleId });
+  saveDB(db);
+}
+
+function getReactionRoles(guildId) {
+  const db = loadDB();
+  return db.reaction_roles.filter(r => r.guildId === guildId);
+}
+
+function removeReactionRole(guildId, messageId, emoji) {
+  const db = loadDB();
+  db.reaction_roles = db.reaction_roles.filter(r => !(r.guildId === guildId && r.messageId === messageId && r.emoji === emoji));
   saveDB(db);
 }
 
@@ -81,6 +153,8 @@ function addCustomCommand(guildId, name, response, createdBy) {
   const idx = db.custom_commands.findIndex(c => c.guildId === guildId && c.name === name);
   if (idx >= 0) {
     db.custom_commands[idx].response = response;
+    db.custom_commands[idx].updatedBy = createdBy;
+    db.custom_commands[idx].updatedAt = new Date().toISOString();
   } else {
     db.custom_commands.push({ guildId, name, response, createdBy, createdAt: new Date().toISOString() });
   }
@@ -120,6 +194,14 @@ function updateLevel(guildId, userId, xp, level) {
   saveDB(db);
 }
 
+function getLeaderboard(guildId) {
+  const db = loadDB();
+  return db.level_system
+    .filter(l => l.guildId === guildId)
+    .sort((a, b) => (b.level * 100 + b.xp) - (a.level * 100 + a.xp))
+    .slice(0, 20);
+}
+
 function addReminder(userId, channelId, reminder, remindAt) {
   const db = loadDB();
   db.reminders.push({ userId, channelId, reminder, remindAt });
@@ -130,6 +212,75 @@ function removeReminder(userId, reminder) {
   const db = loadDB();
   db.reminders = db.reminders.filter(r => !(r.userId === userId && r.reminder === reminder));
   saveDB(db);
+}
+
+function addInvite(guildId, code, inviterId, uses) {
+  const db = loadDB();
+  if (!db.invites) db.invites = {};
+  if (!db.invites[guildId]) db.invites[guildId] = {};
+  db.invites[guildId][code] = { inviterId, uses, created: new Date().toISOString() };
+  saveDB(db);
+}
+
+function updateInvite(guildId, code, uses) {
+  const db = loadDB();
+  if (db.invites[guildId] && db.invites[guildId][code]) {
+    db.invites[guildId][code].uses = uses;
+    saveDB(db);
+  }
+}
+
+function getInvites(guildId) {
+  const db = loadDB();
+  return db.invites[guildId] || {};
+}
+
+function getInviteLeaderboard(guildId) {
+  const db = loadDB();
+  const invites = db.invites[guildId] || {};
+  const counts = {};
+  for (const [code, data] of Object.entries(invites)) {
+    if (!counts[data.inviterId]) counts[data.inviterId] = 0;
+    counts[data.inviterId] += data.uses || 0;
+  }
+  return Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 20)
+    .map(([userId, uses]) => ({ userId, uses }));
+}
+
+function addTempban(guildId, userId, expiresAt) {
+  const db = loadDB();
+  if (!db.tempbans) db.tempbans = [];
+  db.tempbans.push({ guildId, userId, expiresAt });
+  saveDB(db);
+}
+
+function removeTempban(guildId, userId) {
+  const db = loadDB();
+  db.tempbans = (db.tempbans || []).filter(t => !(t.guildId === guildId && t.userId === userId));
+  saveDB(db);
+}
+
+function getTempbans(guildId) {
+  const db = loadDB();
+  return (db.tempbans || []).filter(t => t.guildId === guildId);
+}
+
+function addLog(guildId, type, moderatorId, targetId, reason, details) {
+  const db = loadDB();
+  if (!db.logs) db.logs = [];
+  db.logs.push({ guildId, type, moderatorId, targetId, reason, details, timestamp: new Date().toISOString() });
+  if (db.logs.length > 500) db.logs = db.logs.slice(-500);
+  saveDB(db);
+}
+
+function getLogs(guildId, type, limit = 50) {
+  const db = loadDB();
+  return (db.logs || [])
+    .filter(l => l.guildId === guildId && (!type || l.type === type))
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+    .slice(0, limit);
 }
 
 function getStarboard(guildId, messageId) {
@@ -143,12 +294,57 @@ function addStarboard(guildId, messageId, starboardMessageId, stars) {
   saveDB(db);
 }
 
+function addEmbed(guildId, name, embedData, createdBy) {
+  const db = loadDB();
+  if (!db.embeds) db.embeds = [];
+  const idx = db.embeds.findIndex(e => e.guildId === guildId && e.name === name);
+  if (idx >= 0) {
+    db.embeds[idx] = { guildId, name, embedData, createdBy, updatedAt: new Date().toISOString() };
+  } else {
+    db.embeds.push({ guildId, name, embedData, createdBy, createdAt: new Date().toISOString() });
+  }
+  saveDB(db);
+}
+
+function removeEmbed(guildId, name) {
+  const db = loadDB();
+  db.embeds = (db.embeds || []).filter(e => !(e.guildId === guildId && e.name === name));
+  saveDB(db);
+}
+
+function getEmbeds(guildId) {
+  const db = loadDB();
+  return (db.embeds || []).filter(e => e.guildId === guildId);
+}
+
+function getEmbed(guildId, name) {
+  const db = loadDB();
+  return (db.embeds || []).find(e => e.guildId === guildId && e.name === name);
+}
+
+function getGuildStats(guildId) {
+  const db = loadDB();
+  return {
+    warnings: db.warnings.filter(w => w.guildId === guildId).length,
+    customCommands: db.custom_commands.filter(c => c.guildId === guildId).length,
+    reactionRoles: db.reaction_roles.filter(r => r.guildId === guildId).length,
+    levels: db.level_system.filter(l => l.guildId === guildId).length,
+    logs: (db.logs || []).filter(l => l.guildId === guildId).length,
+    embeds: (db.embeds || []).filter(e => e.guildId === guildId).length,
+  };
+}
+
 module.exports = {
-  loadDB, saveDB, getGuildSettings, updateGuildSetting,
-  addWarning, getWarnings,
-  addReactionRole, getReactionRole,
+  loadDB, saveDB, getGuildSettings, updateGuildSetting, updateGuildSettings,
+  addWarning, getWarnings, clearWarnings,
+  addReactionRole, getReactionRoles, removeReactionRole, getReactionRole,
   addCustomCommand, removeCustomCommand, getCustomCommand, getCustomCommands,
-  getLevel, updateLevel,
+  getLevel, updateLevel, getLeaderboard,
   addReminder, removeReminder,
+  addInvite, updateInvite, getInvites, getInviteLeaderboard,
+  addTempban, removeTempban, getTempbans,
+  addLog, getLogs,
   getStarboard, addStarboard,
+  addEmbed, removeEmbed, getEmbeds, getEmbed,
+  getGuildStats,
 };

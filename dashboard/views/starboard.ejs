@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Starboard - <%= guild.name %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">🤖 Bot</a>
+    <div class="nav-right"><span><%= user.username %></span><a href="/auth/logout" class="btn secondary small">Logout</a></div>
+  </nav>
+  <div class="layout">
+    <%- include('partials/sidebar') %>
+    <div class="main">
+      <h1>⭐ Starboard</h1>
+      <p style="color:var(--text-secondary);margin-bottom:1.5rem;">Star messages to feature the best content.</p>
+
+      <form action="/dashboard/<%= guild.id %>/starboard" method="POST">
+        <div class="card">
+          <h2>⭐ Starboard Settings</h2>
+          <div class="field">
+            <label><input type="checkbox" name="starboardEnabled" <%= settings.starboardEnabled ? 'checked' : '' %>> Enable Starboard</label>
+          </div>
+          <div class="field">
+            <label>Starboard Channel</label>
+            <select name="starboardChannel">
+              <option value="">Select channel</option>
+              <% channels.forEach(ch => { %>
+                <option value="<%= ch.id %>" <%= settings.starboardChannel === ch.id ? 'selected' : '' %>#<%= ch.name %></option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="field">
+            <label>Star Threshold</label>
+            <input type="number" name="starboardThreshold" value="<%= settings.starboardThreshold || 3 %>" min="1" max="50">
+            <small>Number of ⭐ reactions needed to star a message</small>
+          </div>
+          <button type="submit" class="btn primary">Save Starboard Settings</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

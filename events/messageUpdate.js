@@ -8,8 +8,8 @@ module.exports = {
     if (!oldMessage.guild || oldMessage.author.bot) return;
     if (oldMessage.content === newMessage.content) return;
     const settings = getGuildSettings(oldMessage.guild.id);
-    if (!settings.modLogChannel) return;
-    const channel = oldMessage.guild.channels.cache.get(settings.modLogChannel);
+    if (!settings.logChannel || !settings.logEdits) return;
+    const channel = oldMessage.guild.channels.cache.get(settings.logChannel);
     if (!channel) return;
 
     const embed = new EmbedBuilder()

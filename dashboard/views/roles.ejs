@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roles - <%= guild.name %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">🤖 Bot</a>
+    <div class="nav-right"><span><%= user.username %></span><a href="/auth/logout" class="btn secondary small">Logout</a></div>
+  </nav>
+  <div class="layout">
+    <%- include('partials/sidebar') %>
+    <div class="main">
+      <h1>🎭 Role Management</h1>
+      <p style="color:var(--text-secondary);margin-bottom:1.5rem;">Manage server roles and auto-role settings.</p>
+
+      <form action="/dashboard/<%= guild.id %>/roles/autorole" method="POST">
+        <div class="card">
+          <h2>🏷️ Auto Role</h2>
+          <div class="field">
+            <label><input type="checkbox" name="autoroleEnabled" <%= settings.autoroleEnabled ? 'checked' : '' %>> Enable Auto Role</label>
+            <small>Automatically assign a role to new members when they join</small>
+          </div>
+          <div class="field">
+            <label>Role to Auto-Assign</label>
+            <select name="autoroleId">
+              <option value="">None</option>
+              <% roles.forEach(r => { %>
+                <option value="<%= r.id %>" <%= settings.autoroleId === r.id ? 'selected' : '' %>><%= r.name %></option>
+              <% }); %>
+            </select>
+          </div>
+          <button type="submit" class="btn primary">Save Auto Role</button>
+        </div>
+      </form>
+
+      <div class="card">
+        <h2>📋 All Roles (<%= roles.length %>)</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Color</th><th>Name</th><th>Members</th><th>ID</th></tr></thead>
+            <tbody>
+              <% roles.forEach(r => { %>
+                <tr>
+                  <td><span style="display:inline-block;width:16px;height:16px;border-radius:50%;background:<%= r.color %>;"></span></td>
+                  <td><strong><%= r.name %></strong></td>
+                  <td><%= r.members %></td>
+                  <td style="color:var(--text-secondary);font-size:0.8rem;"><%= r.id %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

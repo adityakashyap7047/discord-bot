@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invite Tracker - <%= guild.name %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">🤖 Bot</a>
+    <div class="nav-right"><span><%= user.username %></span><a href="/auth/logout" class="btn secondary small">Logout</a></div>
+  </nav>
+  <div class="layout">
+    <%- include('partials/sidebar') %>
+    <div class="main">
+      <h1>🔗 Invite Tracker</h1>
+      <p style="color:var(--text-secondary);margin-bottom:1.5rem;">Track who invites the most members to your server.</p>
+
+      <form action="/dashboard/<%= guild.id %>/invites" method="POST">
+        <div class="card">
+          <h2>🔗 Invite Tracking</h2>
+          <div class="field">
+            <label><input type="checkbox" name="inviteTracker" <%= settings.inviteTracker ? 'checked' : '' %>> Enable Invite Tracking</label>
+            <small>Track which users invite new members</small>
+          </div>
+          <div class="field">
+            <label>Invite Log Channel</label>
+            <select name="inviteLogChannel">
+              <option value="">Select channel</option>
+              <% channels.forEach(ch => { %>
+                <option value="<%= ch.id %>" <%= settings.inviteLogChannel === ch.id ? 'selected' : '' %>#<%= ch.name %></option>
+              <% }); %>
+            </select>
+            <small>Channel where join/invite info is posted</small>
+          </div>
+          <button type="submit" class="btn primary">Save Invite Settings</button>
+        </div>
+      </form>
+
+      <div class="card">
+        <h2>🏆 Invite Leaderboard</h2>
+        <% if (leaderboard.length === 0) { %>
+          <div class="empty"><p>No invite data yet.</p></div>
+        <% } else { %>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>User</th><th>Invites</th></tr></thead>
+              <tbody>
+                <% leaderboard.forEach((entry, i) => { %>
+                  <tr>
+                    <td><strong><%= i + 1 %></strong></td>
+                    <td><%= entry.userId %></td>
+                    <td><span class="badge success"><%= entry.uses %> invites</span></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+
+      <div class="card">
+        <h2>📋 Active Invites</h2>
+        <% const inviteList = Object.entries(invites); %>
+        <% if (inviteList.length === 0) { %>
+          <div class="empty"><p>No tracked invites yet.</p></div>
+        <% } else { %>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Code</th><th>Inviter</th><th>Uses</th><th>Created</th></tr></thead>
+              <tbody>
+                <% inviteList.forEach(([code, data]) => { %>
+                  <tr>
+                    <td><strong><%= code %></strong></td>
+                    <td><%= data.inviterId %></td>
+                    <td><%= data.uses %></td>
+                    <td style="color:var(--text-secondary);font-size:0.8rem;"><%= new Date(data.created).toLocaleDateString() %></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

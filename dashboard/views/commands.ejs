@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Commands - <%= guild.name %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">🤖 Bot</a>
+    <div class="nav-right"><span><%= user.username %></span><a href="/auth/logout" class="btn secondary small">Logout</a></div>
+  </nav>
+  <div class="layout">
+    <%- include('partials/sidebar') %>
+    <div class="main">
+      <h1>⚡ Custom Commands</h1>
+      <p style="color:var(--text-secondary);margin-bottom:1.5rem;">Create and manage custom bot commands.</p>
+
+      <div class="card">
+        <h2>➕ Add New Command</h2>
+        <form action="/dashboard/<%= guild.id %>/commands/add" method="POST">
+          <div class="field-row">
+            <div class="field">
+              <label>Command Name</label>
+              <input type="text" name="name" placeholder="hello" required>
+              <small>What users type: <%= settings.prefix %><strong>name</strong></small>
+            </div>
+            <div class="field">
+              <label>Bot Response</label>
+              <input type="text" name="response" placeholder="Hello {user}! Welcome!" required>
+              <small>Use {user} to mention the user</small>
+            </div>
+          </div>
+          <button type="submit" class="btn primary">Add Command</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>📋 Existing Commands (<%= customCommands.length %>)</h2>
+        <% if (customCommands.length === 0) { %>
+          <div class="empty"><p>No custom commands yet. Create one above!</p></div>
+        <% } else { %>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Command</th><th>Response</th><th>Created</th><th>Action</th></tr></thead>
+              <tbody>
+                <% customCommands.forEach(cmd => { %>
+                  <tr>
+                    <td><strong><%= settings.prefix %><%= cmd.name %></strong></td>
+                    <td><%= cmd.response.length > 60 ? cmd.response.slice(0, 60) + '...' : cmd.response %></td>
+                    <td style="color:var(--text-secondary);font-size:0.8rem;"><%= new Date(cmd.createdAt).toLocaleDateString() %></td>
+                    <td>
+                      <form action="/dashboard/<%= guild.id %>/commands/remove" method="POST" style="display:inline;">
+                        <input type="hidden" name="name" value="<%= cmd.name %>">
+                        <button type="submit" class="btn danger small" onclick="return confirm('Delete this command?')">Delete</button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
