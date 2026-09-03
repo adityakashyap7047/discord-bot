@@ -59,7 +59,22 @@ startDashboard(client);
 
 client.once('ready', () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
-  client.user.setActivity('!help | Dashboard', { type: 3 });
+
+  const statuses = [
+    { name: 'with absolute power | /help', type: 3 },
+    { name: 'God Mode | 𝕲𝖚𝖞 𝖜𝖎𝖙𝖍 𝖆𝖑𝖑 𝖕𝖔𝖜𝖊𝖗𝖘', type: 3 },
+    { name: 'with the server rules ⚡', type: 3 },
+    { name: `in ${client.guilds.cache.size} servers`, type: 3 },
+    { name: `${client.users.cache.size.toLocaleString()} users`, type: 3 },
+    { name: '!help | Dashboard', type: 3 },
+  ];
+
+  let i = 0;
+  setInterval(() => {
+    const status = statuses[i % statuses.length];
+    client.user.setActivity(status.name, { type: status.type });
+    i++;
+  }, 10000);
 });
 
 client.login(client.config.token);
