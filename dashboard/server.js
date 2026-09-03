@@ -23,6 +23,8 @@ function startDashboard(client) {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
 
+  const isProduction = process.env.RENDER || process.env.NODE_ENV === 'production';
+
   app.use(session({
     secret: client.config.sessionSecret || 'discord-bot-secret',
     resave: false,
@@ -41,7 +43,6 @@ function startDashboard(client) {
   passport.deserializeUser((obj, done) => done(null, obj));
 
   // Detect if running on Render or localhost
-  const isProduction = process.env.RENDER || process.env.NODE_ENV === 'production';
   const renderUrl = process.env.RENDER_EXTERNAL_URL || process.env.RENDER_URL || (process.env.RENDER ? `https://${process.env.RENDER_SERVICE_NAME}.onrender.com` : '');
   const publicUrl = renderUrl || process.env.PUBLIC_URL || '';
 
