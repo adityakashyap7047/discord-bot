@@ -2,67 +2,119 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bot Boy NOTIX Dashboard</title>
+  <title>Bot Boy NOTIX — Discord Bot Dashboard</title>
+  <meta name="description" content="Powerful Discord bot with web dashboard. Moderation, anti-scam, welcome, leveling, and more.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    :root{--bg:#0a0a0f;--bg2:rgba(20,20,35,0.6);--bg3:rgba(25,25,40,0.6);--border:rgba(139,92,246,0.12);--border2:rgba(255,255,255,0.06);--text:#e8eaf0;--text2:#9ca3af;--text3:#6b7280;--accent:#8b5cf6;--accent2:#a78bfa;--accent3:#7c3aed;--green:#22c55e;--red:#ef4444;--pink:#ec4899;--r:16px;--rs:10px}
+    :root{--bg:#09090b;--bg2:rgba(15,15,25,0.8);--bg3:rgba(20,20,35,0.6);--border:rgba(139,92,246,0.1);--border2:rgba(255,255,255,0.05);--text:#fafafa;--text2:#a1a1aa;--text3:#71717a;--accent:#8b5cf6;--accent2:#a78bfa;--accent3:#7c3aed;--pink:#ec4899;--green:#22c55e;--r:20px;--rs:12px}
+    html{scroll-behavior:smooth}
     body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-    body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 50% 0%,rgba(139,92,246,0.1),transparent 50%);pointer-events:none;z-index:0}
-    a{color:var(--accent2);text-decoration:none;transition:color .2s}a:hover{color:var(--accent)}
+    a{color:var(--accent2);text-decoration:none;transition:all .2s}a:hover{color:#fff}
 
-    .nav{display:flex;justify-content:space-between;align-items:center;padding:0 2.5rem;height:64px;background:rgba(10,10,15,0.8);backdrop-filter:blur(24px);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100}
-    .nav .logo{font-weight:800;font-size:1.1rem;letter-spacing:-0.5px;display:flex;align-items:center;gap:0.6rem}
+    /* ─── NAV ─── */
+    .nav{display:flex;justify-content:space-between;align-items:center;padding:0 3rem;height:72px;background:rgba(9,9,11,0.7);backdrop-filter:blur(30px) saturate(1.5);border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:100}
+    .nav .logo{font-weight:900;font-size:1.2rem;letter-spacing:-0.5px;display:flex;align-items:center;gap:0.7rem}
     .nav .logo span{background:linear-gradient(135deg,#8b5cf6,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .nav-links{display:flex;align-items:center;gap:2rem}
+    .nav-links a{color:var(--text2);font-size:0.88rem;font-weight:500;transition:color .2s}.nav-links a:hover{color:#fff}
     .nav-r{display:flex;align-items:center;gap:0.8rem}
-    .avatar{width:32px;height:32px;border-radius:50%;border:2px solid var(--accent)}
-
-    .btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.6rem 1.4rem;border-radius:var(--rs);font-weight:600;font-size:0.85rem;cursor:pointer;border:none;transition:all .25s;font-family:inherit;letter-spacing:-0.1px;position:relative;overflow:hidden}
+    .btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.6rem 1.4rem;border-radius:var(--rs);font-weight:600;font-size:0.85rem;cursor:pointer;border:none;transition:all .25s;font-family:inherit;position:relative;overflow:hidden}
     .btn:active{transform:scale(0.97)}
-    .btn-p{background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;box-shadow:0 0 25px rgba(139,92,246,0.3)}.btn-p:hover{box-shadow:0 0 40px rgba(139,92,246,0.5);transform:translateY(-2px)}
-    .btn-s{background:var(--bg3);color:var(--text);border:1px solid var(--border);backdrop-filter:blur(10px)}.btn-s:hover{background:var(--bg2);border-color:var(--accent);transform:translateY(-1px)}
-    .btn-sm{padding:0.35rem 0.8rem;font-size:0.75rem}
+    .btn-p{background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;box-shadow:0 0 30px rgba(139,92,246,0.3)}.btn-p:hover{box-shadow:0 0 50px rgba(139,92,246,0.5);transform:translateY(-2px);color:#fff}
+    .btn-s{background:rgba(255,255,255,0.05);color:var(--text);border:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(10px)}.btn-s:hover{background:rgba(255,255,255,0.1);border-color:var(--accent);transform:translateY(-1px);color:#fff}
+    .btn-lg{padding:0.85rem 2.4rem;font-size:0.95rem;border-radius:14px}
 
-    .hero{text-align:center;padding:8rem 2rem 6rem;position:relative;z-index:1}
-    .hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(139,92,246,0.15),transparent 70%);pointer-events:none}
-    .hero h1{font-size:4rem;font-weight:800;letter-spacing:-2px;background:linear-gradient(135deg,#fff 20%,#8b5cf6 50%,#ec4899 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:0.6rem;line-height:1.1}
-    .hero p{font-size:1.15rem;color:var(--text2);margin-bottom:3rem;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.6}
-    .hero-stats{display:flex;justify-content:center;gap:5rem;margin-bottom:3.5rem}
-    .hero-stats .s{position:relative}
-    .hero-stats .s span{display:block;font-size:3rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    .hero-stats .s p{font-size:0.78rem;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-top:0.3rem}
-    .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
-    .hero-btns .btn{font-size:0.92rem;padding:0.8rem 2.2rem;border-radius:12px}
+    /* ─── HERO ─── */
+    .hero{text-align:center;padding:10rem 2rem 8rem;position:relative;overflow:hidden}
+    .hero-orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;animation:orbFloat 8s ease-in-out infinite}
+    .hero-orb-1{width:500px;height:500px;background:rgba(139,92,246,0.15);top:-100px;left:50%;transform:translateX(-50%);animation-delay:0s}
+    .hero-orb-2{width:300px;height:300px;background:rgba(236,72,153,0.1);bottom:0;left:20%;animation-delay:2s}
+    .hero-orb-3{width:250px;height:250px;background:rgba(59,130,246,0.08);top:30%;right:10%;animation-delay:4s}
+    @keyframes orbFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.05)}}
+    .hero-badge{display:inline-flex;align-items:center;gap:0.5rem;padding:0.4rem 1rem;border-radius:50px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);font-size:0.78rem;font-weight:600;color:var(--accent2);margin-bottom:2rem;animation:fadeInUp .6s ease}
+    .hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .hero h1{font-size:4.5rem;font-weight:900;letter-spacing:-3px;line-height:1.05;margin-bottom:1.2rem;animation:fadeInUp .6s ease .1s both}
+    .hero h1 .grad{background:linear-gradient(135deg,#fff 30%,#8b5cf6 60%,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .hero h1 .line2{display:block;background:linear-gradient(135deg,#a78bfa,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .hero p{font-size:1.2rem;color:var(--text2);margin-bottom:3rem;max-width:560px;margin-left:auto;margin-right:auto;line-height:1.7;animation:fadeInUp .6s ease .2s both}
+    .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;animation:fadeInUp .6s ease .3s both}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
-    .feat-section{max-width:1100px;margin:0 auto 5rem;padding:0 2rem;position:relative;z-index:1}
-    .feat-section h2{text-align:center;font-size:2rem;font-weight:800;letter-spacing:-1px;margin-bottom:0.5rem}
-    .feat-section .sub{text-align:center;color:var(--text2);margin-bottom:3rem;font-size:1rem}
+    .hero-stats{display:flex;justify-content:center;gap:5rem;margin-bottom:4rem;animation:fadeInUp .6s ease .25s both}
+    .hero-stats .s{text-align:center}
+    .hero-stats .s .num{display:block;font-size:3.2rem;font-weight:900;background:linear-gradient(135deg,#fff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+    .hero-stats .s .label{font-size:0.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-top:0.5rem}
+
+    /* ─── FEATURED SECTION ─── */
+    .featured{max-width:1200px;margin:0 auto 6rem;padding:0 2rem;position:relative;z-index:1}
+    .featured-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+    .feat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:2rem;transition:all .35s;backdrop-filter:blur(20px);position:relative;overflow:hidden}
+    .feat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(139,92,246,0.05),transparent);opacity:0;transition:opacity .35s}
+    .feat-card:hover{border-color:rgba(139,92,246,0.3);transform:translateY(-4px);box-shadow:0 20px 60px rgba(139,92,246,0.1)}.feat-card:hover::before{opacity:1}
+    .feat-card .icon{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(236,72,153,0.1));display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.2rem;border:1px solid rgba(139,92,246,0.15);transition:all .3s}
+    .feat-card:hover .icon{transform:scale(1.08);box-shadow:0 0 25px rgba(139,92,246,0.2)}
+    .feat-card h3{font-size:1.1rem;font-weight:700;margin-bottom:0.5rem;letter-spacing:-0.3px}
+    .feat-card p{font-size:0.88rem;color:var(--text2);line-height:1.6}
+
+    /* ─── FEATURES GRID ─── */
+    .features{max-width:1200px;margin:0 auto 6rem;padding:0 2rem;position:relative;z-index:1}
+    .section-header{text-align:center;margin-bottom:3.5rem}
+    .section-header h2{font-size:2.5rem;font-weight:900;letter-spacing:-1.5px;margin-bottom:0.6rem}
+    .section-header p{font-size:1.05rem;color:var(--text2);max-width:500px;margin:0 auto}
     .feat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem}
-    .feat{background:rgba(20,20,35,0.6);border:1px solid var(--border);border-radius:var(--r);padding:1.8rem 1.4rem;text-align:center;transition:all .3s;backdrop-filter:blur(10px);position:relative;overflow:hidden}
-    .feat::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:50%;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity .3s}
-    .feat:hover{border-color:rgba(139,92,246,0.3);transform:translateY(-4px);box-shadow:0 12px 40px rgba(139,92,246,0.1)}.feat:hover::before{opacity:1}
-    .feat .icon{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(236,72,153,0.2));display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin:0 auto 1rem;border:1px solid rgba(139,92,246,0.2);transition:all .3s}
-    .feat:hover .icon{background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(236,72,153,0.3));transform:scale(1.1);box-shadow:0 0 20px rgba(139,92,246,0.2)}
-    .feat h3{font-size:0.88rem;margin-bottom:0.4rem;font-weight:600}.feat p{font-size:0.78rem;color:var(--text3);line-height:1.5}
+    .feat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1.8rem 1.5rem;text-align:center;transition:all .35s;backdrop-filter:blur(20px);position:relative;overflow:hidden}
+    .feat::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:60%;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity .35s}
+    .feat:hover{border-color:rgba(139,92,246,0.3);transform:translateY(-5px);box-shadow:0 20px 50px rgba(139,92,246,0.08)}.feat:hover::before{opacity:1}
+    .feat .icon{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,rgba(139,92,246,0.12),rgba(236,72,153,0.08));display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin:0 auto 1rem;border:1px solid rgba(139,92,246,0.12);transition:all .3s}
+    .feat:hover .icon{background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(236,72,153,0.15));transform:scale(1.12);box-shadow:0 0 25px rgba(139,92,246,0.15)}
+    .feat h3{font-size:0.92rem;margin-bottom:0.4rem;font-weight:700;letter-spacing:-0.2px}
+    .feat p{font-size:0.8rem;color:var(--text3);line-height:1.5}
 
-    .sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.2rem}
-    .sc{background:rgba(20,20,35,0.6);border:1px solid var(--border);border-radius:var(--r);padding:1.8rem 1.5rem;text-align:center;text-decoration:none;color:var(--text);transition:all .3s;backdrop-filter:blur(10px)}
-    .sc:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 12px 40px rgba(139,92,246,0.15)}
-    .sc img{width:68px;height:68px;border-radius:50%;margin-bottom:1rem;border:3px solid var(--border)}.sc:hover img{border-color:var(--accent)}
-    .sc .ph{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--pink));display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:700;margin:0 auto 1rem;box-shadow:0 0 20px rgba(139,92,246,0.3)}
-    .sc h3{font-size:0.95rem;margin-bottom:0.4rem}
+    /* ─── STATS BANNER ─── */
+    .stats-banner{background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.05));border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:4rem 2rem;margin-bottom:6rem;position:relative;z-index:1}
+    .stats-grid{display:flex;justify-content:center;gap:6rem;max-width:900px;margin:0 auto}
+    .stat-item{text-align:center}
+    .stat-item .num{font-size:3rem;font-weight:900;background:linear-gradient(135deg,var(--accent2),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+    .stat-item .label{font-size:0.78rem;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-top:0.5rem}
 
-    .footer{text-align:center;padding:3rem 2rem;border-top:1px solid var(--border2);color:var(--text3);font-size:0.8rem;position:relative;z-index:1}
+    /* ─── CTA ─── */
+    .cta{text-align:center;padding:8rem 2rem;position:relative;z-index:1}
+    .cta::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(139,92,246,0.12),transparent 70%);pointer-events:none}
+    .cta h2{font-size:3rem;font-weight:900;letter-spacing:-2px;margin-bottom:0.8rem}
+    .cta p{font-size:1.1rem;color:var(--text2);margin-bottom:2.5rem;max-width:450px;margin-left:auto;margin-right:auto}
+    .cta-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
 
+    /* ─── FOOTER ─── */
+    .footer{border-top:1px solid var(--border2);padding:4rem 3rem 2rem;position:relative;z-index:1}
+    .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;max-width:1200px;margin:0 auto 3rem}
+    .footer-brand .logo{font-weight:900;font-size:1.1rem;margin-bottom:0.8rem;display:block}
+    .footer-brand .logo span{background:linear-gradient(135deg,#8b5cf6,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .footer-brand p{font-size:0.85rem;color:var(--text3);line-height:1.6;max-width:280px}
+    .footer-col h4{font-size:0.75rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);font-weight:700;margin-bottom:1rem}
+    .footer-col a{display:block;font-size:0.88rem;color:var(--text2);margin-bottom:0.6rem;transition:color .2s}.footer-col a:hover{color:#fff}
+    .footer-bottom{text-align:center;padding-top:2rem;border-top:1px solid var(--border2);color:var(--text3);font-size:0.8rem}
+
+    /* ─── SCROLL ANIMATIONS ─── */
+    .reveal{opacity:0;transform:translateY(30px);transition:all .6s cubic-bezier(.4,0,.2,1)}
+    .reveal.visible{opacity:1;transform:translateY(0)}
+
+    /* ─── RESPONSIVE ─── */
     ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(139,92,246,0.3);border-radius:3px}
-    @media(max-width:900px){.feat-grid{grid-template-columns:repeat(2,1fr)}.hero h1{font-size:2.5rem}.hero-stats{gap:2.5rem}.hero-stats .s span{font-size:2rem}}
-    @media(max-width:600px){.feat-grid{grid-template-columns:1fr}.hero h1{font-size:2rem}.hero-stats{flex-direction:column;gap:1.5rem}.nav{padding:0 1.2rem}}
+    @media(max-width:1024px){.feat-grid{grid-template-columns:repeat(2,1fr)}.featured-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:768px){.nav-links{display:none}.hero h1{font-size:2.8rem}.hero-stats{gap:2.5rem}.hero-stats .s .num{font-size:2.2rem}.stats-grid{gap:2.5rem}.stat-item .num{font-size:2rem}.feat-grid{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr}.nav{padding:0 1.5rem}}
   </style>
 </head>
 <body>
-  <div class="nav">
+  <nav class="nav">
     <a href="/" class="logo"><span>Bot Boy NOTIX</span></a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#commands">Commands</a>
+      <a href="/dashboard/servers">Servers</a>
+    </div>
     <div class="nav-r">
       <% if (user) { %>
         <a href="/dashboard" class="btn btn-p btn-sm">Dashboard</a>
@@ -70,45 +122,130 @@
         <a href="/auth/login" class="btn btn-p btn-sm">Login</a>
       <% } %>
     </div>
-  </div>
+  </nav>
 
-  <div class="hero">
-    <h1>Your Discord adventure<br>starts here</h1>
-    <p>Manage your server, connect with your community, and unlock new possibilities — all in one place.</p>
-    <div class="hero-stats">
-      <div class="s"><span id="g">0</span><p>Guilds</p></div>
-      <div class="s"><span id="u">0</span><p>Users</p></div>
-      <div class="s"><span id="c">0</span><p>Commands</p></div>
-    </div>
+  <section class="hero">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+    <div class="hero-badge"><span class="dot"></span> Trusted by thousands of servers</div>
+    <h1><span class="grad">Your Discord</span><span class="line2">starts here</span></h1>
+    <p>The all-in-one bot with a powerful web dashboard. Moderate, protect, and grow your server effortlessly.</p>
     <div class="hero-btns">
-      <% if (user) { %><a href="/dashboard" class="btn btn-p">Open Dashboard</a><% } else { %><a href="/auth/login" class="btn btn-p">Login with Discord</a><% } %>
-      <a href="https://discord.com/api/oauth2/authorize?client_id=<%= bot.config.clientId %>&permissions=8&scope=bot%20applications.commands" target="_blank" class="btn btn-s">Add to Server</a>
+      <% if (user) { %><a href="/dashboard" class="btn btn-p btn-lg">Open Dashboard</a><% } else { %><a href="/auth/login" class="btn btn-p btn-lg">Login with Discord</a><% } %>
+      <a href="https://discord.com/api/oauth2/authorize?client_id=<%= bot.config.clientId %>&permissions=8&scope=bot%20applications.commands" target="_blank" class="btn btn-s btn-lg">Add to Server</a>
     </div>
-  </div>
+    <div class="hero-stats">
+      <div class="s"><span class="num" id="g">0</span><span class="label">Servers</span></div>
+      <div class="s"><span class="num" id="u">0</span><span class="label">Users</span></div>
+      <div class="s"><span class="num" id="c">0</span><span class="label">Commands</span></div>
+    </div>
+  </section>
 
-  <div class="feat-section">
-    <h2>Everything you need</h2>
-    <p class="sub">Powerful features to manage and grow your Discord server</p>
+  <section class="featured" id="features">
+    <div class="featured-grid">
+      <div class="feat-card reveal">
+        <div class="icon">&#128737;</div>
+        <h3>Advanced Moderation</h3>
+        <p>Complete moderation toolkit with kick, ban, mute, warn, purge, slowmode, and channel lock/unlock. Keep your server safe and organized.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="icon">&#128683;</div>
+        <h3>Anti-Scam Protection</h3>
+        <p>AI-powered scam detection blocks crypto scams, phishing links, and celebrity impersonation in real-time. Protect your community automatically.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="icon">&#128101;</div>
+        <h3>Welcome & Goodbye</h3>
+        <p>Beautiful welcome messages with custom embeds, images, auto-roles, and invite tracking. Make every new member feel at home.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="icon">&#128640;</div>
+        <h3>Raid Protection</h3>
+        <p>Automatic server lockdown when mass-join raids are detected. Account age gates and new member restrictions keep bad actors out.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats-banner">
+    <div class="stats-grid">
+      <div class="stat-item reveal"><span class="num" id="sg">0</span><span class="label">Servers Protected</span></div>
+      <div class="stat-item reveal"><span class="num" id="su">0</span><span class="label">Users Managed</span></div>
+      <div class="stat-item reveal"><span class="num" id="sc">0</span><span class="label">Commands Executed</span></div>
+    </div>
+  </section>
+
+  <section class="features" id="commands">
+    <div class="section-header">
+      <h2>Everything you need</h2>
+      <p>Powerful features to manage, moderate, and grow your Discord server</p>
+    </div>
     <div class="feat-grid">
-      <div class="feat"><div class="icon">&#128737;</div><h3>Moderation</h3><p>Kick, ban, mute, warn, purge, slowmode</p></div>
-      <div class="feat"><div class="icon">&#128075;</div><h3>Welcome / Goodbye</h3><p>Custom embeds, images, auto-roles</p></div>
-      <div class="feat"><div class="icon">&#128737;</div><h3>Auto-Moderation</h3><p>Anti-spam, anti-link, anti-raid, anti-scam</p></div>
-      <div class="feat"><div class="icon">&#128200;</div><h3>Leveling</h3><p>XP system, leaderboards, level-up alerts</p></div>
-      <div class="feat"><div class="icon">&#11088;</div><h3>Starboard</h3><p>Feature best messages with star reactions</p></div>
-      <div class="feat"><div class="icon">&#128203;</div><h3>Logging</h3><p>Message edits, deletes, joins, bans</p></div>
-      <div class="feat"><div class="icon">&#128279;</div><h3>Invite Tracker</h3><p>See who invites the most members</p></div>
-      <div class="feat"><div class="icon">&#127912;</div><h3>Embed Builder</h3><p>Build and send custom embeds live</p></div>
-      <div class="feat"><div class="icon">&#9889;</div><h3>Custom Commands</h3><p>Create your own bot commands</p></div>
-      <div class="feat"><div class="icon">&#127917;</div><h3>Reaction Roles</h3><p>Self-assignable roles via emoji</p></div>
-      <div class="feat"><div class="icon">&#128202;</div><h3>Polls</h3><p>Interactive polls with reactions</p></div>
-      <div class="feat"><div class="icon">&#127760;</div><h3>Web Dashboard</h3><p>Configure everything online</p></div>
+      <div class="feat reveal"><div class="icon">&#128737;</div><h3>Moderation</h3><p>Kick, ban, mute, warn, purge</p></div>
+      <div class="feat reveal"><div class="icon">&#128075;</div><h3>Welcome / Goodbye</h3><p>Embeds, images, auto-roles</p></div>
+      <div class="feat reveal"><div class="icon">&#128737;</div><h3>Auto-Moderation</h3><p>Anti-spam, anti-link, anti-scam</p></div>
+      <div class="feat reveal"><div class="icon">&#128200;</div><h3>Leveling</h3><p>XP, leaderboards, rank-ups</p></div>
+      <div class="feat reveal"><div class="icon">&#11088;</div><h3>Starboard</h3><p>Feature best messages</p></div>
+      <div class="feat reveal"><div class="icon">&#128203;</div><h3>Logging</h3><p>Edits, deletes, joins, bans</p></div>
+      <div class="feat reveal"><div class="icon">&#128279;</div><h3>Invite Tracker</h3><p>Top inviters leaderboard</p></div>
+      <div class="feat reveal"><div class="icon">&#127912;</div><h3>Embed Builder</h3><p>Custom embeds, live preview</p></div>
+      <div class="feat reveal"><div class="icon">&#9889;</div><h3>Custom Commands</h3><p>Build your own commands</p></div>
+      <div class="feat reveal"><div class="icon">&#127917;</div><h3>Reaction Roles</h3><p>Self-assignable roles</p></div>
+      <div class="feat reveal"><div class="icon">&#128202;</div><h3>Polls</h3><p>Interactive voting</p></div>
+      <div class="feat reveal"><div class="icon">&#127760;</div><h3>Web Dashboard</h3><p>Configure online, anywhere</p></div>
     </div>
-  </div>
+  </section>
 
-  <div class="footer">
-    <p>Bot Boy NOTIX &copy; 2026 — Built with Discord.js</p>
-  </div>
+  <section class="cta">
+    <h2>Ready to get started?</h2>
+    <p>Add Bot Boy NOTIX to your server in seconds and unlock powerful features.</p>
+    <div class="cta-btns">
+      <% if (user) { %><a href="/dashboard" class="btn btn-p btn-lg">Open Dashboard</a><% } else { %><a href="/auth/login" class="btn btn-p btn-lg">Login with Discord</a><% } %>
+      <a href="https://discord.com/api/oauth2/authorize?client_id=<%= bot.config.clientId %>&permissions=8&scope=bot%20applications.commands" target="_blank" class="btn btn-s btn-lg">Add to Server</a>
+    </div>
+  </section>
 
-  <script>fetch('/api/stats').then(r=>r.json()).then(d=>{document.getElementById('g').textContent=d.guilds;document.getElementById('u').textContent=d.users.toLocaleString();document.getElementById('c').textContent=d.commands})</script>
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <span class="logo"><span>Bot Boy NOTIX</span></span>
+        <p>Professional Discord bot with a powerful web dashboard. Moderate, protect, and grow your community.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="#features">Features</a>
+        <a href="#commands">Commands</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/dashboard/servers">Servers</a>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <a href="#">Documentation</a>
+        <a href="#">Support Server</a>
+        <a href="#">Report Bug</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="#">Terms of Service</a>
+        <a href="#">Privacy Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Bot Boy NOTIX. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    fetch('/api/stats').then(r=>r.json()).then(d=>{
+      document.getElementById('g').textContent=d.guilds;
+      document.getElementById('u').textContent=d.users.toLocaleString();
+      document.getElementById('c').textContent=d.commands;
+      document.getElementById('sg').textContent=d.guilds;
+      document.getElementById('su').textContent=d.users.toLocaleString();
+      document.getElementById('sc').textContent=d.commands;
+    });
+    const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target)}})},{threshold:0.1});
+    document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+  </script>
 </body>
 </html>
