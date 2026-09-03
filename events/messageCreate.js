@@ -1,5 +1,10 @@
-const { Events, Collection } = require('discord.js');
-const { getGuildSettings, getCustomCommand, getLevel, updateLevel } = require('../utils/database');
+const { Events, Collection, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { getGuildSettings, getCustomCommand, getLevel, updateLevel, addLog } = require('../utils/database');
+const { detectScam, getScamDescription } = require('../utils/scamPatterns');
+const { canSendLinks, canSendImages, getAgeRestrictionMessage } = require('../utils/accountChecks');
+const { hasMassMentions, getMentionCount } = require('../utils/raidProtection');
+const { trackMessage } = require('../utils/duplicateDetection');
+const { checkMessage } = require('../utils/linkChecker');
 
 module.exports = {
   name: Events.MessageCreate,
@@ -11,6 +16,32 @@ module.exports = {
     const settings = getGuildSettings(message.guild.id);
     const prefix = settings.prefix || client.config.prefix;
 
+    // New Member Restrictions - Links
+    if (settings.newMemberRestriction && !canSendLinks(message.member, settings)) {
+      if (/https?:\/\/[^\s]+/.test(message.content)) {
+        await message.delete().catch(() => {});
+        return message.channel.send({
+          embeds: [new EmbedBuilder()
+            .setColor('#ff0000')
+            .setDescription(`🚫 ${getAgeRestrictionMessage(message.member, settings)}`)
+            .setFooter({ text: 'New Member Restriction' })],
+        }).then(m => setTimeout(() => m.delete(), 5000));
+      }
+    }
+
+    // New Member Restrictions - Images/Attachments
+    if (settings.newMemberRestriction && !canSendImages(message.member, settings)) {
+      if (message.attachments.size > 0) {
+        await message.delete().catch(() => {});
+        return message.channel.send({
+          embeds: [new EmbedBuilder()
+            .setColor('#ff0000')
+            .setDescription(`🚫 ${getAgeRestrictionMessage(message.member, settings)}`)
+            .setFooter({ text: 'New Member Restriction' })],
+        }).then(m => setTimeout(() => m.delete(), 5000));
+      }
+    }
+
     // Auto-moderation
     if (settings.autoMod) {
       const badWords = ['slur', 'nword', 'retard'];
@@ -21,6 +52,7 @@ module.exports = {
       }
     }
 
+    // Anti-Spam
     if (settings.antiSpam) {
       if (!client.spamCache) client.spamCache = new Map();
       const userSpam = client.spamCache.get(message.author.id) || [];
@@ -33,10 +65,143 @@ module.exports = {
       }
     }
 
+    // Anti-Link
     if (settings.antiLink) {
-      if (/https?:\/\/[^\s]+/.test(message.content) && !message.member.permissions.has('ManageMessages')) {
+      if (/https?:\/\/[^\s]+/.test(message.content) && !message.member.permissions.has(PermissionFlagsBits.ManageMessages)) {
         await message.delete().catch(() => {});
         return message.channel.send('🚫 Links are not allowed here.').then(m => setTimeout(() => m.delete(), 3000));
+      }
+    }
+
+    // Mass Mention Protection
+    if (settings.massMentionLimit && hasMassMentions(message.content, settings.massMentionLimit)) {
+      if (!message.member.permissions.has(PermissionFlagsBits.ManageMessages)) {
+        await message.delete().catch(() => {});
+        const mentionCount = getMentionCount(message.content);
+        return message.channel.send({
+          embeds: [new EmbedBuilder()
+            .setColor('#ff0000')
+            .setDescription(`🚫 Too many mentions! (${mentionCount} max: ${settings.massMentionLimit})`)
+            .setFooter({ text: 'Mass Mention Protection' })],
+        }).then(m => setTimeout(() => m.delete(), 3000));
+      }
+    }
+
+    // Duplicate Message Detection
+    if (settings.duplicateDetection) {
+      const dupResult = trackMessage(message);
+      if (dupResult.isDuplicate) {
+        await message.delete().catch(() => {});
+        return message.channel.send({
+          embeds: [new EmbedBuilder()
+            .setColor('#ff0000')
+            .setDescription(`🚫 Duplicate message detected! ${dupResult.selfSpam ? 'Stop spamming the same message.' : ''}`)
+            .setFooter({ text: 'Duplicate Detection' })],
+        }).then(m => setTimeout(() => m.delete(), 3000));
+      }
+    }
+
+    // Link Reputation Check
+    if (settings.linkReputationCheck && !message.member.permissions.has(PermissionFlagsBits.ManageMessages)) {
+      const linkResult = checkMessage(message.content);
+      if (linkResult.isHighRisk) {
+        await message.delete().catch(() => {});
+        return message.channel.send({
+          embeds: [new EmbedBuilder()
+            .setColor('#ff0000')
+            .setDescription(`🚫 Suspicious link detected and blocked!`)
+            .addFields(
+              linkResult.results.filter(r => r.isHighRisk).map(r => ({
+                name: r.domain || 'Unknown',
+                value: r.issues.join(', ') || 'High risk',
+                inline: true,
+              })),
+            )
+            .setFooter({ text: 'Link Reputation Check' })],
+        }).then(m => setTimeout(() => m.delete(), 5000));
+      }
+    }
+
+    // Anti-Scam
+    if (settings.antiScam) {
+      const scamResult = detectScam(message.content);
+      if (scamResult.isScam) {
+        if (settings.scamWhitelist && settings.scamWhitelist.includes(message.author.id)) {
+          return;
+        }
+
+        await message.delete().catch(() => {});
+
+        const description = getScamDescription(scamResult.categories);
+
+        if (settings.scamAction === 'mute' && settings.mutedRole) {
+          await message.member.roles.add(settings.mutedRole).catch(() => {});
+        } else if (settings.scamAction === 'kick') {
+          await message.member.kick('Anti-scam: Posting scam content').catch(() => {});
+        } else if (settings.scamAction === 'ban') {
+          await message.member.ban({ reason: 'Anti-scam: Posting scam content' }).catch(() => {});
+        }
+
+        const logEmbed = new EmbedBuilder()
+          .setColor('#ff0000')
+          .setTitle('🚨 Scam Message Detected')
+          .setDescription(description)
+          .addFields(
+            { name: 'User', value: `${message.author.tag} (${message.author.id})`, inline: true },
+            { name: 'Channel', value: `${message.channel}`, inline: true },
+            { name: 'Confidence', value: `${scamResult.confidence}%`, inline: true },
+            { name: 'Action Taken', value: settings.scamAction || 'delete', inline: true },
+            { name: 'Content', value: message.content.substring(0, 500) || 'No text content' },
+          )
+          .setTimestamp();
+
+        const logChannelId = settings.scamLogChannel || settings.scamAlertsChannel;
+        if (logChannelId) {
+          const logCh = message.guild.channels.cache.get(logChannelId);
+          if (logCh) logCh.send({ embeds: [logEmbed] }).catch(() => {});
+        }
+
+        addLog(message.guild.id, 'scam', client.user.id, message.author.id, description, {
+          content: message.content,
+          channel: message.channel.id,
+          confidence: scamResult.confidence,
+          categories: scamResult.categories,
+        });
+
+        const warningMsg = await message.channel.send({
+          embeds: [new EmbedBuilder()
+            .setColor('#ff0000')
+            .setDescription(`🚫 **Scam message blocked!** ${message.author}, this type of content is not allowed.`)
+            .setFooter({ text: 'Anti-Scam Protection' })],
+        });
+        setTimeout(() => warningMsg.delete().catch(() => {}), 5000);
+
+        return;
+      }
+    }
+
+    // Bot mention + "nitro" trigger
+    const botMention = message.mentions.users.first();
+    if (botMention && botMention.id === client.user.id) {
+      const textAfterMention = message.content.replace(/<@!?\d+>/g, '').trim().toLowerCase();
+      if (textAfterMention === 'nitro') {
+        const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+        const embed = new EmbedBuilder()
+          .setColor('#5865F2')
+          .setTitle('You received a gift!')
+          .setDescription('You have been gifted **Nitro** from a friend!\n\n**Nitro** — Compare Nitro perks')
+          .setThumbnail('https://discordassets.com/assets/nitro-star.77cd4e187900.svg')
+          .setFooter({ text: 'This gift link is valid for 48 hours.' })
+          .setTimestamp();
+        const row = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId(`nitro_prank_${message.author.id}`)
+            .setLabel('Claim')
+            .setStyle(ButtonStyle.Success)
+            .setEmoji('🎁'),
+        );
+        message.channel.send({ embeds: [embed], components: [row] });
+        return;
       }
     }
 

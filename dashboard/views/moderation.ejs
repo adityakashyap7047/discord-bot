@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="nav"><a href="/" class="logo"><span>&#129302; Bot Boy NOTIX</span></a><div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div></div>
+  <div class="nav"><a href="/" class="logo"><span>Bot Boy NOTIX</span></a><div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div></div>
   <div class="layout" data-guild="<%= guild.id %>">
     <%- include('partials/sidebar') %>
     <div class="main">
@@ -19,7 +19,8 @@
         <div class="sw"><div class="info"><div class="t">&#9889; Anti-Spam</div><div class="d">Prevent message flooding</div></div><label class="toggle"><input type="checkbox" <%= settings.antiSpam ? 'checked' : '' %> data-auto="antiSpam"><span class="sl"></span></label></div>
         <div class="sw"><div class="info"><div class="t">&#128279; Anti-Link</div><div class="d">Block links from non-mods</div></div><label class="toggle"><input type="checkbox" <%= settings.antiLink ? 'checked' : '' %> data-auto="antiLink"><span class="sl"></span></label></div>
         <div class="sw"><div class="info"><div class="t">&#128163; Anti-Raid</div><div class="d">Protect against mass-join raids</div></div><label class="toggle"><input type="checkbox" <%= settings.antiRaid ? 'checked' : '' %> data-auto="antiRaid"><span class="sl"></span></label></div>
-        <div class="row r2" style="margin-top:1rem;">
+        <div class="sw"><div class="info"><div class="t">&#128683; Anti-Scam</div><div class="d">Block crypto scams and phishing</div></div><label class="toggle"><input type="checkbox" <%= settings.antiScam ? 'checked' : '' %> data-auto="antiScam"><span class="sl"></span></label></div>
+        <div class="row r2" style="margin-top:1.2rem;">
           <div class="field"><label>Flood Limit (msgs)</label><input type="number" value="<%= settings.floodLimit || 5 %>" min="2" max="20" data-auto="floodLimit"></div>
           <div class="field"><label>Flood Timeframe (sec)</label><input type="number" value="<%= settings.floodTimeframe || 5 %>" min="2" max="30" data-auto="floodTimeframe"></div>
         </div>
@@ -27,6 +28,27 @@
       <div class="card">
         <div class="card-h"><h2>&#128263; Mute Role</h2></div>
         <div class="field"><label>Role assigned when muting</label><select data-auto="mutedRole"><option value="">None</option><% roles.forEach(r => { %><option value="<%= r.id %>" <%= settings.mutedRole === r.id ? 'selected' : '' %>><%= r.name %></option><% }); %></select></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>&#128683; Scam Protection</h2></div>
+        <div class="sw"><div class="info"><div class="t">&#128683; Anti-Scam</div><div class="d">Block crypto scams and phishing attempts</div></div><label class="toggle"><input type="checkbox" <%= settings.antiScam ? 'checked' : '' %> data-auto="antiScam"><span class="sl"></span></label></div>
+        <div class="sw"><div class="info"><div class="t">&#128269; Link Reputation Check</div><div class="d">Check URLs against known scam databases</div></div><label class="toggle"><input type="checkbox" <%= settings.linkReputationCheck ? 'checked' : '' %> data-auto="linkReputationCheck"><span class="sl"></span></label></div>
+        <div class="sw"><div class="info"><div class="t">&#128100; Suspicious Username Detection</div><div class="d">Flag accounts with suspicious names</div></div><label class="toggle"><input type="checkbox" <%= settings.suspiciousUsernameDetection ? 'checked' : '' %> data-auto="suspiciousUsernameDetection"><span class="sl"></span></label></div>
+        <div class="sw"><div class="info"><div class="t">&#128203; Duplicate Message Detection</div><div class="d">Block repeated messages across channels</div></div><label class="toggle"><input type="checkbox" <%= settings.duplicateDetection ? 'checked' : '' %> data-auto="duplicateDetection"><span class="sl"></span></label></div>
+        <div class="field"><label>Mass Mention Limit</label><input type="number" value="<%= settings.massMentionLimit || 5 %>" min="1" max="20" data-auto="massMentionLimit"><small>Max mentions per message (0 = disabled)</small></div>
+        <div class="field"><label>Scam Action</label><select data-auto="scamAction"><option value="delete" <%= settings.scamAction === 'delete' ? 'selected' : '' %>>Delete Only</option><option value="mute" <%= settings.scamAction === 'mute' ? 'selected' : '' %>>Delete + Mute</option><option value="kick" <%= settings.scamAction === 'kick' ? 'selected' : '' %>>Delete + Kick</option><option value="ban" <%= settings.scamAction === 'ban' ? 'selected' : '' %>>Delete + Ban</option></select></div>
+        <div class="field"><label>Scam Log Channel</label><select data-auto="scamLogChannel"><option value="">Select</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.scamLogChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option><% }); %></select></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>&#128737; Raid Protection</h2><span class="badge <%= settings.raidProtection ? 'b-green' : 'b-red' %>"><%= settings.raidProtection ? 'ON' : 'OFF' %></span></div>
+        <div class="sw"><div class="info"><div class="t">&#128163; Enable Raid Protection</div><div class="d">Auto-lockdown when too many accounts join</div></div><label class="toggle"><input type="checkbox" <%= settings.raidProtection ? 'checked' : '' %> data-auto="raidProtection"><span class="sl"></span></label></div>
+        <div class="row r2" style="margin-top:1rem;">
+          <div class="field"><label>Threshold (joins)</label><input type="number" value="<%= settings.raidThreshold || 5 %>" min="2" max="50" data-auto="raidThreshold"></div>
+          <div class="field"><label>Timeframe (seconds)</label><input type="number" value="<%= settings.raidTimeframe || 60 %>" min="10" max="300" data-auto="raidTimeframe"></div>
+        </div>
+        <div class="field"><label>Lockdown Duration (minutes)</label><input type="number" value="<%= (settings.raidLockdownDuration || 300000) / 60000 %>" min="1" max="60" data-auto="raidLockdownDuration"><small>Auto-unlock after this time</small></div>
       </div>
     </div>
   </div>

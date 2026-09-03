@@ -8,7 +8,7 @@
 </head>
 <body>
   <div class="nav">
-    <a href="/" class="logo"><span>&#129302; Bot Boy NOTIX</span></a>
+    <a href="/" class="logo"><span>Bot Boy NOTIX</span></a>
     <div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div>
   </div>
   <div class="layout" data-guild="<%= guild.id %>">
@@ -49,6 +49,23 @@
         <div class="card-h"><h2>&#128142; Server Boost</h2></div>
         <div class="field"><label>Boost Message</label><textarea rows="2" data-auto="boostMessage"><%= settings.boostMessage || '' %></textarea></div>
         <div class="field"><label>Channel</label><select data-auto="boostChannel"><option value="">Select</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.boostChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option><% }); %></select></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>&#128274; Verification</h2><span class="badge <%= settings.verificationEnabled ? 'b-green' : 'b-red' %>"><%= settings.verificationEnabled ? 'ON' : 'OFF' %></span></div>
+        <div class="sw"><div class="info"><div class="t">Enable Verification</div><div class="d">New members must verify before chatting</div></div><label class="toggle"><input type="checkbox" <%= settings.verificationEnabled ? 'checked' : '' %> data-auto="verificationEnabled"><span class="sl"></span></label></div>
+        <div class="field" style="margin-top:1rem;"><label>Verification Channel</label><select data-auto="verificationChannel"><option value="">Select</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.verificationChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option><% }); %></select></div>
+        <div class="field"><label>Verified Role</label><select data-auto="verificationRole"><option value="">Select</option><% roles.forEach(r => { %><option value="<%= r.id %>" <%= settings.verificationRole === r.id ? 'selected' : '' %>><%= r.name %></option><% }); %></select></div>
+        <div class="field"><label>Message</label><textarea rows="2" data-auto="verificationMessage"><%= settings.verificationMessage || 'Welcome! Please react with ✅ to verify.' %></textarea></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>&#128101; Account Restrictions</h2></div>
+        <div class="sw"><div class="info"><div class="t">&#128197; Account Age Gate</div><div class="d">Kick new accounts younger than X days</div></div><label class="toggle"><input type="checkbox" <%= settings.accountAgeGate ? 'checked' : '' %> data-auto="accountAgeGate"><span class="sl"></span></label></div>
+        <div class="field"><label>Min Account Age (days)</label><input type="number" value="<%= settings.minAccountAge || 7 %>" min="1" max="30" data-auto="minAccountAge"></div>
+        <div class="sw"><div class="info"><div class="t">&#128274; New Member Restriction</div><div class="d">Block links/images from new members</div></div><label class="toggle"><input type="checkbox" <%= settings.newMemberRestriction ? 'checked' : '' %> data-auto="newMemberRestriction"><span class="sl"></span></label></div>
+        <div class="field"><label>Restriction Duration (days)</label><input type="number" value="<%= settings.newMemberRestrictionDays || 1 %>" min="1" max="7" data-auto="newMemberRestrictionDays"></div>
+        <div class="sw"><div class="info"><div class="t">&#9200; Auto-Timeout New Members</div><div class="d">Timeout new members temporarily</div></div><label class="toggle"><input type="checkbox" <%= settings.newMemberTimeout ? 'checked' : '' %> data-auto="newMemberTimeout"><span class="sl"></span></label></div>
       </div>
     </div>
   </div>
