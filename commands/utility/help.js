@@ -27,7 +27,6 @@ module.exports = {
 
     embed.addFields(
       { name: 'Auto-Mod Toggles', value: '`!automod automod` `!automod antispam` `!automod antilink` `!automod antiscam` `!automod accountagegate` `!automod newmemberrestriction` `!automod newmembertimeout` `!automod duplicate` `!automod linkcheck` `!automod suspiciousname` `!automod massmention`\nUsage: `!automod <feature> on/off`', inline: false },
-      { name: 'Prank', value: '`@BotBoy nitro` — Sends a fake Nitro gift (mention bot + type "nitro")', inline: false },
     );
 
     message.reply({ embeds: [embed] });
