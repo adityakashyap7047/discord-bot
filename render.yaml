@@ -3,7 +3,7 @@ services:
     name: discord-bot
     env: node
     buildCommand: npm install
-    startCommand: node index.js
+    startCommand: npx pm2-runtime ecosystem.config.js
     envVars:
       - key: NODE_ENV
         value: production

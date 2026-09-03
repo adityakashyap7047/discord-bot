@@ -4,14 +4,17 @@ const path = require('path');
 const DB_DIR = path.join(__dirname, '..', 'data');
 const DB_FILE = path.join(DB_DIR, 'bot.json');
 
+let cache = null;
+
 function ensureDir() {
   if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
 }
 
 function loadDB() {
+  if (cache) return cache;
   ensureDir();
   if (!fs.existsSync(DB_FILE)) {
-    const initial = {
+    cache = {
       guild_settings: {},
       warnings: [],
       reaction_roles: [],
@@ -27,13 +30,15 @@ function loadDB() {
       goodbye_config: {},
       welcome_config: {},
     };
-    fs.writeFileSync(DB_FILE, JSON.stringify(initial, null, 2));
-    return initial;
+    fs.writeFileSync(DB_FILE, JSON.stringify(cache, null, 2));
+    return cache;
   }
-  return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+  cache = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+  return cache;
 }
 
 function saveDB(data) {
+  cache = data;
   ensureDir();
   fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 }

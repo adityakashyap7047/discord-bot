@@ -7,8 +7,12 @@ module.exports = {
   once: false,
   async execute(reaction, user, client) {
     if (user.bot) return;
-    if (reaction.partial) await reaction.fetch();
-    if (reaction.message.partial) await reaction.message.fetch();
+    try {
+      if (reaction.partial) await reaction.fetch();
+      if (reaction.message.partial) await reaction.message.fetch();
+    } catch {
+      return;
+    }
 
     const rr = getReactionRole(reaction.message.guild.id, reaction.message.id, reaction.emoji.name);
     if (rr) {

@@ -5,6 +5,14 @@ const path = require('path');
 const db = require('./utils/database');
 const { startDashboard } = require('./dashboard/server');
 
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[FATAL] Unhandled Rejection:', reason);
+});
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -47,12 +55,40 @@ for (const folder of commandFolders) {
 const eventFiles = fs.readdirSync(path.join(__dirname, 'events')).filter(f => f.endsWith('.js'));
 for (const file of eventFiles) {
   const event = require(path.join(__dirname, 'events', file));
+  const handler = (...args) => {
+    const result = event.execute(...args, client);
+    if (result && typeof result.catch === 'function') {
+      result.catch((err) => {
+        console.error(`[EVENT ERROR] ${event.name}:`, err);
+      });
+    }
+  };
   if (event.once) {
-    client.once(event.name, (...args) => event.execute(...args, client));
+    client.once(event.name, handler);
   } else {
-    client.on(event.name, (...args) => event.execute(...args, client));
+    client.on(event.name, handler);
   }
 }
+
+client.on('error', (err) => {
+  console.error('[CLIENT ERROR]', err);
+});
+
+client.on('warn', (info) => {
+  console.warn('[CLIENT WARN]', info);
+});
+
+client.on('disconnect', () => {
+  console.warn('[CLIENT] Disconnected from gateway');
+});
+
+client.on('shardError', (err, shardId) => {
+  console.error(`[SHARD ${shardId}] Error:`, err);
+});
+
+client.on('shardDisconnect', (event, shardId) => {
+  console.warn(`[SHARD ${shardId}] Disconnected (code: ${event.code})`);
+});
 
 db.loadDB();
 startDashboard(client);
@@ -77,4 +113,7 @@ client.once('ready', () => {
   }, 10000);
 });
 
-client.login(client.config.token);
+client.login(client.config.token).catch((err) => {
+  console.error('[FATAL] Failed to login:', err);
+  process.exit(1);
+});
