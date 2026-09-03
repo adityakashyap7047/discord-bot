@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giveaways - <%= guild.name %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="nav">
+    <a href="/" class="logo"><span>Bot Boy NOTIX</span></a>
+    <div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div>
+  </div>
+  <div class="layout" data-guild="<%= guild.id %>">
+    <%- include('partials/sidebar') %>
+    <div class="main">
+      <h1>&#127873; Giveaways</h1>
+      <p class="sub">Create and manage giveaways from the dashboard.</p>
+
+      <div class="card">
+        <div class="card-h"><h2>&#127873; New Giveaway</h2></div>
+        <div class="field"><label>Channel</label><select id="gw-channel"><option value="">Select Channel</option><% channels.forEach(ch => { %><option value="<%= ch.id %>"><%= ch.name %></option><% }); %></select></div>
+        <div class="row r2">
+          <div class="field"><label>Prize</label><input type="text" id="gw-prize" placeholder="What are you giving away?"></div>
+          <div class="field"><label>Duration</label><input type="text" id="gw-duration" placeholder="10m, 2h, 1d"></div>
+        </div>
+        <div class="row r2">
+          <div class="field"><label>Winners</label><input type="number" id="gw-winners" value="1" min="1" max="20"></div>
+          <div class="field"><label>Host</label><input type="text" value="<%= user.username %>" disabled></div>
+        </div>
+        <button onclick="startGiveaway()" class="btn" style="background:var(--accent);color:#fff;margin-top:1rem;">Start Giveaway</button>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>&#127919; Active Giveaways</h2></div>
+        <div id="giveaway-list" style="max-height:400px;overflow-y:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+            <thead><tr style="border-bottom:1px solid var(--border);text-align:left;"><th style="padding:0.5rem;">Prize</th><th style="padding:0.5rem;">Channel</th><th style="padding:0.5rem;">Winners</th><th style="padding:0.5rem;">Ends</th><th style="padding:0.5rem;">Entries</th><th style="padding:0.5rem;">Status</th></tr></thead>
+            <tbody id="gw-body">
+              <% if (activeGiveaways && activeGiveaways.length > 0) { %>
+                <% activeGiveaways.forEach(g => { %>
+                  <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.5rem;"><strong><%= g.prize %></strong></td>
+                    <td style="padding:0.5rem;">#<%= g.channelName %></td>
+                    <td style="padding:0.5rem;"><%= g.winners %></td>
+                    <td style="padding:0.5rem;"><%= g.endsAt %></td>
+                    <td style="padding:0.5rem;"><%= g.entries %> entries</td>
+                    <td style="padding:0.5rem;"><span class="badge <%= g.ended ? 'b-red' : 'b-green' %>"><%= g.ended ? 'Ended' : 'Active' %></span></td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr><td colspan="6" style="padding:1rem;text-align:center;color:var(--text3);">No active giveaways</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>&#128161; Giveaway Tips</h2></div>
+        <div style="font-size:0.85rem;color:var(--text2);line-height:1.8;">
+          <p><strong>Duration formats:</strong> <code>10m</code> (10 minutes), <code>2h</code> (2 hours), <code>1d</code> (1 day)</p>
+          <p><strong>Slash commands:</strong> <code>/giveaway start</code>, <code>/giveaway end</code>, <code>/giveaway reroll</code></p>
+          <p><strong>Prefix commands:</strong> <code>!giveaway start</code>, <code>!giveaway end</code>, <code>!giveaway reroll</code></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+  <script>
+    async function startGiveaway() {
+      const channel = document.getElementById('gw-channel').value;
+      const prize = document.getElementById('gw-prize').value;
+      const duration = document.getElementById('gw-duration').value;
+      const winners = document.getElementById('gw-winners').value;
+
+      if (!channel || !prize || !duration) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/guilds/<%= guild.id %>/giveaways/start`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ channelId: channel, prize, duration, winners: parseInt(winners) || 1 })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Giveaway started!');
+          location.reload();
+        } else {
+          alert(data.error || 'Failed to start giveaway');
+        }
+      } catch (e) {
+        alert('Error starting giveaway');
+      }
+    }
+  </script>
+</body>
+</html>

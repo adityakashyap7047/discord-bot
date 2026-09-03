@@ -371,6 +371,187 @@ function startDashboard(client) {
     res.render('reactionroles', { user: req.user, guild: g, settings, reactionRoles: rr, channels, roles, currentPage: 'reactionroles' });
   });
 
+  // ============ ANTI-SCAM ============
+  app.get('/dashboard/:guildId/antiscam', isAuthenticated, hasPermission, (req, res) => {
+    const g = req.guild;
+    const settings = req.guildSettings;
+    const channels = g.channels.cache.filter(c => c.type === 0).map(c => ({ id: c.id, name: c.name }));
+    const roles = g.roles.cache.filter(r => r.id !== g.id).map(r => ({ id: r.id, name: r.name }));
+    res.render('antiscam', { user: req.user, guild: g, settings, channels, roles, currentPage: 'antiscam' });
+  });
+
+  app.post('/dashboard/:guildId/antiscam', isAuthenticated, hasPermission, (req, res) => {
+    const s = req.body;
+    updateGuildSettings(req.guild.id, {
+      antiScam: s.antiScam === 'on',
+      scamLogChannel: s.scamLogChannel || null,
+      scamAction: s.scamAction || 'delete',
+      accountAgeGate: s.accountAgeGate === 'on',
+      minAccountAge: parseInt(s.minAccountAge) || 7,
+      newMemberRestriction: s.newMemberRestriction === 'on',
+      duplicateDetection: s.duplicateDetection === 'on',
+      raidProtection: s.raidProtection === 'on',
+      raidThreshold: parseInt(s.raidThreshold) || 10,
+      raidTimeframe: parseInt(s.raidTimeframe) || 60,
+      verificationEnabled: s.verificationEnabled === 'on',
+      verificationChannel: s.verificationChannel || null,
+      verificationRole: s.verificationRole || null,
+    });
+    res.redirect(`/dashboard/${req.guild.id}/antiscam?saved=true`);
+  });
+
+  // ============ TICKETS ============
+  app.get('/dashboard/:guildId/tickets', isAuthenticated, hasPermission, (req, res) => {
+    const g = req.guild;
+    const settings = req.guildSettings;
+    const channels = g.channels.cache.filter(c => c.type === 0).map(c => ({ id: c.id, name: c.name }));
+    const roles = g.roles.cache.filter(r => r.id !== g.id).map(r => ({ id: r.id, name: r.name }));
+
+    const ticketCache = require('../commands/moderation/ticket').ticketCache;
+    const activeTickets = [];
+    ticketCache.forEach((data, channelId) => {
+      if (data.guildId === g.id) {
+        const ch = g.channels.cache.get(channelId);
+        const member = g.members.cache.get(data.userId);
+        activeTickets.push({
+          channelId,
+          channelName: ch ? ch.name : 'deleted',
+          userId: data.userId,
+          userName: member ? member.user.username : 'Unknown',
+          createdAt: new Date(data.createdAt).toLocaleString(),
+        });
+      }
+    });
+
+    res.render('tickets', { user: req.user, guild: g, settings, channels, roles, activeTickets, currentPage: 'tickets' });
+  });
+
+  app.post('/api/guilds/:guildId/tickets/panel', isAuthenticated, hasPermission, async (req, res) => {
+    const settings = getGuildSettings(req.params.guildId);
+    if (!settings.ticketCategory) return res.json({ success: false, error: 'Ticket category not configured' });
+
+    const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+    const ch = req.guild.channels.cache.get(req.body.channelId);
+    if (!ch) return res.json({ success: false, error: 'Channel not found' });
+
+    const embed = new EmbedBuilder()
+      .setColor(settings.ticketPanelColor || '#8b5cf6')
+      .setTitle(settings.ticketPanelTitle || 'Support Tickets')
+      .setDescription(settings.ticketPanelDescription || 'Need help? Click the button below to create a support ticket.')
+      .setFooter({ text: 'Ticket System' })
+      .setTimestamp();
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('ticket_create')
+        .setLabel('Create Ticket')
+        .setEmoji('🎫')
+        .setStyle(ButtonStyle.Primary),
+    );
+
+    await ch.send({ embeds: [embed], components: [row] });
+    res.json({ success: true });
+  });
+
+  app.post('/api/guilds/:guildId/tickets/:channelId/close', isAuthenticated, hasPermission, async (req, res) => {
+    const ch = req.guild.channels.cache.get(req.params.channelId);
+    if (!ch) return res.json({ success: false, error: 'Channel not found' });
+
+    const { EmbedBuilder } = require('discord.js');
+    const embed = new EmbedBuilder()
+      .setColor('#ef4444')
+      .setTitle('Ticket Closed')
+      .setDescription(`Closed by dashboard\nTicket will be deleted in 10 seconds.`)
+      .setTimestamp();
+
+    await ch.send({ embeds: [embed] });
+    setTimeout(() => ch.delete().catch(() => {}), 10000);
+    res.json({ success: true });
+  });
+
+  // ============ GIVEAWAYS ============
+  app.get('/dashboard/:guildId/giveaways', isAuthenticated, hasPermission, (req, res) => {
+    const g = req.guild;
+    const settings = req.guildSettings;
+    const channels = g.channels.cache.filter(c => c.type === 0).map(c => ({ id: c.id, name: c.name }));
+
+    const giveawaysMap = require('../commands/moderation/giveaway').giveaways;
+    const activeGiveaways = [];
+    giveawaysMap.forEach((data) => {
+      if (data.guildId === g.id) {
+        const ch = g.channels.cache.get(data.channelId);
+        activeGiveaways.push({
+          prize: data.prize,
+          channelName: ch ? ch.name : 'deleted',
+          winners: data.winners,
+          endsAt: data.ended ? 'Ended' : new Date(data.endAt).toLocaleString(),
+          entries: data.entries ? data.entries.size : 0,
+          ended: data.ended,
+          messageId: data.messageId,
+        });
+      }
+    });
+
+    res.render('giveaways', { user: req.user, guild: g, settings, channels, activeGiveaways, currentPage: 'giveaways' });
+  });
+
+  app.post('/api/guilds/:guildId/giveaways/start', isAuthenticated, hasPermission, async (req, res) => {
+    const { channelId, prize, duration, winners } = req.body;
+    if (!channelId || !prize || !duration) return res.json({ success: false, error: 'Missing required fields' });
+
+    const ch = req.guild.channels.cache.get(channelId);
+    if (!ch) return res.json({ success: false, error: 'Channel not found' });
+
+    const numWinners = parseInt(winners) || 1;
+
+    let ms = 0;
+    const match = duration.match(/^(\d+)(m|h|d)$/);
+    if (!match) return res.json({ success: false, error: 'Invalid duration format. Use 10m, 2h, or 1d' });
+
+    const num = parseInt(match[1]);
+    const unit = match[2];
+    if (unit === 'm') ms = num * 60 * 1000;
+    if (unit === 'h') ms = num * 60 * 60 * 1000;
+    if (unit === 'd') ms = num * 24 * 60 * 60 * 1000;
+
+    const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+
+    const embed = new EmbedBuilder()
+      .setColor('#8b5cf6')
+      .setTitle('GIVEAWAY')
+      .setDescription(`**Prize:** ${prize}\n**Winners:** ${numWinners}\n**Ends:** <t:${Math.floor((Date.now() + ms) / 1000)}:R>\n\nReact with 🎉 to enter!`)
+      .setFooter({ text: `Started by ${req.user.username}` })
+      .setTimestamp();
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('giveaway_enter')
+        .setLabel('Enter')
+        .setEmoji('🎉')
+        .setStyle(ButtonStyle.Primary),
+    );
+
+    const msg = await ch.send({ embeds: [embed], components: [row] });
+    await msg.react('🎉');
+
+    const giveawaysMap = require('../commands/moderation/giveaway').giveaways;
+    const { endGiveaway } = require('../commands/moderation/giveaway');
+    giveawaysMap.set(msg.id, {
+      guildId: req.guild.id,
+      channelId: ch.id,
+      messageId: msg.id,
+      prize,
+      winners: numWinners,
+      endAt: Date.now() + ms,
+      hostId: req.user.id,
+      ended: false,
+      entries: new Set(),
+    });
+
+    setTimeout(() => endGiveaway(msg.id, client), ms);
+    res.json({ success: true });
+  });
+
   // ============ BOT SERVERS ============
   app.get('/dashboard/servers', isAuthenticated, (req, res) => {
     const botGuilds = client.guilds.cache.map(g => ({

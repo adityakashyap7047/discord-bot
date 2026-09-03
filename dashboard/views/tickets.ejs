@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tickets - <%= guild.name %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="nav">
+    <a href="/" class="logo"><span>Bot Boy NOTIX</span></a>
+    <div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div>
+  </div>
+  <div class="layout" data-guild="<%= guild.id %>">
+    <%- include('partials/sidebar') %>
+    <div class="main">
+      <h1>&#127915; Ticket System</h1>
+      <p class="sub">Configure and manage support tickets. All changes auto-save.</p>
+
+      <div class="card">
+        <div class="card-h"><h2>&#127915; Ticket Setup</h2><span class="badge <%= settings.ticketCategory ? 'b-green' : 'b-red' %>"><%= settings.ticketCategory ? 'ON' : 'OFF' %></span></div>
+        <div class="sw"><div class="info"><div class="t">Enable Tickets</div><div class="d">Allow users to create support tickets</div></div><label class="toggle"><input type="checkbox" <%= settings.ticketCategory ? 'checked' : '' %> data-auto="ticketEnabled"><span class="sl"></span></label></div>
+        <div class="field" style="margin-top:1rem;"><label>Ticket Category</label><select data-auto="ticketCategory"><option value="">Select Category</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.ticketCategory === ch.id ? 'selected' : '' %>><%= ch.name %></option><% }); %></select><small>Tickets will be created in this category</small></div>
+        <div class="field"><label>Support Role</label><select data-auto="ticketSupportRole"><option value="">Select Role</option><% roles.forEach(r => { %><option value="<%= r.id %>" <%= settings.ticketSupportRole === r.id ? 'selected' : '' %>><%= r.name %></option><% }); %></select><small>Role that can see and manage tickets</small></div>
+        <div class="field"><label>Log Channel</label><select data-auto="ticketLogChannel"><option value="">Select Channel</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.ticketLogChannel === ch.id ? 'selected' : '' %>><%= ch.name %></option><% }); %></select><small>Transcripts are sent here when tickets are closed</small></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>&#128172; Panel Settings</h2></div>
+        <div class="field"><label>Panel Title</label><input type="text" value="<%= settings.ticketPanelTitle || 'Support Tickets' %>" data-auto="ticketPanelTitle" placeholder="Support Tickets"></div>
+        <div class="field"><label>Panel Description</label><textarea rows="2" data-auto="ticketPanelDescription"><%= settings.ticketPanelDescription || 'Need help? Click the button below to create a support ticket.\n\nOur staff will assist you shortly.' %></textarea></div>
+        <div class="field"><label>Panel Color</label><input type="color" value="<%= settings.ticketPanelColor || '#8b5cf6' %>" data-auto="ticketPanelColor"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>&#128221; Transcript & Closing</h2></div>
+        <div class="sw"><div class="info"><div class="t">Save Transcripts</div><div class="d">Save a transcript when tickets are closed</div></div><label class="toggle"><input type="checkbox" <%= settings.ticketSaveTranscript !== false ? 'checked' : '' %> data-auto="ticketSaveTranscript"><span class="sl"></span></label></div>
+        <div class="sw"><div class="info"><div class="t">Auto-Close Empty</div><div class="d">Auto-close tickets with no activity for 24h</div></div><label class="toggle"><input type="checkbox" <%= settings.ticketAutoClose ? 'checked' : '' %> data-auto="ticketAutoClose"><span class="sl"></span></label></div>
+        <div class="field" style="margin-top:1rem;"><label>Max Open Tickets Per User</label><input type="number" value="<%= settings.ticketMaxOpen || 3 %>" data-auto="ticketMaxOpen" min="1" max="10"></div>
+        <div class="field"><label>Claim Message</label><textarea rows="2" data-auto="ticketClaimMessage"><%= settings.ticketClaimMessage || '' %></textarea><small>Message sent when a staff member claims the ticket</small></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>&#128269; Active Tickets</h2></div>
+        <div id="ticket-list" style="max-height:400px;overflow-y:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+            <thead><tr style="border-bottom:1px solid var(--border);text-align:left;"><th style="padding:0.5rem;">Channel</th><th style="padding:0.5rem;">Opened By</th><th style="padding:0.5rem;">Created</th><th style="padding:0.5rem;">Status</th><th style="padding:0.5rem;">Action</th></tr></thead>
+            <tbody id="ticket-body">
+              <% if (activeTickets && activeTickets.length > 0) { %>
+                <% activeTickets.forEach(t => { %>
+                  <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.5rem;"><a href="https://discord.com/channels/<%= guild.id %>/<%= t.channelId %>" target="_blank" style="color:var(--accent);">#<%= t.channelName %></a></td>
+                    <td style="padding:0.5rem;"><%= t.userName %></td>
+                    <td style="padding:0.5rem;"><%= t.createdAt %></td>
+                    <td style="padding:0.5rem;"><span class="badge b-green">Open</span></td>
+                    <td style="padding:0.5rem;"><button onclick="closeTicket('<%= t.channelId %>')" class="btn btn-sm" style="background:#ef4444;color:#fff;">Close</button></td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr><td colspan="5" style="padding:1rem;text-align:center;color:var(--text3);">No active tickets</td></tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>&#128640; Quick Actions</h2></div>
+        <div class="row r2" style="gap:0.5rem;">
+          <button onclick="sendPanel()" class="btn" style="background:var(--accent);color:#fff;">Send Panel to Channel</button>
+          <button onclick="refreshTickets()" class="btn" style="background:var(--border);color:var(--text);">Refresh Ticket List</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+  <script>
+    async function closeTicket(channelId) {
+      if (!confirm('Close this ticket?')) return;
+      try {
+        const res = await fetch(`/api/guilds/<%= guild.id %>/tickets/${channelId}/close`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          location.reload();
+        } else {
+          alert(data.error || 'Failed to close ticket');
+        }
+      } catch (e) {
+        alert('Error closing ticket');
+      }
+    }
+
+    async function sendPanel() {
+      const channel = prompt('Enter channel ID to send the ticket panel:');
+      if (!channel) return;
+      try {
+        const res = await fetch(`/api/guilds/<%= guild.id %>/tickets/panel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ channelId: channel })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Panel sent!');
+        } else {
+          alert(data.error || 'Failed to send panel');
+        }
+      } catch (e) {
+        alert('Error sending panel');
+      }
+    }
+
+    function refreshTickets() {
+      location.reload();
+    }
+  </script>
+</body>
+</html>

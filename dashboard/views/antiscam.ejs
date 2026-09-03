@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anti-Scam - <%= guild.name %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="nav">
+    <a href="/" class="logo"><span>Bot Boy NOTIX</span></a>
+    <div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div>
+  </div>
+  <div class="layout" data-guild="<%= guild.id %>">
+    <%- include('partials/sidebar') %>
+    <div class="main">
+      <h1>&#128683; Anti-Scam Protection</h1>
+      <p class="sub">Protect your server from scam messages, phishing links, and malicious content.</p>
+
+      <div class="card">
+        <div class="card-h"><h2>&#128683; Anti-Scam</h2><span class="badge <%= settings.antiScam ? 'b-green' : 'b-red' %>"><%= settings.antiScam ? 'ON' : 'OFF' %></span></div>
+        <div class="sw"><div class="info"><div class="t">Enable Anti-Scam</div><div class="d">Automatically detect and block scam messages</div></div><label class="toggle"><input type="checkbox" <%= settings.antiScam ? 'checked' : '' %> data-auto="antiScam"><span class="sl"></span></label></div>
+        <div class="field" style="margin-top:1rem;"><label>Log Channel</label><select data-auto="scamLogChannel"><option value="">Select Channel</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.scamLogChannel === ch.id ? 'selected' : '' %>><%= ch.name %></option><% }); %></select></div>
+        <div class="field"><label>Action</label><select data-auto="scamAction">
+          <option value="delete" <%= settings.scamAction === 'delete' ? 'selected' : '' %>>Delete Only</option>
+          <option value="mute" <%= settings.scamAction === 'mute' ? 'selected' : '' %>>Delete + Mute</option>
+          <option value="kick" <%= settings.scamAction === 'kick' ? 'selected' : '' %>>Delete + Kick</option>
+          <option value="ban" <%= settings.scamAction === 'ban' ? 'selected' : '' %>>Delete + Ban</option>
+        </select></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>&#128100; Account Restrictions</h2></div>
+        <div class="sw"><div class="info"><div class="t">Account Age Gate</div><div class="d">Restrict new accounts from sending links</div></div><label class="toggle"><input type="checkbox" <%= settings.accountAgeGate ? 'checked' : '' %> data-auto="accountAgeGate"><span class="sl"></span></label></div>
+        <div class="field" style="margin-top:1rem;"><label>Minimum Account Age (days)</label><input type="number" value="<%= settings.minAccountAge || 7 %>" data-auto="minAccountAge" min="1"></div>
+        <div class="sw"><div class="info"><div class="t">New Member Link Restriction</div><div class="d">Block new members from posting links</div></div><label class="toggle"><input type="checkbox" <%= settings.newMemberRestriction ? 'checked' : '' %> data-auto="newMemberRestriction"><span class="sl"></span></label></div>
+        <div class="sw"><div class="info"><div class="t">Duplicate Detection</div><div class="d">Detect and block duplicate/spam messages</div></div><label class="toggle"><input type="checkbox" <%= settings.duplicateDetection ? 'checked' : '' %> data-auto="duplicateDetection"><span class="sl"></span></label></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>&#128172; Raid Protection</h2><span class="badge <%= settings.raidProtection ? 'b-green' : 'b-red' %>"><%= settings.raidProtection ? 'ON' : 'OFF' %></span></div>
+        <div class="sw"><div class="info"><div class="t">Enable Raid Protection</div><div class="d">Detect and prevent raids (mass joins)</div></div><label class="toggle"><input type="checkbox" <%= settings.raidProtection ? 'checked' : '' %> data-auto="raidProtection"><span class="sl"></span></label></div>
+        <div class="field" style="margin-top:1rem;"><label>Join Threshold</label><input type="number" value="<%= settings.raidThreshold || 10 %>" data-auto="raidThreshold" min="3" max="50"><small>Number of joins to trigger alert</small></div>
+        <div class="field"><label>Timeframe (seconds)</label><input type="number" value="<%= settings.raidTimeframe || 60 %>" data-auto="raidTimeframe" min="10" max="300"><small>Time window to count joins</small></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>&#128274; Verification</h2><span class="badge <%= settings.verificationEnabled ? 'b-green' : 'b-red' %>"><%= settings.verificationEnabled ? 'ON' : 'OFF' %></span></div>
+        <div class="sw"><div class="info"><div class="t">Enable Verification</div><div class="d">New members must verify before chatting</div></div><label class="toggle"><input type="checkbox" <%= settings.verificationEnabled ? 'checked' : '' %> data-auto="verificationEnabled"><span class="sl"></span></label></div>
+        <div class="field" style="margin-top:1rem;"><label>Verification Channel</label><select data-auto="verificationChannel"><option value="">Select Channel</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.verificationChannel === ch.id ? 'selected' : '' %>><%= ch.name %></option><% }); %></select></div>
+        <div class="field"><label>Verified Role</label><select data-auto="verificationRole"><option value="">Select Role</option><% roles.forEach(r => { %><option value="<%= r.id %>" <%= settings.verificationRole === r.id ? 'selected' : '' %>><%= r.name %></option><% }); %></select></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>
