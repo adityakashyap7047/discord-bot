@@ -427,46 +427,56 @@ function startDashboard(client) {
   });
 
   app.post('/api/guilds/:guildId/tickets/panel', isAuthenticated, hasPermission, async (req, res) => {
-    const settings = getGuildSettings(req.params.guildId);
-    if (!settings.ticketCategory) return res.json({ success: false, error: 'Ticket category not configured' });
+    try {
+      const settings = getGuildSettings(req.params.guildId);
+      if (!settings.ticketCategory) return res.json({ success: false, error: 'Ticket category not configured' });
 
-    const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-    const ch = req.guild.channels.cache.get(req.body.channelId);
-    if (!ch) return res.json({ success: false, error: 'Channel not found' });
+      const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+      const ch = req.guild.channels.cache.get(req.body.channelId);
+      if (!ch) return res.json({ success: false, error: 'Channel not found' });
 
-    const embed = new EmbedBuilder()
-      .setColor(settings.ticketPanelColor || '#8b5cf6')
-      .setTitle(settings.ticketPanelTitle || 'Support Tickets')
-      .setDescription(settings.ticketPanelDescription || 'Need help? Click the button below to create a support ticket.')
-      .setFooter({ text: 'Ticket System' })
-      .setTimestamp();
+      const embed = new EmbedBuilder()
+        .setColor(settings.ticketPanelColor || '#8b5cf6')
+        .setTitle(settings.ticketPanelTitle || 'Support Tickets')
+        .setDescription(settings.ticketPanelDescription || 'Need help? Click the button below to create a support ticket.')
+        .setFooter({ text: 'Ticket System' })
+        .setTimestamp();
 
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId('ticket_create')
-        .setLabel('Create Ticket')
-        .setEmoji('🎫')
-        .setStyle(ButtonStyle.Primary),
-    );
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId('ticket_create')
+          .setLabel('Create Ticket')
+          .setEmoji('🎫')
+          .setStyle(ButtonStyle.Primary),
+      );
 
-    await ch.send({ embeds: [embed], components: [row] });
-    res.json({ success: true });
+      await ch.send({ embeds: [embed], components: [row] });
+      res.json({ success: true });
+    } catch (e) {
+      console.error('Ticket panel error:', e);
+      res.json({ success: false, error: e.message });
+    }
   });
 
   app.post('/api/guilds/:guildId/tickets/:channelId/close', isAuthenticated, hasPermission, async (req, res) => {
-    const ch = req.guild.channels.cache.get(req.params.channelId);
-    if (!ch) return res.json({ success: false, error: 'Channel not found' });
+    try {
+      const ch = req.guild.channels.cache.get(req.params.channelId);
+      if (!ch) return res.json({ success: false, error: 'Channel not found' });
 
-    const { EmbedBuilder } = require('discord.js');
-    const embed = new EmbedBuilder()
-      .setColor('#ef4444')
-      .setTitle('Ticket Closed')
-      .setDescription(`Closed by dashboard\nTicket will be deleted in 10 seconds.`)
-      .setTimestamp();
+      const { EmbedBuilder } = require('discord.js');
+      const embed = new EmbedBuilder()
+        .setColor('#ef4444')
+        .setTitle('Ticket Closed')
+        .setDescription(`Closed by dashboard\nTicket will be deleted in 10 seconds.`)
+        .setTimestamp();
 
-    await ch.send({ embeds: [embed] });
-    setTimeout(() => ch.delete().catch(() => {}), 10000);
-    res.json({ success: true });
+      await ch.send({ embeds: [embed] });
+      setTimeout(() => ch.delete().catch(() => {}), 10000);
+      res.json({ success: true });
+    } catch (e) {
+      console.error('Ticket close error:', e);
+      res.json({ success: false, error: e.message });
+    }
   });
 
   // ============ GIVEAWAYS ============
@@ -496,60 +506,65 @@ function startDashboard(client) {
   });
 
   app.post('/api/guilds/:guildId/giveaways/start', isAuthenticated, hasPermission, async (req, res) => {
-    const { channelId, prize, duration, winners } = req.body;
-    if (!channelId || !prize || !duration) return res.json({ success: false, error: 'Missing required fields' });
+    try {
+      const { channelId, prize, duration, winners } = req.body;
+      if (!channelId || !prize || !duration) return res.json({ success: false, error: 'Missing required fields' });
 
-    const ch = req.guild.channels.cache.get(channelId);
-    if (!ch) return res.json({ success: false, error: 'Channel not found' });
+      const ch = req.guild.channels.cache.get(channelId);
+      if (!ch) return res.json({ success: false, error: 'Channel not found' });
 
-    const numWinners = parseInt(winners) || 1;
+      const numWinners = parseInt(winners) || 1;
 
-    let ms = 0;
-    const match = duration.match(/^(\d+)(m|h|d)$/);
-    if (!match) return res.json({ success: false, error: 'Invalid duration format. Use 10m, 2h, or 1d' });
+      let ms = 0;
+      const match = duration.match(/^(\d+)(m|h|d)$/);
+      if (!match) return res.json({ success: false, error: 'Invalid duration format. Use 10m, 2h, or 1d' });
 
-    const num = parseInt(match[1]);
-    const unit = match[2];
-    if (unit === 'm') ms = num * 60 * 1000;
-    if (unit === 'h') ms = num * 60 * 60 * 1000;
-    if (unit === 'd') ms = num * 24 * 60 * 60 * 1000;
+      const num = parseInt(match[1]);
+      const unit = match[2];
+      if (unit === 'm') ms = num * 60 * 1000;
+      if (unit === 'h') ms = num * 60 * 60 * 1000;
+      if (unit === 'd') ms = num * 24 * 60 * 60 * 1000;
 
-    const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+      const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
-    const embed = new EmbedBuilder()
-      .setColor('#8b5cf6')
-      .setTitle('GIVEAWAY')
-      .setDescription(`**Prize:** ${prize}\n**Winners:** ${numWinners}\n**Ends:** <t:${Math.floor((Date.now() + ms) / 1000)}:R>\n\nReact with 🎉 to enter!`)
-      .setFooter({ text: `Started by ${req.user.username}` })
-      .setTimestamp();
+      const embed = new EmbedBuilder()
+        .setColor('#8b5cf6')
+        .setTitle('GIVEAWAY')
+        .setDescription(`**Prize:** ${prize}\n**Winners:** ${numWinners}\n**Ends:** <t:${Math.floor((Date.now() + ms) / 1000)}:R>\n\nReact with 🎉 to enter!`)
+        .setFooter({ text: `Started by ${req.user.username}` })
+        .setTimestamp();
 
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId('giveaway_enter')
-        .setLabel('Enter')
-        .setEmoji('🎉')
-        .setStyle(ButtonStyle.Primary),
-    );
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId('giveaway_enter')
+          .setLabel('Enter')
+          .setEmoji('🎉')
+          .setStyle(ButtonStyle.Primary),
+      );
 
-    const msg = await ch.send({ embeds: [embed], components: [row] });
-    await msg.react('🎉');
+      const msg = await ch.send({ embeds: [embed], components: [row] });
+      await msg.react('🎉');
 
-    const giveawaysMap = require('../commands/moderation/giveaway').giveaways;
-    const { endGiveaway } = require('../commands/moderation/giveaway');
-    giveawaysMap.set(msg.id, {
-      guildId: req.guild.id,
-      channelId: ch.id,
-      messageId: msg.id,
-      prize,
-      winners: numWinners,
-      endAt: Date.now() + ms,
-      hostId: req.user.id,
-      ended: false,
-      entries: new Set(),
-    });
+      const giveawaysMap = require('../commands/moderation/giveaway').giveaways;
+      const { endGiveaway } = require('../commands/moderation/giveaway');
+      giveawaysMap.set(msg.id, {
+        guildId: req.guild.id,
+        channelId: ch.id,
+        messageId: msg.id,
+        prize,
+        winners: numWinners,
+        endAt: Date.now() + ms,
+        hostId: req.user.id,
+        ended: false,
+        entries: new Set(),
+      });
 
-    setTimeout(() => endGiveaway(msg.id, client), ms);
-    res.json({ success: true });
+      setTimeout(() => endGiveaway(msg.id, client), ms);
+      res.json({ success: true });
+    } catch (e) {
+      console.error('Giveaway start error:', e);
+      res.json({ success: false, error: e.message });
+    }
   });
 
   // ============ BOT SERVERS ============
