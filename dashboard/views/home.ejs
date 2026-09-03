@@ -197,6 +197,113 @@
     </div>
   </section>
 
+  <section style="max-width:1100px;margin:0 auto 6rem;padding:0 2rem;position:relative;z-index:1" id="all-commands">
+    <div class="section-header">
+      <h2>All Commands</h2>
+      <p>Use <code>/</code> on mobile for autocomplete, or <code>!</code> prefix on desktop</p>
+    </div>
+    <style>
+      .hc-grid{display:grid;gap:1rem}
+      .hc-cat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;backdrop-filter:blur(20px);transition:all .35s}
+      .hc-cat:hover{border-color:rgba(139,92,246,0.25)}
+      .hc-cat-head{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.3rem;border-bottom:1px solid transparent;cursor:pointer;transition:border-color .3s}
+      .hc-cat.open .hc-cat-head{border-bottom-color:var(--border)}
+      .hc-cat-head h3{font-size:0.95rem;font-weight:700;display:flex;align-items:center;gap:0.5rem}
+      .hc-cat-head .cnt{font-size:0.65rem;padding:0.2rem 0.6rem;border-radius:20px;background:rgba(59,130,246,0.1);color:#60a5fa;border:1px solid rgba(59,130,246,0.2);font-weight:600}
+      .hc-cat-head .arr{font-size:0.7rem;color:var(--text3);transition:transform .3s}
+      .hc-cat.open .arr{transform:rotate(180deg)}
+      .hc-cat-body{padding:0;max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s ease}
+      .hc-cat.open .hc-cat-body{max-height:3000px;padding:0.5rem 1.3rem 1.3rem}
+      .hc-tbl{width:100%;border-collapse:collapse}
+      .hc-tbl th{text-align:left;padding:0.4rem 0.6rem;font-size:0.58rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);font-weight:700;border-bottom:1px solid var(--border)}
+      .hc-tbl td{padding:0.45rem 0.6rem;font-size:0.78rem;border-bottom:1px solid rgba(139,92,246,0.04)}
+      .hc-tbl tr:last-child td{border-bottom:none}
+      .hc-tbl tr{transition:background .2s}.hc-tbl tr:hover{background:rgba(139,92,246,0.03)}
+      .hc-cmd{font-weight:700;color:var(--accent2);white-space:nowrap}
+      .hc-code{font-size:0.72rem;color:var(--text3);background:rgba(139,92,246,0.06);padding:0.15rem 0.45rem;border-radius:5px;display:inline-block;width:fit-content;border:1px solid rgba(139,92,246,0.08);word-break:break-all}
+      .hc-code code{color:#c4b5fd}
+    </style>
+    <div class="hc-grid">
+      <% const hcCmds = [
+        { cat: 'Moderation', icon: '&#128737;', cmds: [
+          { n: 'ban', s: '/ban user:@user reason:Spamming', p: '!ban @user Spamming' },
+          { n: 'kick', s: '/kick user:@user reason:Rule violation', p: '!kick @user Rule violation' },
+          { n: 'mute', s: '/mute user:@user duration:10m', p: '!mute @user 10m' },
+          { n: 'warn', s: '/warn user:@user reason:Being rude', p: '!warn @user Being rude' },
+          { n: 'warnings', s: '/warnings user:@user', p: '!warnings @user' },
+          { n: 'purge', s: '/purge amount:50', p: '!purge 50' },
+          { n: 'nick', s: '/nick user:@user name:NewNick', p: '!nick @user NewNick' },
+          { n: 'slowmode', s: '/slowmode channel:#channel seconds:10', p: '!slowmode #channel 10' },
+          { n: 'lock', s: '/lock channel:#channel reason:Raid', p: '!lock #channel Raid' },
+          { n: 'unlock', s: '/unlock channel:#channel', p: '!unlock #channel' },
+        ]},
+        { cat: 'Anti-Scam & Security', icon: '&#128683;', cmds: [
+          { n: 'antiscam', s: '/antiscam enable|disable|status', p: '!antiscam enable' },
+          { n: 'verification', s: '/verification channel|role|enable|disable', p: '!verification channel #verify' },
+          { n: 'raid', s: '/raid enable|disable|threshold|unlock', p: '!raid enable' },
+        ]},
+        { cat: 'Setup', icon: '&#9881;', cmds: [
+          { n: 'setup', s: '/setup', p: '!setup' },
+          { n: 'setwelcome', s: '/setwelcome channel:#welcome message:Hello {user}!', p: '!setwelcome #welcome Hello {user}!' },
+          { n: 'setgoodbye', s: '/setgoodbye channel:#goodbye', p: '!setgoodbye #goodbye' },
+          { n: 'setlog', s: '/setlog channel:#mod-logs', p: '!setlog #mod-logs' },
+          { n: 'setprefix', s: '/setprefix prefix:?', p: '!setprefix ?' },
+          { n: 'setautorole', s: '/setautorole role:@Member', p: '!setautorole @Member' },
+          { n: 'automod', s: '/automod feature:antispam toggle:on', p: '!automod antispam on' },
+        ]},
+        { cat: 'Utility', icon: '&#128269;', cmds: [
+          { n: 'ping', s: '/ping', p: '!ping' },
+          { n: 'help', s: '/help', p: '!help' },
+          { n: 'avatar', s: '/avatar user:@user', p: '!avatar @user' },
+          { n: 'userinfo', s: '/userinfo user:@user', p: '!userinfo @user' },
+          { n: 'serverinfo', s: '/serverinfo', p: '!serverinfo' },
+          { n: 'poll', s: '/poll question:Best lang? options:JS,Python', p: '!poll Best lang? JS Python' },
+          { n: 'remind', s: '/remind time:30m message:Check oven', p: '!remind 30m Check oven' },
+          { n: 'msg', s: '/msg channel:#channel message:Hello!', p: '!msg #channel Hello!' },
+        ]},
+        { cat: 'Fun', icon: '&#127917;', cmds: [
+          { n: '8ball', s: '/8ball question:Will I win?', p: '!8ball Will I win?' },
+          { n: 'roll', s: '/roll sides:20', p: '!roll 20' },
+          { n: 'decide', s: '/decide options:Pizza,Pasta', p: '!decide Pizza Pasta' },
+          { n: 'say', s: '/say message:Hello!', p: '!say Hello!' },
+          { n: 'reverse', s: '/reverse text:Hello World', p: '!reverse Hello World' },
+        ]},
+        { cat: 'Tickets & Giveaways', icon: '&#127915;', cmds: [
+          { n: 'ticket', s: '/ticket setup|panel|close', p: '!ticket setup #tickets @Support' },
+          { n: 'giveaway', s: '/giveaway channel:#ch prize:Nitro duration:24h winners:1', p: '!giveaway #ch Nitro 24h 1' },
+        ]},
+        { cat: 'Custom Commands & Roles', icon: '&#9993;', cmds: [
+          { n: 'addcommand', s: '/addcommand name:hello response:Hi {user}!', p: '!addcommand hello Hi {user}!' },
+          { n: 'removecommand', s: '/removecommand name:hello', p: '!removecommand hello' },
+          { n: 'listcommands', s: '/listcommands', p: '!listcommands' },
+          { n: 'reactionrole', s: '/reactionrole channel:#roles', p: '!reactionrole #roles 123456 @Role emoji' },
+        ]},
+      ]; %>
+      <% hcCmds.forEach((cat, i) => { %>
+        <div class="hc-cat<%= i < 2 ? ' open' : '' %>">
+          <div class="hc-cat-head" onclick="this.parentElement.classList.toggle('open')">
+            <h3><span><%= cat.icon %></span> <%= cat.cat %> <span class="cnt"><%= cat.cmds.length %></span></h3>
+            <span class="arr">&#9660;</span>
+          </div>
+          <div class="hc-cat-body">
+            <table class="hc-tbl">
+              <thead><tr><th style="width:15%">Command</th><th style="width:42%">/ Slash (Mobile)</th><th style="width:43%">! Prefix (Desktop)</th></tr></thead>
+              <tbody>
+                <% cat.cmds.forEach(cmd => { %>
+                  <tr>
+                    <td class="hc-cmd"><%= cmd.n %></td>
+                    <td><span class="hc-code"><code><%= cmd.s %></code></span></td>
+                    <td><span class="hc-code"><code><%= cmd.p %></code></span></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </section>
+
   <section class="cta">
     <h2>Ready to get started?</h2>
     <p>Add Bot Boy NOTIX to your server in seconds and unlock powerful features.</p>
