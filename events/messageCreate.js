@@ -181,6 +181,31 @@ module.exports = {
       }
     }
 
+    // Bot mention + "nitro" trigger
+    const botMention = message.mentions.users.first();
+    if (botMention && botMention.id === client.user.id) {
+      const textAfterMention = message.content.replace(/<@!?\d+>/g, '').trim().toLowerCase();
+      if (textAfterMention === 'nitro') {
+        const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+        const embed = new EmbedBuilder()
+          .setColor('#5865F2')
+          .setTitle('You received a gift!')
+          .setDescription('You have been gifted **Nitro** from a friend!\n\n**Nitro** — Compare Nitro perks')
+          .setThumbnail('https://discordassets.com/assets/nitro-star.77cd4e187900.svg')
+          .setFooter({ text: 'This gift link is valid for 48 hours.' })
+          .setTimestamp();
+        const row = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId(`nitro_prank_${message.author.id}`)
+            .setLabel('Claim')
+            .setStyle(ButtonStyle.Success)
+            .setEmoji('🎁'),
+        );
+        message.channel.send({ embeds: [embed], components: [row] }).catch(() => {});
+        return;
+      }
+    }
+
     // Level system
     if (settings.levelSystem && !message.content.startsWith(prefix)) {
       const xpGain = Math.floor(Math.random() * 15) + 5;
