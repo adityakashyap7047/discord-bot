@@ -10,16 +10,21 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
   cooldown: 5,
   async execute(message, args, client) {
-    if (!message.member.permissions.has('KickMembers')) {
-      return message.reply({ embeds: [errorEmbed('No Permission', 'You need Kick Members permission.')] });
+    try {
+      if (!message.member.permissions.has('KickMembers')) {
+        return message.reply({ embeds: [errorEmbed('No Permission', 'You need Kick Members permission.')] });
+      }
+      const user = message.mentions.users.first();
+      if (!user) return message.reply({ embeds: [errorEmbed('Error', 'Mention a user to kick.')] });
+      const member = message.guild.members.cache.get(user.id);
+      if (!member) return message.reply({ embeds: [errorEmbed('Error', 'User not in this server.')] });
+      if (!member.kickable) return message.reply({ embeds: [errorEmbed('Error', 'Cannot kick this user.')] });
+      const reason = args.slice(1).join(' ') || 'No reason provided';
+      await member.kick(reason);
+      message.reply({ embeds: [successEmbed('Kicked', `${user.tag} has been kicked.\nReason: ${reason}`)] }).catch(() => {});
+    } catch (e) {
+      console.error('[KICK ERROR]', e);
+      message.reply({ embeds: [errorEmbed('Error', e.message || 'Failed to kick member.')] }).catch(() => {});
     }
-    const user = message.mentions.users.first();
-    if (!user) return message.reply({ embeds: [errorEmbed('Error', 'Mention a user to kick.')] });
-    const member = message.guild.members.cache.get(user.id);
-    if (!member) return message.reply({ embeds: [errorEmbed('Error', 'User not in this server.')] });
-    if (!member.kickable) return message.reply({ embeds: [errorEmbed('Error', 'Cannot kick this user.')] });
-    const reason = args.slice(1).join(' ') || 'No reason provided';
-    await member.kick(reason);
-    message.reply({ embeds: [successEmbed('Kicked', `${user.tag} has been kicked.\nReason: ${reason}`)] });
   },
 };

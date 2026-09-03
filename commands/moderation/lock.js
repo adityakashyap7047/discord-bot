@@ -8,10 +8,15 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels),
   cooldown: 5,
   async execute(message, args, client) {
-    if (!message.member.permissions.has('ManageChannels')) {
-      return message.reply({ embeds: [errorEmbed('No Permission', 'You need Manage Channels permission.')] });
+    try {
+      if (!message.member.permissions.has('ManageChannels')) {
+        return message.reply({ embeds: [errorEmbed('No Permission', 'You need Manage Channels permission.')] });
+      }
+      await message.channel.permissionOverwrites.edit(message.guild.roles.everyone, { SendMessages: false });
+      message.reply({ embeds: [successEmbed('Locked', `🔒 ${message.channel} has been locked.`)] }).catch(() => {});
+    } catch (e) {
+      console.error('[LOCK ERROR]', e);
+      message.reply({ embeds: [errorEmbed('Error', e.message || 'Failed to lock channel.')] }).catch(() => {});
     }
-    await message.channel.permissionOverwrites.edit(message.guild.roles.everyone, { SendMessages: false });
-    message.reply({ embeds: [successEmbed('Locked', `🔒 ${message.channel} has been locked.`)] });
   },
 };
