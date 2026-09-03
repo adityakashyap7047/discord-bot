@@ -112,13 +112,13 @@ module.exports = {
             .setTimestamp();
           if (settings.welcomeImage) embed.setImage(settings.welcomeImage);
           embed.setFooter({ text: `Member #${member.guild.memberCount}` });
-          channel.send({ embeds: [embed] });
+          channel.send({ embeds: [embed] }).catch(() => {});
         } else {
           const msg = (settings.welcomeMessage || 'Welcome {user} to {server}!')
             .replace('{user}', `<@${member.id}>`)
             .replace('{server}', member.guild.name)
             .replace('{memberCount}', member.guild.memberCount) + inviterText;
-          channel.send(msg);
+          channel.send(msg).catch(() => {});
         }
       }
     }
@@ -171,7 +171,7 @@ module.exports = {
           )
           .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
           .setTimestamp();
-        logCh.send({ embeds: [embed] });
+        logCh.send({ embeds: [embed] }).catch(() => {});
       }
     }
   },

@@ -10,37 +10,58 @@ function ensureDir() {
   if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
 }
 
+function getDefaultDB() {
+  return {
+    guild_settings: {},
+    warnings: [],
+    reaction_roles: [],
+    custom_commands: [],
+    level_system: [],
+    starboard: [],
+    reminders: [],
+    invites: {},
+    tempbans: [],
+    logs: [],
+    embeds: [],
+    autoroles: [],
+    goodbye_config: {},
+    welcome_config: {},
+  };
+}
+
 function loadDB() {
   if (cache) return cache;
   ensureDir();
   if (!fs.existsSync(DB_FILE)) {
-    cache = {
-      guild_settings: {},
-      warnings: [],
-      reaction_roles: [],
-      custom_commands: [],
-      level_system: [],
-      starboard: [],
-      reminders: [],
-      invites: {},
-      tempbans: [],
-      logs: [],
-      embeds: [],
-      autoroles: [],
-      goodbye_config: {},
-      welcome_config: {},
-    };
-    fs.writeFileSync(DB_FILE, JSON.stringify(cache, null, 2));
+    cache = getDefaultDB();
+    saveDB(cache);
     return cache;
   }
-  cache = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+  try {
+    const raw = fs.readFileSync(DB_FILE, 'utf8');
+    cache = JSON.parse(raw);
+  } catch (err) {
+    console.error('[DB] Failed to parse bot.json, creating backup and resetting:', err.message);
+    try {
+      fs.copyFileSync(DB_FILE, DB_FILE + '.corrupt.' + Date.now());
+    } catch (_) {}
+    cache = getDefaultDB();
+    saveDB(cache);
+  }
   return cache;
 }
 
 function saveDB(data) {
   cache = data;
   ensureDir();
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
+  const tmp = DB_FILE + '.tmp';
+  try {
+    fs.writeFileSync(tmp, JSON.stringify(data, null, 2));
+    fs.renameSync(tmp, DB_FILE);
+  } catch (err) {
+    console.error('[DB] Failed to save:', err.message);
+    try { fs.unlinkSync(tmp); } catch (_) {}
+  }
 }
 
 function getGuildSettings(guildId) {

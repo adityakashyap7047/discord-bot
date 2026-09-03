@@ -23,6 +23,6 @@ module.exports = {
     if (message.attachments.size > 0) {
       embed.addFields({ name: 'Attachments', value: message.attachments.map(a => a.url).join('\n').slice(0, 1024) });
     }
-    channel.send({ embeds: [embed] });
+    channel.send({ embeds: [embed] }).catch(() => {});
   },
 };

@@ -22,6 +22,6 @@ module.exports = {
         { name: 'After', value: newMessage.content.slice(0, 512) || 'No content' },
       )
       .setTimestamp();
-    channel.send({ embeds: [embed] });
+    channel.send({ embeds: [embed] }).catch(() => {});
   },
 };

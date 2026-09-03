@@ -598,8 +598,20 @@ function startDashboard(client) {
     });
   });
 
-  app.get('/api/guilds/:guildId/settings', (req, res) => res.json(getGuildSettings(req.params.guildId)));
-  app.get('/api/guilds/:guildId/stats', (req, res) => res.json(getGuildStats(req.params.guildId)));
+  app.get('/api/guilds/:guildId/settings', isAuthenticated, (req, res) => {
+    const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);
+    if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
+      return res.status(403).json({ error: 'No permission' });
+    }
+    res.json(getGuildSettings(req.params.guildId));
+  });
+  app.get('/api/guilds/:guildId/stats', isAuthenticated, (req, res) => {
+    const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);
+    if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
+      return res.status(403).json({ error: 'No permission' });
+    }
+    res.json(getGuildStats(req.params.guildId));
+  });
 
   // Global error handler
   app.use((err, req, res, next) => {

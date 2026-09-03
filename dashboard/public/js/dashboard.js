@@ -25,11 +25,6 @@ document.querySelectorAll('[data-auto]').forEach(el => {
     let val = el.type === 'checkbox' ? (el.checked ? 'on' : 'off') : el.value;
     autoSave(guildId, { [key]: val });
   });
-  if (el.tagName === 'SELECT') {
-    el.addEventListener('change', () => {
-      autoSave(guildId, { [key]: el.value });
-    });
-  }
 });
 
 document.querySelectorAll('[data-preview]').forEach(el => {

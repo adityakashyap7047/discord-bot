@@ -52,8 +52,11 @@ module.exports = {
 
       if (sub === 'start' || !sub) {
         const duration = args[1];
-        const prize = args.slice(2, -1).join(' ');
-        const winners = parseInt(args[args.length - 1]) || 1;
+        const lastArg = args[args.length - 1];
+        const numWinners = parseInt(lastArg);
+        const hasWinners = !isNaN(numWinners) && args.length > 3;
+        const prize = hasWinners ? args.slice(2, -1).join(' ') : args.slice(2).join(' ');
+        const winners = hasWinners ? numWinners : 1;
 
         if (!duration || !prize) {
           return message.reply('Usage: `!giveaway start <duration> <prize> [winners]`\nDuration: `10m`, `2h`, `1d`');
@@ -92,7 +95,7 @@ module.exports = {
           entries: new Set(),
         });
 
-        setTimeout(() => endGiveaway(msg.id, client), ms);
+        setTimeout(() => endGiveaway(msg.id, client).catch(() => {}), ms);
         return message.delete().catch(() => {});
       }
 

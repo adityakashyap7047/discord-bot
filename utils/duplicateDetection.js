@@ -35,7 +35,7 @@ function trackMessage(message) {
       timestamp: now,
       isDuplicate: true,
     });
-    messageCache.set(guildId, recentMessages);
+    messageCache.set(guildId, cache.filter(m => Date.now() - m.timestamp < 300000));
 
     return {
       isDuplicate: true,
@@ -61,7 +61,7 @@ function trackMessage(message) {
       timestamp: now,
       isDuplicate: true,
     });
-    messageCache.set(guildId, recentMessages);
+    messageCache.set(guildId, cache.filter(m => Date.now() - m.timestamp < 300000));
 
     return {
       isDuplicate: true,

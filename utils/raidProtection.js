@@ -114,15 +114,17 @@ async function applyLockdown(guild, settings, client) {
   });
 
   setTimeout(async () => {
-    clearLockdown(guild.id);
-    for (const [, channel] of guild.channels.cache) {
-      if (channel.isTextBased() && !channel.isVoiceBased()) {
-        try {
+    try {
+      clearLockdown(guild.id);
+      for (const [, channel] of guild.channels.cache) {
+        if (channel.isTextBased() && !channel.isVoiceBased()) {
           await channel.permissionOverwrites.edit(guild.id, {
             SendMessages: null,
           }).catch(() => {});
-        } catch (e) {}
+        }
       }
+    } catch (e) {
+      console.error('[RAID] Lockdown release error:', e);
     }
   }, settings.raidLockdownDuration || 300000);
 }

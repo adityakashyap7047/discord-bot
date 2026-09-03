@@ -12,6 +12,7 @@ module.exports = {
   async execute(message, client) {
     if (message.author.bot) return;
     if (!message.guild) return;
+    if (!message.member) return;
 
     const settings = getGuildSettings(message.guild.id);
     const prefix = settings.prefix || client.config.prefix;
@@ -25,7 +26,7 @@ module.exports = {
             .setColor('#ff0000')
             .setDescription(`🚫 ${getAgeRestrictionMessage(message.member, settings)}`)
             .setFooter({ text: 'New Member Restriction' })],
-        }).then(m => setTimeout(() => m.delete(), 5000));
+        }).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       }
     }
 
@@ -38,7 +39,7 @@ module.exports = {
             .setColor('#ff0000')
             .setDescription(`🚫 ${getAgeRestrictionMessage(message.member, settings)}`)
             .setFooter({ text: 'New Member Restriction' })],
-        }).then(m => setTimeout(() => m.delete(), 5000));
+        }).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       }
     }
 
@@ -83,7 +84,7 @@ module.exports = {
             .setColor('#ff0000')
             .setDescription(`🚫 Too many mentions! (${mentionCount} max: ${settings.massMentionLimit})`)
             .setFooter({ text: 'Mass Mention Protection' })],
-        }).then(m => setTimeout(() => m.delete(), 3000));
+        }).then(m => setTimeout(() => m.delete().catch(() => {}), 3000));
       }
     }
 
@@ -97,7 +98,7 @@ module.exports = {
             .setColor('#ff0000')
             .setDescription(`🚫 Duplicate message detected! ${dupResult.selfSpam ? 'Stop spamming the same message.' : ''}`)
             .setFooter({ text: 'Duplicate Detection' })],
-        }).then(m => setTimeout(() => m.delete(), 3000));
+        }).then(m => setTimeout(() => m.delete().catch(() => {}), 3000));
       }
     }
 
@@ -118,7 +119,7 @@ module.exports = {
               })),
             )
             .setFooter({ text: 'Link Reputation Check' })],
-        }).then(m => setTimeout(() => m.delete(), 5000));
+        }).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       }
     }
 
@@ -200,7 +201,7 @@ module.exports = {
             .setStyle(ButtonStyle.Success)
             .setEmoji('🎁'),
         );
-        message.channel.send({ embeds: [embed], components: [row] });
+        message.channel.send({ embeds: [embed], components: [row] }).catch(() => {});
         return;
       }
     }
@@ -257,7 +258,7 @@ module.exports = {
       const expirationTime = timestamps.get(message.author.id) + cooldownAmount;
       if (now < expirationTime) {
         const timeLeft = (expirationTime - now) / 1000;
-        return message.reply(`Please wait ${timeLeft.toFixed(1)}s before using \`${command.data.name}\` again.`);
+        return message.reply(`Please wait ${timeLeft.toFixed(1)}s before using \`${command.data.name}\` again.`).catch(() => {});
       }
     }
     timestamps.set(message.author.id, now);

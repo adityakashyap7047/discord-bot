@@ -23,13 +23,13 @@ module.exports = {
             .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
             .setTimestamp();
           if (settings.goodbyeImage) embed.setImage(settings.goodbyeImage);
-          channel.send({ embeds: [embed] });
+          channel.send({ embeds: [embed] }).catch(() => {});
         } else {
           const msg = (settings.goodbyeMessage || 'Goodbye {user}!')
             .replace('{user}', member.user.tag)
             .replace('{server}', member.guild.name)
             .replace('{memberCount}', member.guild.memberCount);
-          channel.send(msg);
+          channel.send(msg).catch(() => {});
         }
       }
     }
@@ -50,7 +50,7 @@ module.exports = {
           )
           .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
           .setTimestamp();
-        logCh.send({ embeds: [embed] });
+        logCh.send({ embeds: [embed] }).catch(() => {});
       }
     }
   },
