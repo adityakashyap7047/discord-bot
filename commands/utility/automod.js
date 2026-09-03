@@ -1,10 +1,9 @@
-const { EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const { getGuildSettings, updateGuildSetting } = require('../../utils/database');
 
 module.exports = {
-  data: null,
-  name: 'automod',
-  description: 'Toggle auto-moderation features',
+  data: new SlashCommandBuilder().setName('automod').setDescription('Toggle auto-moderation features'),
+  cooldown: 5,
   async execute(message, args, client) {
     if (!message.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
       return message.reply({
