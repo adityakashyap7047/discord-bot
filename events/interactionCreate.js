@@ -17,5 +17,27 @@ module.exports = {
         .setFooter({ text: 'Gottem!' });
       await interaction.reply({ embeds: [embed], files: [file], ephemeral: true });
     }
+
+    if (interaction.customId === 'giveaway_enter') {
+      const { giveaways } = require('../commands/moderation/giveaway');
+      const giveaway = giveaways.get(interaction.message.id);
+
+      if (!giveaway || giveaway.ended) {
+        return interaction.reply({ content: 'This giveaway has ended.', ephemeral: true });
+      }
+
+      if (giveaway.entries.has(interaction.user.id)) {
+        giveaway.entries.delete(interaction.user.id);
+        return interaction.reply({ content: 'You left the giveaway.', ephemeral: true });
+      }
+
+      giveaway.entries.add(interaction.user.id);
+      return interaction.reply({ content: `You entered the giveaway! (${giveaway.entries.size} entries)`, ephemeral: true });
+    }
+
+    if (interaction.customId.startsWith('ticket_')) {
+      const { handleTicket } = require('../commands/moderation/ticket');
+      await handleTicket(interaction, client);
+    }
   },
 };

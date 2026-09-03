@@ -12,6 +12,7 @@ module.exports = {
       Setup: ['setup', 'setwelcome', 'setgoodbye', 'setlog', 'setprefix', 'setautorole', 'automod', 'starboard'],
       'Custom Commands': ['addcommand', 'removecommand', 'listcommands'],
       'Reaction Roles': ['reactionrole'],
+      Events: ['giveaway', 'ticket'],
     };
 
     const embed = new EmbedBuilder()

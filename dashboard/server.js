@@ -308,7 +308,8 @@ function startDashboard(client) {
     const settings = req.guildSettings;
     const invites = getInvites(g.id);
     const leaderboard = getInviteLeaderboard(g.id);
-    res.render('invites', { user: req.user, guild: g, settings, invites, leaderboard, currentPage: 'invites' });
+    const channels = g.channels.cache.filter(c => c.type === 0).map(c => ({ id: c.id, name: c.name }));
+    res.render('invites', { user: req.user, guild: g, settings, invites, leaderboard, channels, currentPage: 'invites' });
   });
 
   app.post('/dashboard/:guildId/invites', isAuthenticated, hasPermission, (req, res) => {
