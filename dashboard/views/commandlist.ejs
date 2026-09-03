@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commands - Bot Boy NOTIX</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .cmd-grid{display:grid;gap:1.3rem;margin-top:1rem}
+    .cmd-cat{background:rgba(15,15,25,0.8);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;backdrop-filter:blur(20px);transition:all .35s}
+    .cmd-cat:hover{border-color:rgba(139,92,246,0.25);box-shadow:var(--glow-sm)}
+    .cmd-cat-head{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+    .cmd-cat-head h3{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:0.6rem;letter-spacing:-0.3px}
+    .cmd-cat-head .arrow{font-size:0.8rem;color:var(--text3);transition:transform .3s}
+    .cmd-cat.open .arrow{transform:rotate(180deg)}
+    .cmd-cat-body{padding:0 1.5rem;max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s ease}
+    .cmd-cat.open .cmd-cat-body{max-height:2000px;padding:1rem 1.5rem 1.5rem}
+    .cmd-desc{font-size:0.8rem;color:var(--text3);margin-bottom:1rem;line-height:1.5}
+    .cmd-table{width:100%;border-collapse:collapse}
+    .cmd-table th{text-align:left;padding:0.5rem 0.75rem;font-size:0.6rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);font-weight:700;border-bottom:1px solid var(--border)}
+    .cmd-table td{padding:0.6rem 0.75rem;font-size:0.82rem;border-bottom:1px solid rgba(139,92,246,0.04);vertical-align:top}
+    .cmd-table tr:last-child td{border-bottom:none}
+    .cmd-table tr{transition:background .2s}.cmd-table tr:hover{background:rgba(139,92,246,0.03)}
+    .cmd-name{font-weight:700;color:var(--accent2)}
+    .cmd-formats{display:flex;flex-direction:column;gap:0.25rem}
+    .cmd-format{font-size:0.75rem;color:var(--text3);background:rgba(139,92,246,0.06);padding:0.2rem 0.5rem;border-radius:6px;display:inline-block;width:fit-content;border:1px solid rgba(139,92,246,0.08)}
+    .cmd-format code{color:var(--accent2);font-family:'JetBrains Mono',monospace}
+    .mobile-tip{background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.05));border:1px solid rgba(139,92,246,0.15);border-radius:var(--r);padding:1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
+    .mobile-tip .tip-icon{font-size:2rem;flex-shrink:0}
+    .mobile-tip .tip-text h3{font-size:0.95rem;font-weight:700;margin-bottom:0.3rem}
+    .mobile-tip .tip-text p{font-size:0.82rem;color:var(--text2);line-height:1.5}
+  </style>
+</head>
+<body>
+  <div class="nav"><a href="/" class="logo"><span>Bot Boy NOTIX</span></a><div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div></div>
+  <div class="layout">
+    <%- include('partials/sidebar') %>
+    <div class="main">
+      <h1>&#9889; All Commands</h1>
+      <p class="sub">Complete list of all bot commands. Use <code>/</code> on mobile for easy access!</p>
+
+      <div class="mobile-tip">
+        <div class="tip-icon">&#128241;</div>
+        <div class="tip-text">
+          <h3>Mobile Users</h3>
+          <p>Type <strong>/</strong> in any channel to see all commands with autocomplete. Select a command and fill in the options using Discord's built-in UI - no need to type channel names or roles manually!</p>
+        </div>
+      </div>
+
+      <div class="cmd-grid">
+        <% const commands = [
+          { cat: 'Moderation', icon: '&#128737;', desc: 'Keep your server safe and organized', cmds: [
+            { name: 'ban', slash: '/ban user:@user reason:Spamming', prefix: '!ban @user Spamming' },
+            { name: 'kick', slash: '/kick user:@user reason:Rule violation', prefix: '!kick @user Rule violation' },
+            { name: 'mute', slash: '/mute user:@user duration:10m reason:Spam', prefix: '!mute @user 10m Spam' },
+            { name: 'warn', slash: '/warn user:@user reason:Being rude', prefix: '!warn @user Being rude' },
+            { name: 'warnings', slash: '/warnings user:@user', prefix: '!warnings @user' },
+            { name: 'purge', slash: '/purge amount:50', prefix: '!purge 50' },
+            { name: 'nick', slash: '/nick user:@user name:NewNick', prefix: '!nick @user NewNick' },
+            { name: 'slowmode', slash: '/slowmode channel:#channel seconds:10', prefix: '!slowmode #channel 10' },
+            { name: 'lock', slash: '/lock channel:#channel reason:Raid', prefix: '!lock #channel Raid' },
+            { name: 'unlock', slash: '/unlock channel:#channel', prefix: '!unlock #channel' },
+          ]},
+          { cat: 'Anti-Scam & Security', icon: '&#128683;', desc: 'Protect your community from scams and raids', cmds: [
+            { name: 'antiscam enable', slash: '/antiscam enable', prefix: '!antiscam enable' },
+            { name: 'antiscam disable', slash: '/antiscam disable', prefix: '!antiscam disable' },
+            { name: 'antiscam action', slash: '/antiscam action type:Ban', prefix: '!antiscam action ban' },
+            { name: 'antiscam logchannel', slash: '/antiscam logchannel channel:#logs', prefix: '!antiscam logchannel #logs' },
+            { name: 'antiscam whitelist', slash: '/antiscam whitelist user:@user', prefix: '!antiscam whitelist @user' },
+            { name: 'antiscam status', slash: '/antiscam status', prefix: '!antiscam status' },
+            { name: 'verification enable', slash: '/verification enable', prefix: '!verification enable' },
+            { name: 'verification disable', slash: '/verification disable', prefix: '!verification disable' },
+            { name: 'verification channel', slash: '/verification channel channel:#verify', prefix: '!verification channel #verify' },
+            { name: 'verification role', slash: '/verification role role:@Verified', prefix: '!verification role @Verified' },
+            { name: 'verification status', slash: '/verification status', prefix: '!verification status' },
+            { name: 'raid enable', slash: '/raid enable', prefix: '!raid enable' },
+            { name: 'raid disable', slash: '/raid disable', prefix: '!raid disable' },
+            { name: 'raid threshold', slash: '/raid threshold count:10', prefix: '!raid threshold 10' },
+            { name: 'raid timeframe', slash: '/raid timeframe seconds:60', prefix: '!raid timeframe 60' },
+            { name: 'raid lockdown', slash: '/raid lockdown minutes:30', prefix: '!raid lockdown 30' },
+            { name: 'raid unlock', slash: '/raid unlock', prefix: '!raid unlock' },
+            { name: 'raid status', slash: '/raid status', prefix: '!raid status' },
+          ]},
+          { cat: 'Setup & Configuration', icon: '&#9881;', desc: 'Configure your server settings', cmds: [
+            { name: 'setup', slash: '/setup', prefix: '!setup' },
+            { name: 'setwelcome', slash: '/setwelcome channel:#welcome message:Welcome {user}!', prefix: '!setwelcome #welcome Welcome {user}!' },
+            { name: 'setgoodbye', slash: '/setgoodbye channel:#goodbye message:Goodbye {user}!', prefix: '!setgoodbye #goodbye Goodbye {user}!' },
+            { name: 'setlog', slash: '/setlog channel:#mod-logs', prefix: '!setlog #mod-logs' },
+            { name: 'setprefix', slash: '/setprefix prefix:?', prefix: '!setprefix ?' },
+            { name: 'setautorole', slash: '/setautorole role:@Member', prefix: '!setautorole @Member' },
+            { name: 'automod', slash: '/automod feature:antispam toggle:on', prefix: '!automod antispam on' },
+          ]},
+          { cat: 'Utility', icon: '&#128269;', desc: 'Info and utility commands', cmds: [
+            { name: 'ping', slash: '/ping', prefix: '!ping' },
+            { name: 'help', slash: '/help', prefix: '!help' },
+            { name: 'avatar', slash: '/avatar user:@user', prefix: '!avatar @user' },
+            { name: 'userinfo', slash: '/userinfo user:@user', prefix: '!userinfo @user' },
+            { name: 'serverinfo', slash: '/serverinfo', prefix: '!serverinfo' },
+            { name: 'poll', slash: '/poll question:Best language? options:JS,Python,Java', prefix: '!poll Best language? JS Python Java' },
+            { name: 'remind', slash: '/remind time:30m message:Check oven', prefix: '!remind 30m Check oven' },
+            { name: 'level', slash: '/level user:@user', prefix: '!level @user' },
+            { name: 'msg', slash: '/msg channel:#channel message:Hello!', prefix: '!msg #channel Hello!' },
+          ]},
+          { cat: 'Fun', icon: '&#127917;', desc: 'Fun commands to play with', cmds: [
+            { name: '8ball', slash: '/8ball question:Will I win?', prefix: '!8ball Will I win?' },
+            { name: 'roll', slash: '/roll sides:20', prefix: '!roll 20' },
+            { name: 'decide', slash: '/decide options:Pizza,Pasta', prefix: '!decide Pizza Pasta' },
+            { name: 'say', slash: '/say message:Hello everyone!', prefix: '!say Hello everyone!' },
+            { name: 'reverse', slash: '/reverse text:Hello World', prefix: '!reverse Hello World' },
+          ]},
+          { cat: 'Custom Commands', icon: '&#9993;', desc: 'Create your own custom commands', cmds: [
+            { name: 'addcommand', slash: '/addcommand name:hello response:Hello {user}!', prefix: '!addcommand hello Hello {user}!' },
+            { name: 'removecommand', slash: '/removecommand name:hello', prefix: '!removecommand hello' },
+            { name: 'listcommands', slash: '/listcommands', prefix: '!listcommands' },
+          ]},
+          { cat: 'Tickets', icon: '&#127915;', desc: 'Support ticket system', cmds: [
+            { name: 'ticket setup', slash: '/ticket setup category:#tickets support-role:@Support', prefix: '!ticket setup #tickets @Support' },
+            { name: 'ticket panel', slash: '/ticket panel channel:#support', prefix: '!ticket panel #support' },
+            { name: 'ticket close', slash: '/ticket close', prefix: '!ticket close' },
+          ]},
+          { cat: 'Giveaways', icon: '&#127873;', desc: 'Host giveaways in your server', cmds: [
+            { name: 'giveaway', slash: '/giveaway channel:#giveaways prize:Discord Nitro duration:24h winners:1', prefix: '!giveaway #giveaways Discord Nitro 24h 1' },
+          ]},
+          { cat: 'Reaction Roles', icon: '&#127917;', desc: 'Self-assignable roles via reactions', cmds: [
+            { name: 'reactionrole', slash: '/reactionrole channel:#roles message-id:1234567890 role:@Role emoji:&#127917;', prefix: '!reactionrole #roles 1234567890 @Role &#127917;' },
+          ]},
+          { cat: 'Leveling', icon: '&#128200;', desc: 'XP and level system', cmds: [
+            { name: 'level', slash: '/level user:@user', prefix: '!level @user' },
+          ]},
+        ]; %>
+
+        <% commands.forEach((cat, ci) => { %>
+          <div class="cmd-cat<%= ci < 3 ? ' open' : '' %>" data-idx="<%= ci %>">
+            <div class="cmd-cat-head" onclick="this.parentElement.classList.toggle('open')">
+              <h3><span><%= cat.icon %></span> <%= cat.cat %> <span class="badge b-blue"><%= cat.cmds.length %></span></h3>
+              <span class="arrow">&#9660;</span>
+            </div>
+            <div class="cmd-cat-body">
+              <p class="cmd-desc"><%= cat.desc %></p>
+              <table class="cmd-table">
+                <thead><tr><th style="width:25%">Command</th><th style="width:37.5%">Slash Format (Mobile)</th><th style="width:37.5%">Prefix Format (Desktop)</th></tr></thead>
+                <tbody>
+                  <% cat.cmds.forEach(cmd => { %>
+                    <tr>
+                      <td class="cmd-name"><%= cmd.name %></td>
+                      <td><div class="cmd-formats"><span class="cmd-format"><code><%= cmd.slash %></code></span></div></td>
+                      <td><div class="cmd-formats"><span class="cmd-format"><code><%= cmd.prefix %></code></span></div></td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </div>
+  </div>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

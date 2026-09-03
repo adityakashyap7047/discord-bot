@@ -1,10 +1,44 @@
-const { Events, EmbedBuilder, AttachmentBuilder } = require('discord.js');
+const { Events, Collection, EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const path = require('path');
 
 module.exports = {
   name: Events.InteractionCreate,
   once: false,
   async execute(interaction, client) {
+    if (interaction.isChatInputCommand()) {
+      const command = client.commands.get(interaction.commandName);
+      if (!command) return;
+
+      if (!client.cooldowns.has(command.data.name)) {
+        client.cooldowns.set(command.data.name, new Collection());
+      }
+      const now = Date.now();
+      const timestamps = client.cooldowns.get(command.data.name);
+      const cooldownAmount = (command.cooldown || 3) * 1000;
+      if (timestamps.has(interaction.user.id)) {
+        const expirationTime = timestamps.get(interaction.user.id) + cooldownAmount;
+        if (now < expirationTime) {
+          const timeLeft = (expirationTime - now) / 1000;
+          return interaction.reply({ content: `Please wait ${timeLeft.toFixed(1)}s before using \`/${command.data.name}\` again.`, ephemeral: true }).catch(() => {});
+        }
+      }
+      timestamps.set(interaction.user.id, now);
+      setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
+
+      try {
+        await command.execute(interaction, client);
+      } catch (error) {
+        console.error(`[SLASH COMMAND ERROR] ${command.data.name}:`, error);
+        const reply = { content: 'There was an error executing this command!', ephemeral: true };
+        if (interaction.replied || interaction.deferred) {
+          await interaction.followUp(reply).catch(() => {});
+        } else {
+          await interaction.reply(reply).catch(() => {});
+        }
+      }
+      return;
+    }
+
     if (!interaction.isButton()) return;
 
     if (interaction.customId.startsWith('nitro_prank_')) {

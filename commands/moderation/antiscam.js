@@ -1,6 +1,37 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const { getGuildSettings, updateGuildSetting } = require('../../utils/database');
 
+function getSourceInfo(source) {
+  if (source.isChatInputCommand) {
+    return {
+      isSlash: true,
+      guild: source.guild,
+      member: source.member,
+      user: source.user,
+      reply: (opts) => source.reply(opts),
+      sub: source.options.getSubcommand(),
+      getString: (name) => source.options.getString(name),
+      getChannel: (name) => source.options.getChannel(name),
+      getUser: (name) => source.options.getUser(name),
+    };
+  }
+  const args = source.content.trim().split(/ +/).slice(1);
+  return {
+    isSlash: false,
+    guild: source.guild,
+    member: source.member,
+    user: source.author,
+    reply: (opts) => source.reply(opts),
+    sub: args[0]?.toLowerCase() || '',
+    getString: (name) => {
+      const idx = args.indexOf('--' + name);
+      return idx !== -1 ? args[idx + 1] : args[1];
+    },
+    getChannel: (name) => source.mentions.channels.first(),
+    getUser: (name) => source.mentions.users.first(),
+  };
+}
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('antiscam')
@@ -46,13 +77,14 @@ module.exports = {
             .setRequired(true)))
     .addSubcommand(sub =>
       sub.setName('status').setDescription('Check anti-scam status')),
-  async execute(interaction) {
-    const settings = getGuildSettings(interaction.guild.id);
-    const sub = interaction.options.getSubcommand();
+  async execute(source, client) {
+    const src = getSourceInfo(source);
+    const settings = getGuildSettings(src.guild.id);
+    const sub = src.sub;
 
     if (sub === 'enable') {
-      updateGuildSetting(interaction.guild.id, 'antiScam', true);
-      return interaction.reply({
+      updateGuildSetting(src.guild.id, 'antiScam', true);
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
           .setTitle('Anti-Scam Enabled')
@@ -62,8 +94,8 @@ module.exports = {
     }
 
     if (sub === 'disable') {
-      updateGuildSetting(interaction.guild.id, 'antiScam', false);
-      return interaction.reply({
+      updateGuildSetting(src.guild.id, 'antiScam', false);
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#ff0000')
           .setTitle('Anti-Scam Disabled')
@@ -73,9 +105,9 @@ module.exports = {
     }
 
     if (sub === 'action') {
-      const type = interaction.options.getString('type');
-      updateGuildSetting(interaction.guild.id, 'scamAction', type);
-      return interaction.reply({
+      const type = src.getString('type');
+      updateGuildSetting(src.guild.id, 'scamAction', type);
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
           .setTitle('Anti-Scam Action Updated')
@@ -85,9 +117,9 @@ module.exports = {
     }
 
     if (sub === 'logchannel') {
-      const channel = interaction.options.getChannel('channel');
-      updateGuildSetting(interaction.guild.id, 'scamLogChannel', channel.id);
-      return interaction.reply({
+      const channel = src.getChannel('channel');
+      updateGuildSetting(src.guild.id, 'scamLogChannel', channel.id);
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
           .setTitle('Scam Log Channel Set')
@@ -97,30 +129,30 @@ module.exports = {
     }
 
     if (sub === 'whitelist') {
-      const user = interaction.options.getUser('user');
+      const user = src.getUser('user');
       const whitelist = settings.scamWhitelist || [];
       if (!whitelist.includes(user.id)) {
         whitelist.push(user.id);
-        updateGuildSetting(interaction.guild.id, 'scamWhitelist', whitelist);
+        updateGuildSetting(src.guild.id, 'scamWhitelist', whitelist);
       }
-      return interaction.reply({
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
           .setTitle('User Whitelisted')
-          .setDescription(`${user.tag} has been whitelisted from anti-scam.`)
+          .setDescription(`${user.tag || user.username} has been whitelisted from anti-scam.`)
           .setTimestamp()],
       });
     }
 
     if (sub === 'unwhitelist') {
-      const user = interaction.options.getUser('user');
+      const user = src.getUser('user');
       const whitelist = (settings.scamWhitelist || []).filter(id => id !== user.id);
-      updateGuildSetting(interaction.guild.id, 'scamWhitelist', whitelist);
-      return interaction.reply({
+      updateGuildSetting(src.guild.id, 'scamWhitelist', whitelist);
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#ff0000')
           .setTitle('User Removed from Whitelist')
-          .setDescription(`${user.tag} has been removed from the whitelist.`)
+          .setDescription(`${user.tag || user.username} has been removed from the whitelist.`)
           .setTimestamp()],
       });
     }
@@ -128,10 +160,10 @@ module.exports = {
     if (sub === 'status') {
       const whitelist = settings.scamWhitelist || [];
       const logChannel = settings.scamLogChannel
-        ? interaction.guild.channels.cache.get(settings.scamLogChannel)
+        ? src.guild.channels.cache.get(settings.scamLogChannel)
         : null;
 
-      return interaction.reply({
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor(settings.antiScam ? '#00ff00' : '#ff0000')
           .setTitle('Anti-Scam Status')
@@ -145,5 +177,7 @@ module.exports = {
           .setTimestamp()],
       });
     }
+
+    return src.reply({ content: 'Unknown subcommand. Use `enable`, `disable`, `action`, `logchannel`, `whitelist`, `unwhitelist`, or `status`.', ephemeral: true });
   },
 };

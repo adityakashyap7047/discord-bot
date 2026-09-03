@@ -113,6 +113,7 @@
     <div class="nav-links">
       <a href="#features">Features</a>
       <a href="#commands">Commands</a>
+      <a href="/commandlist">All Commands</a>
       <a href="/dashboard/servers">Servers</a>
     </div>
     <div class="nav-r">
@@ -201,6 +202,7 @@
     <p>Add Bot Boy NOTIX to your server in seconds and unlock powerful features.</p>
     <div class="cta-btns">
       <% if (user) { %><a href="/dashboard" class="btn btn-p btn-lg">Open Dashboard</a><% } else { %><a href="/auth/login" class="btn btn-p btn-lg">Login with Discord</a><% } %>
+      <a href="/commandlist" class="btn btn-s btn-lg">View All Commands</a>
       <a href="https://discord.com/api/oauth2/authorize?client_id=<%= bot.config.clientId %>&permissions=8&scope=bot%20applications.commands" target="_blank" class="btn btn-s btn-lg">Add to Server</a>
     </div>
   </section>

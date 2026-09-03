@@ -2,6 +2,33 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('disc
 const { getGuildSettings, updateGuildSetting } = require('../../utils/database');
 const { isLockdown, clearLockdown, getLockdownTimeRemaining } = require('../../utils/raidProtection');
 
+function getSourceInfo(source) {
+  if (source.isChatInputCommand) {
+    return {
+      isSlash: true,
+      guild: source.guild,
+      member: source.member,
+      user: source.user,
+      reply: (opts) => source.reply(opts),
+      sub: source.options.getSubcommand(),
+      getInteger: (name) => source.options.getInteger(name),
+    };
+  }
+  const args = source.content.trim().split(/ +/).slice(1);
+  return {
+    isSlash: false,
+    guild: source.guild,
+    member: source.member,
+    user: source.author,
+    reply: (opts) => source.reply(opts),
+    sub: args[0]?.toLowerCase() || '',
+    getInteger: (name) => {
+      const idx = args.indexOf('--' + name);
+      return idx !== -1 ? parseInt(args[idx + 1]) : parseInt(args[1]);
+    },
+  };
+}
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('raid')
@@ -27,13 +54,14 @@ module.exports = {
       sub.setName('unlock').setDescription('Manually end lockdown'))
     .addSubcommand(sub =>
       sub.setName('status').setDescription('Check raid protection status')),
-  async execute(interaction) {
-    const settings = getGuildSettings(interaction.guild.id);
-    const sub = interaction.options.getSubcommand();
+  async execute(source, client) {
+    const src = getSourceInfo(source);
+    const settings = getGuildSettings(src.guild.id);
+    const sub = src.sub;
 
     if (sub === 'enable') {
-      updateGuildSetting(interaction.guild.id, 'raidProtection', true);
-      return interaction.reply({
+      updateGuildSetting(src.guild.id, 'raidProtection', true);
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
           .setTitle('Raid Protection Enabled')
@@ -42,8 +70,8 @@ module.exports = {
     }
 
     if (sub === 'disable') {
-      updateGuildSetting(interaction.guild.id, 'raidProtection', false);
-      return interaction.reply({
+      updateGuildSetting(src.guild.id, 'raidProtection', false);
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#ff0000')
           .setTitle('Raid Protection Disabled')
@@ -52,9 +80,9 @@ module.exports = {
     }
 
     if (sub === 'threshold') {
-      const count = interaction.options.getInteger('count');
-      updateGuildSetting(interaction.guild.id, 'raidThreshold', count);
-      return interaction.reply({
+      const count = src.getInteger('count');
+      updateGuildSetting(src.guild.id, 'raidThreshold', count);
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
           .setTitle('Raid Threshold Updated')
@@ -63,9 +91,9 @@ module.exports = {
     }
 
     if (sub === 'timeframe') {
-      const seconds = interaction.options.getInteger('seconds');
-      updateGuildSetting(interaction.guild.id, 'raidTimeframe', seconds);
-      return interaction.reply({
+      const seconds = src.getInteger('seconds');
+      updateGuildSetting(src.guild.id, 'raidTimeframe', seconds);
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
           .setTitle('Raid Timeframe Updated')
@@ -74,9 +102,9 @@ module.exports = {
     }
 
     if (sub === 'lockdown') {
-      const minutes = interaction.options.getInteger('minutes');
-      updateGuildSetting(interaction.guild.id, 'raidLockdownDuration', minutes * 60000);
-      return interaction.reply({
+      const minutes = src.getInteger('minutes');
+      updateGuildSetting(src.guild.id, 'raidLockdownDuration', minutes * 60000);
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
           .setTitle('Lockdown Duration Updated')
@@ -85,8 +113,8 @@ module.exports = {
     }
 
     if (sub === 'unlock') {
-      if (!isLockdown(interaction.guild.id)) {
-        return interaction.reply({
+      if (!isLockdown(src.guild.id)) {
+        return src.reply({
           embeds: [new EmbedBuilder()
             .setColor('#ff0000')
             .setTitle('No Active Lockdown')
@@ -94,17 +122,17 @@ module.exports = {
           ephemeral: true,
         });
       }
-      clearLockdown(interaction.guild.id);
-      for (const [, channel] of interaction.guild.channels.cache) {
+      clearLockdown(src.guild.id);
+      for (const [, channel] of src.guild.channels.cache) {
         if (channel.isTextBased() && !channel.isVoiceBased()) {
           try {
-            await channel.permissionOverwrites.edit(interaction.guild.id, {
+            await channel.permissionOverwrites.edit(src.guild.id, {
               SendMessages: null,
             }).catch(() => {});
           } catch (e) {}
         }
       }
-      return interaction.reply({
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
           .setTitle('Lockdown Ended')
@@ -113,10 +141,10 @@ module.exports = {
     }
 
     if (sub === 'status') {
-      const inLockdown = isLockdown(interaction.guild.id);
-      const remaining = getLockdownTimeRemaining(interaction.guild.id);
+      const inLockdown = isLockdown(src.guild.id);
+      const remaining = getLockdownTimeRemaining(src.guild.id);
 
-      return interaction.reply({
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor(settings.raidProtection ? '#00ff00' : '#ff0000')
           .setTitle('Raid Protection Status')
@@ -129,5 +157,7 @@ module.exports = {
           )],
       });
     }
+
+    return src.reply({ content: 'Unknown subcommand. Use `enable`, `disable`, `threshold`, `timeframe`, `lockdown`, `unlock`, or `status`.', ephemeral: true });
   },
 };

@@ -371,6 +371,11 @@ function startDashboard(client) {
     res.render('reactionroles', { user: req.user, guild: g, settings, reactionRoles: rr, channels, roles, currentPage: 'reactionroles' });
   });
 
+  // ============ COMMAND LIST ============
+  app.get('/commandlist', (req, res) => {
+    res.render('commandlist', { user: req.user || null, bot: client });
+  });
+
   // ============ ANTI-SCAM ============
   app.get('/dashboard/:guildId/antiscam', isAuthenticated, hasPermission, (req, res) => {
     const g = req.guild;

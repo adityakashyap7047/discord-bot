@@ -1,6 +1,37 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const { getGuildSettings, updateGuildSetting } = require('../../utils/database');
 
+function getSourceInfo(source) {
+  if (source.isChatInputCommand) {
+    return {
+      isSlash: true,
+      guild: source.guild,
+      member: source.member,
+      user: source.user,
+      reply: (opts) => source.reply(opts),
+      sub: source.options.getSubcommand(),
+      getString: (name) => source.options.getString(name),
+      getChannel: (name) => source.options.getChannel(name),
+      getRole: (name) => source.options.getRole(name),
+    };
+  }
+  const args = source.content.trim().split(/ +/).slice(1);
+  return {
+    isSlash: false,
+    guild: source.guild,
+    member: source.member,
+    user: source.author,
+    reply: (opts) => source.reply(opts),
+    sub: args[0]?.toLowerCase() || '',
+    getString: (name) => {
+      const idx = args.indexOf('--' + name);
+      return idx !== -1 ? args[idx + 1] : args.slice(1).join(' ');
+    },
+    getChannel: (name) => source.mentions.channels.first(),
+    getRole: (name) => source.mentions.roles.first(),
+  };
+}
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('verification')
@@ -24,13 +55,14 @@ module.exports = {
         .addStringOption(opt => opt.setName('message').setDescription('Custom message').setRequired(true)))
     .addSubcommand(sub =>
       sub.setName('status').setDescription('Check verification status')),
-  async execute(interaction) {
-    const settings = getGuildSettings(interaction.guild.id);
-    const sub = interaction.options.getSubcommand();
+  async execute(source, client) {
+    const src = getSourceInfo(source);
+    const settings = getGuildSettings(src.guild.id);
+    const sub = src.sub;
 
     if (sub === 'enable') {
       if (!settings.verificationChannel || !settings.verificationRole) {
-        return interaction.reply({
+        return src.reply({
           embeds: [new EmbedBuilder()
             .setColor('#ff0000')
             .setTitle('Configuration Required')
@@ -38,8 +70,8 @@ module.exports = {
           ephemeral: true,
         });
       }
-      updateGuildSetting(interaction.guild.id, 'verificationEnabled', true);
-      return interaction.reply({
+      updateGuildSetting(src.guild.id, 'verificationEnabled', true);
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
           .setTitle('Verification Enabled')
@@ -48,8 +80,8 @@ module.exports = {
     }
 
     if (sub === 'disable') {
-      updateGuildSetting(interaction.guild.id, 'verificationEnabled', false);
-      return interaction.reply({
+      updateGuildSetting(src.guild.id, 'verificationEnabled', false);
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#ff0000')
           .setTitle('Verification Disabled')
@@ -58,9 +90,9 @@ module.exports = {
     }
 
     if (sub === 'channel') {
-      const channel = interaction.options.getChannel('channel');
-      updateGuildSetting(interaction.guild.id, 'verificationChannel', channel.id);
-      return interaction.reply({
+      const channel = src.getChannel('channel');
+      updateGuildSetting(src.guild.id, 'verificationChannel', channel.id);
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
           .setTitle('Verification Channel Set')
@@ -69,9 +101,9 @@ module.exports = {
     }
 
     if (sub === 'role') {
-      const role = interaction.options.getRole('role');
-      updateGuildSetting(interaction.guild.id, 'verificationRole', role.id);
-      return interaction.reply({
+      const role = src.getRole('role');
+      updateGuildSetting(src.guild.id, 'verificationRole', role.id);
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
           .setTitle('Verified Role Set')
@@ -80,9 +112,9 @@ module.exports = {
     }
 
     if (sub === 'message') {
-      const msg = interaction.options.getString('message');
-      updateGuildSetting(interaction.guild.id, 'verificationMessage', msg);
-      return interaction.reply({
+      const msg = src.getString('message');
+      updateGuildSetting(src.guild.id, 'verificationMessage', msg);
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
           .setTitle('Verification Message Updated')
@@ -92,13 +124,13 @@ module.exports = {
 
     if (sub === 'status') {
       const verChannel = settings.verificationChannel
-        ? interaction.guild.channels.cache.get(settings.verificationChannel)
+        ? src.guild.channels.cache.get(settings.verificationChannel)
         : null;
       const verRole = settings.verificationRole
-        ? interaction.guild.roles.cache.get(settings.verificationRole)
+        ? src.guild.roles.cache.get(settings.verificationRole)
         : null;
 
-      return interaction.reply({
+      return src.reply({
         embeds: [new EmbedBuilder()
           .setColor(settings.verificationEnabled ? '#00ff00' : '#ff0000')
           .setTitle('Verification Status')
@@ -110,5 +142,7 @@ module.exports = {
           )],
       });
     }
+
+    return src.reply({ content: 'Unknown subcommand. Use `enable`, `disable`, `channel`, `role`, `message`, or `status`.', ephemeral: true });
   },
 };
