@@ -18,6 +18,7 @@ function startDashboard(client) {
   const app = express();
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, 'views'));
+  app.set('trust proxy', 1);
   app.use(express.static(path.join(__dirname, 'public')));
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
@@ -26,7 +27,11 @@ function startDashboard(client) {
     secret: client.config.sessionSecret || 'discord-bot-secret',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 } // 7 days
+    cookie: {
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+    }
   }));
 
   app.use(passport.initialize());
