@@ -13,6 +13,6 @@ module.exports = {
         { name: 'Latency', value: `${ping}ms`, inline: true },
         { name: 'API', value: `${client.ws.ping}ms`, inline: true },
       );
-    sent.edit({ content: null, embeds: [embed] });
+    sent.edit({ content: null, embeds: [embed] }).catch(() => {});
   },
 };

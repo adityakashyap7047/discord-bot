@@ -1,4 +1,4 @@
-const { Events } = require('discord.js');
+const { Events, EmbedBuilder } = require('discord.js');
 const { getGuildSettings } = require('../utils/database');
 
 module.exports = {
@@ -12,7 +12,6 @@ module.exports = {
       const channel = member.guild.channels.cache.get(settings.goodbyeChannel);
       if (channel) {
         if (settings.goodbyeEmbed) {
-          const { EmbedBuilder } = require('discord.js');
           const msg = (settings.goodbyeMessage || 'Goodbye {user}!')
             .replace('{user}', member.user.tag)
             .replace('{server}', member.guild.name)
@@ -36,7 +35,6 @@ module.exports = {
 
     // Log leave
     if (settings.logChannel && settings.logJoins) {
-      const { EmbedBuilder } = require('discord.js');
       const logCh = member.guild.channels.cache.get(settings.logChannel);
       if (logCh) {
         const roles = member.roles.cache.filter(r => r.id !== member.guild.id).map(r => r.name).join(', ') || 'None';

@@ -111,6 +111,10 @@ client.once('ready', () => {
     client.user.setActivity(status.name, { type: status.type });
     i++;
   }, 10000);
+
+  setInterval(() => {
+    if (client.spamCache) client.spamCache.clear();
+  }, 300000);
 });
 
 client.login(client.config.token).catch((err) => {

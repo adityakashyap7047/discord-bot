@@ -8,6 +8,6 @@ module.exports = {
     const text = args.join(' ');
     if (!text) return message.reply('Say something!');
     message.delete().catch(() => {});
-    message.channel.send(text);
+    message.channel.send(text).catch(() => {});
   },
 };

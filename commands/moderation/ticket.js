@@ -90,9 +90,11 @@ module.exports = {
 
 async function handleTicket(interaction, client) {
   if (interaction.customId === 'ticket_create') {
+    await interaction.deferReply({ ephemeral: true }).catch(() => {});
+
     const settings = getGuildSettings(interaction.guild.id);
     if (!settings.ticketCategory) {
-      return interaction.reply({ content: 'Ticket system not configured.', ephemeral: true });
+      return interaction.editReply({ content: 'Ticket system not configured.' }).catch(() => {});
     }
 
     const ticketNumber = (interaction.guild.channels.cache.filter(c => c.name.startsWith('ticket-')).size || 0) + 1;
@@ -108,7 +110,7 @@ async function handleTicket(interaction, client) {
       ],
     }).catch(() => null);
 
-    if (!channel) return interaction.reply({ content: 'Failed to create ticket channel.', ephemeral: true });
+    if (!channel) return interaction.editReply({ content: 'Failed to create ticket channel.' }).catch(() => {});
 
     ticketCache.set(channel.id, {
       userId: interaction.user.id,
@@ -131,8 +133,8 @@ async function handleTicket(interaction, client) {
         .setStyle(ButtonStyle.Danger),
     );
 
-    await channel.send({ embeds: [embed], components: [row] });
-    return interaction.reply({ content: `Ticket created: ${channel}`, ephemeral: true });
+    await channel.send({ embeds: [embed], components: [row] }).catch(() => {});
+    return interaction.editReply({ content: `Ticket created: ${channel}` }).catch(() => {});
   }
 
   if (interaction.customId === 'ticket_close') {
@@ -146,8 +148,9 @@ async function handleTicket(interaction, client) {
       .setDescription(`Closed by ${interaction.user}\nTicket will be deleted in 10 seconds.`)
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed] });
+    await interaction.reply({ embeds: [embed] }).catch(() => {});
     setTimeout(() => interaction.channel.delete().catch(() => {}), 10000);
+    ticketCache.delete(interaction.channel.id);
   }
 }
 
