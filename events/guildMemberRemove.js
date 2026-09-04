@@ -5,7 +5,7 @@ module.exports = {
   name: Events.GuildMemberRemove,
   once: false,
   async execute(member, client) {
-    const settings = getGuildSettings(member.guild.id);
+    const settings = await getGuildSettings(member.guild.id);
 
     // Goodbye Message
     if (settings.goodbyeEnabled && settings.goodbyeChannel) {

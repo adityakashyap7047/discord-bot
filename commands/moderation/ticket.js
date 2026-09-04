@@ -29,7 +29,7 @@ module.exports = {
       return message.reply('You need **Manage Server** permission.');
     }
 
-    const settings = getGuildSettings(message.guild.id);
+    const settings = await getGuildSettings(message.guild.id);
 
     if (message.content.startsWith('!')) {
       const sub = args[0]?.toLowerCase();
@@ -92,7 +92,7 @@ async function handleTicket(interaction, client) {
   if (interaction.customId === 'ticket_create') {
     await interaction.deferReply({ ephemeral: true }).catch(() => {});
 
-    const settings = getGuildSettings(interaction.guild.id);
+    const settings = await getGuildSettings(interaction.guild.id);
     if (!settings.ticketCategory) {
       return interaction.editReply({ content: 'Ticket system not configured.' }).catch(() => {});
     }

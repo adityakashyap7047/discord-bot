@@ -74,7 +74,7 @@ function startDashboard(client) {
     res.redirect('/auth/login');
   }
 
-  function hasPermission(req, res, next) {
+  async function hasPermission(req, res, next) {
     const guild = client.guilds.cache.get(req.params.guildId);
     if (!guild) return res.redirect('/dashboard');
     const userGuild = req.user.guilds.find(g => g.id === req.params.guildId);
@@ -82,7 +82,7 @@ function startDashboard(client) {
     const perms = parseInt(userGuild.permissions);
     if ((perms & 0x20) !== 0x20 && (perms & 0x8) !== 0x8) return res.redirect('/dashboard');
     req.guild = guild;
-    req.guildSettings = getGuildSettings(guild.id);
+    req.guildSettings = await getGuildSettings(guild.id);
     next();
   }
 
@@ -439,7 +439,7 @@ function startDashboard(client) {
 
   app.post('/api/guilds/:guildId/tickets/panel', isAuthenticated, hasPermission, async (req, res) => {
     try {
-      const settings = getGuildSettings(req.params.guildId);
+      const settings = await getGuildSettings(req.params.guildId);
       if (!settings.ticketCategory) return res.json({ success: false, error: 'Ticket category not configured' });
 
       const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
@@ -625,12 +625,12 @@ function startDashboard(client) {
     });
   });
 
-  app.get('/api/guilds/:guildId/settings', isAuthenticated, (req, res) => {
+  app.get('/api/guilds/:guildId/settings', isAuthenticated, async (req, res) => {
     const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);
     if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
       return res.status(403).json({ error: 'No permission' });
     }
-    res.json(getGuildSettings(req.params.guildId));
+    res.json(await getGuildSettings(req.params.guildId));
   });
   app.get('/api/guilds/:guildId/stats', isAuthenticated, (req, res) => {
     const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);

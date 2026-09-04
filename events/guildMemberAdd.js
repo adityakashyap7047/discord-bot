@@ -7,7 +7,7 @@ module.exports = {
   name: Events.GuildMemberAdd,
   once: false,
   async execute(member, client) {
-    const settings = getGuildSettings(member.guild.id);
+    const settings = await getGuildSettings(member.guild.id);
 
     // Raid Protection
     const raidResult = await checkRaid(member, settings, client);

@@ -9,7 +9,7 @@ module.exports = {
     if (!message.member.permissions.has('ManageGuild')) {
       return message.reply({ embeds: [errorEmbed('No Permission', 'You need Manage Server permission.')] });
     }
-    const settings = getGuildSettings(client.db, message.guild.id);
+    const settings = await getGuildSettings(client.db, message.guild.id);
     const embed = successEmbed('Current Settings', [
       `**Prefix:** \`${settings.prefix}\``,
       `**Welcome:** ${settings.welcomeEnabled ? '✅' : '❌'} ${settings.welcomeChannel ? `<#${settings.welcomeChannel}>` : ''}`,

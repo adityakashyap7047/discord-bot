@@ -79,7 +79,7 @@ module.exports = {
       sub.setName('status').setDescription('Check anti-scam status')),
   async execute(source, client) {
     const src = getSourceInfo(source);
-    const settings = getGuildSettings(src.guild.id);
+    const settings = await getGuildSettings(src.guild.id);
     const sub = src.sub;
 
     if (sub === 'enable') {

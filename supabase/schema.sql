@@ -3,6 +3,14 @@
 -- Run this in Supabase SQL Editor
 -- ============================================
 
+-- Guild settings (server config: welcome, goodbye, automod, prefix, etc.)
+CREATE TABLE IF NOT EXISTS guild_settings (
+  guild_id TEXT PRIMARY KEY,
+  settings JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- User profiles (cross-server identity)
 CREATE TABLE IF NOT EXISTS profiles (
   user_id TEXT PRIMARY KEY,

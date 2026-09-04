@@ -90,98 +90,124 @@ function saveDB(data) {
   }
 }
 
-function getGuildSettings(guildId) {
+const defaultSettings = {
+  prefix: '!',
+  welcomeEnabled: false,
+  welcomeChannel: null,
+  welcomeMessage: 'Welcome {user} to {server}! You are member #{memberCount}.',
+  welcomeEmbed: false,
+  welcomeColor: '#00ff00',
+  welcomeImage: '',
+  goodbyeEnabled: false,
+  goodbyeChannel: null,
+  goodbyeMessage: 'Goodbye {user}! We will miss you.',
+  goodbyeEmbed: false,
+  goodbyeColor: '#ff0000',
+  goodbyeImage: '',
+  modLogChannel: null,
+  modLogEnabled: false,
+  autoRole: null,
+  autoRoleEnabled: false,
+  autoMod: false,
+  antiSpam: false,
+  antiLink: false,
+  antiRaid: false,
+  antiScam: false,
+  scamLogChannel: null,
+  scamAction: 'delete',
+  scamWhitelist: [],
+  mutedRole: null,
+  logChannel: null,
+  logMessages: false,
+  logJoins: false,
+  logBans: false,
+  logEdits: false,
+  starboardChannel: null,
+  starboardEnabled: false,
+  starboardThreshold: 3,
+  levelSystem: false,
+  levelChannel: null,
+  levelUpMessage: '🎉 {user} leveled up to **Level {level}**!',
+  inviteTracker: false,
+  inviteLogChannel: null,
+  autoroleEnabled: false,
+  autoroleId: null,
+  voiceChannelLog: false,
+  floodLimit: 5,
+  floodTimeframe: 5,
+  welcomeRoles: [],
+  boostMessage: '',
+  boostChannel: null,
+  customReactions: [],
+  disabledCommands: [],
+  commandAliases: {},
+  accountAgeGate: false,
+  minAccountAge: 7,
+  newMemberRestriction: false,
+  newMemberRestrictionDays: 1,
+  newMemberTimeout: false,
+  newMemberTimeoutDuration: 60000,
+  verificationEnabled: false,
+  verificationChannel: null,
+  verificationRole: null,
+  verificationMessage: 'Welcome! Please react with ✅ to verify.',
+  raidProtection: false,
+  raidThreshold: 5,
+  raidTimeframe: 60,
+  raidLockdownDuration: 300000,
+  massMentionLimit: 5,
+  duplicateDetection: false,
+  suspiciousUsernameDetection: false,
+  linkReputationCheck: false,
+  scamAlertsChannel: null,
+};
+
+async function getGuildSettings(guildId) {
   const db = loadDB();
+
+  // Try Supabase first
+  if (supa.isAvailable()) {
+    const supaSettings = await supa.getGuildSettingsSupabase(guildId);
+    if (supaSettings) {
+      // Merge with defaults so new keys are always present
+      const merged = { guildId, ...defaultSettings, ...supaSettings };
+      db.guild_settings[guildId] = merged;
+      return merged;
+    }
+  }
+
+  // Fall back to local JSON
   if (!db.guild_settings[guildId]) {
-    db.guild_settings[guildId] = {
-      guildId,
-      prefix: '!',
-      welcomeEnabled: false,
-      welcomeChannel: null,
-      welcomeMessage: 'Welcome {user} to {server}! You are member #{memberCount}.',
-      welcomeEmbed: false,
-      welcomeColor: '#00ff00',
-      welcomeImage: '',
-      goodbyeEnabled: false,
-      goodbyeChannel: null,
-      goodbyeMessage: 'Goodbye {user}! We will miss you.',
-      goodbyeEmbed: false,
-      goodbyeColor: '#ff0000',
-      goodbyeImage: '',
-      modLogChannel: null,
-      modLogEnabled: false,
-      autoRole: null,
-      autoRoleEnabled: false,
-      autoMod: false,
-      antiSpam: false,
-      antiLink: false,
-      antiRaid: false,
-      antiScam: false,
-      scamLogChannel: null,
-      scamAction: 'delete',
-      scamWhitelist: [],
-      mutedRole: null,
-      logChannel: null,
-      logMessages: false,
-      logJoins: false,
-      logBans: false,
-      logEdits: false,
-      starboardChannel: null,
-      starboardEnabled: false,
-      starboardThreshold: 3,
-      levelSystem: false,
-      levelChannel: null,
-      levelUpMessage: '🎉 {user} leveled up to **Level {level}**!',
-      inviteTracker: false,
-      inviteLogChannel: null,
-      autoroleEnabled: false,
-      autoroleId: null,
-      voiceChannelLog: false,
-      floodLimit: 5,
-      floodTimeframe: 5,
-      welcomeRoles: [],
-      boostMessage: '',
-      boostChannel: null,
-      customReactions: [],
-      disabledCommands: [],
-      commandAliases: {},
-      accountAgeGate: false,
-      minAccountAge: 7,
-      newMemberRestriction: false,
-      newMemberRestrictionDays: 1,
-      newMemberTimeout: false,
-      newMemberTimeoutDuration: 60000,
-      verificationEnabled: false,
-      verificationChannel: null,
-      verificationRole: null,
-      verificationMessage: 'Welcome! Please react with ✅ to verify.',
-      raidProtection: false,
-      raidThreshold: 5,
-      raidTimeframe: 60,
-      raidLockdownDuration: 300000,
-      massMentionLimit: 5,
-      duplicateDetection: false,
-      suspiciousUsernameDetection: false,
-      linkReputationCheck: false,
-      scamAlertsChannel: null,
-    };
+    db.guild_settings[guildId] = { guildId, ...defaultSettings };
     saveDB(db);
+    // Save to Supabase if available
+    if (supa.isAvailable()) {
+      supa.upsertGuildSettings(guildId, db.guild_settings[guildId]).catch(e => console.error('[DB] Supabase save error:', e.message));
+    }
   }
   return db.guild_settings[guildId];
 }
 
-function updateGuildSetting(guildId, key, value) {
+async function updateGuildSetting(guildId, key, value) {
   const db = loadDB();
-  if (!db.guild_settings[guildId]) getGuildSettings(guildId);
+  if (!db.guild_settings[guildId]) await getGuildSettings(guildId);
   db.guild_settings[guildId][key] = value;
   saveDB(db);
+  // Persist to Supabase
+  if (supa.isAvailable()) {
+    supa.upsertGuildSettings(guildId, db.guild_settings[guildId]).catch(e => console.error('[DB] Supabase save error:', e.message));
+  }
 }
 
-function updateGuildSettings(guildId, updates) {
+async function updateGuildSettings(guildId, updates) {
   const db = loadDB();
-  if (!db.guild_settings[guildId]) getGuildSettings(guildId);
+  if (!db.guild_settings[guildId]) await getGuildSettings(guildId);
   Object.assign(db.guild_settings[guildId], updates);
   saveDB(db);
+  // Persist to Supabase
+  if (supa.isAvailable()) {
+    supa.upsertGuildSettings(guildId, db.guild_settings[guildId]).catch(e => console.error('[DB] Supabase save error:', e.message));
+  }
 }
 
 async function addWarning(guildId, userId, moderatorId, reason) {
@@ -252,6 +278,10 @@ async function removeCustomCommand(guildId, name) {
 }
 
 async function getCustomCommand(guildId, name) {
+  if (supa.isAvailable()) {
+    const result = await supa.getCustomCommand(guildId, name);
+    if (result) return result;
+  }
   const db = loadDB();
   return db.custom_commands.find(c => c.guildId === guildId && c.name === name);
 }

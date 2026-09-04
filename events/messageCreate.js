@@ -20,7 +20,7 @@ module.exports = {
     // AFK check
     try { afkCmd.checkAFK(message); } catch(e) { console.error('[AFK ERROR]', e.message); }
 
-    const settings = getGuildSettings(message.guild.id);
+    const settings = await getGuildSettings(message.guild.id);
     const prefix = settings.prefix || client.config.prefix;
 
     // New Member Restrictions - Links

@@ -20,6 +20,30 @@ function initSupabase() {
 function isAvailable() { return available; }
 function getClient() { return supabase; }
 
+// ============ GUILD SETTINGS ============
+async function getGuildSettingsSupabase(guildId) {
+  if (!available) return null;
+  const { data } = await supabase.from('guild_settings').select('*').eq('guild_id', guildId).maybeSingle();
+  return data ? data.settings : null;
+}
+
+async function upsertGuildSettings(guildId, settings) {
+  if (!available) return;
+  await supabase.from('guild_settings').upsert(
+    { guild_id: guildId, settings, updated_at: new Date().toISOString() },
+    { onConflict: 'guild_id' }
+  );
+}
+
+// ============ CUSTOM COMMAND LOOKUP ============
+async function getCustomCommand(guildId, name) {
+  if (!available) return null;
+  const { data } = await supabase.from('custom_commands').select('*').eq('guild_id', guildId).eq('name', name).maybeSingle();
+  if (!data) return null;
+  // Normalize column names to match local DB format
+  return { guildId: data.guild_id, name: data.name, response: data.response, createdBy: data.created_by };
+}
+
 // ============ PROFILES ============
 async function getProfile(userId) {
   if (!available) return null;
@@ -315,6 +339,7 @@ module.exports = {
   isAvailable,
   getClient,
 
+  getGuildSettingsSupabase, upsertGuildSettings,
   getProfile, upsertProfile,
   getEconomy, upsertEconomy, getEconomyLeaderboard,
   getInventory, upsertInventory,
@@ -324,7 +349,7 @@ module.exports = {
   getLevel, upsertLevel, getLeaderboard,
   addWarning, getWarnings, clearWarnings,
   addLog, getLogs,
-  addCustomCommand, removeCustomCommand, getCustomCommands,
+  addCustomCommand, removeCustomCommand, getCustomCommands, getCustomCommand,
   addReactionRole, removeReactionRole, getReactionRoles, getReactionRole,
   getStarboard, addStarboard,
   addEmbed, removeEmbed, getEmbeds, getEmbed,

@@ -39,7 +39,7 @@ module.exports = {
             )
             .setTimestamp();
           const { getGuildSettings } = require('../utils/database');
-          const settings = getGuildSettings(reaction.message.guild.id);
+          const settings = await getGuildSettings(reaction.message.guild.id);
           const starChannelId = settings.starboardChannel || settings.modLogChannel;
           if (starChannelId) {
             const starChannel = reaction.message.guild.channels.cache.get(starChannelId);

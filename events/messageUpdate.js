@@ -7,7 +7,7 @@ module.exports = {
   async execute(oldMessage, newMessage, client) {
     if (!oldMessage.guild || oldMessage.author.bot) return;
     if (oldMessage.content === newMessage.content) return;
-    const settings = getGuildSettings(oldMessage.guild.id);
+    const settings = await getGuildSettings(oldMessage.guild.id);
     if (!settings.logChannel || !settings.logEdits) return;
     const channel = oldMessage.guild.channels.cache.get(settings.logChannel);
     if (!channel) return;
