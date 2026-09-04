@@ -1,11 +1,13 @@
 const { Events, Collection, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const { getGuildSettings, getCustomCommand, getLevel, updateLevel, addLog } = require('../utils/database');
-const { detectScam, getScamDescription } = require('../utils/scamPatterns');
-const { canSendLinks, canSendImages, getAgeRestrictionMessage } = require('../utils/accountChecks');
-const { hasMassMentions, getMentionCount } = require('../utils/raidProtection');
-const { trackMessage } = require('../utils/duplicateDetection');
-const { checkMessage } = require('../utils/linkChecker');
-const afkCmd = require('../commands/utility/afk');
+let scamPatterns, accountChecks, raidProtection, duplicateDetection, linkChecker;
+try { scamPatterns = require('../utils/scamPatterns'); } catch(e) { scamPatterns = { detectScam: () => ({ isScam: false }), getScamDescription: () => '' }; }
+try { accountChecks = require('../utils/accountChecks'); } catch(e) { accountChecks = { canSendLinks: () => true, canSendImages: () => true, getAgeRestrictionMessage: () => '' }; }
+try { raidProtection = require('../utils/raidProtection'); } catch(e) { raidProtection = { hasMassMentions: () => false, getMentionCount: () => 0 }; }
+try { duplicateDetection = require('../utils/duplicateDetection'); } catch(e) { duplicateDetection = { trackMessage: () => ({ isDuplicate: false }) }; }
+try { linkChecker = require('../utils/linkChecker'); } catch(e) { linkChecker = { checkMessage: () => ({ isHighRisk: false }) }; }
+let afkCmd;
+try { afkCmd = require('../commands/utility/afk'); } catch(e) { afkCmd = { checkAFK: () => {} }; }
 
 module.exports = {
   name: Events.MessageCreate,
@@ -22,26 +24,26 @@ module.exports = {
     const prefix = settings.prefix || client.config.prefix;
 
     // New Member Restrictions - Links
-    if (settings.newMemberRestriction && !canSendLinks(message.member, settings)) {
+    if (settings.newMemberRestriction && !accountChecks.canSendLinks(message.member, settings)) {
       if (/https?:\/\/[^\s]+/.test(message.content)) {
         await message.delete().catch(() => {});
         return message.channel.send({
           embeds: [new EmbedBuilder()
             .setColor('#ff0000')
-            .setDescription(`🚫 ${getAgeRestrictionMessage(message.member, settings)}`)
+            .setDescription(`🚫 ${accountChecks.getAgeRestrictionMessage(message.member, settings)}`)
             .setFooter({ text: 'New Member Restriction' })],
         }).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       }
     }
 
     // New Member Restrictions - Images/Attachments
-    if (settings.newMemberRestriction && !canSendImages(message.member, settings)) {
+    if (settings.newMemberRestriction && !accountChecks.canSendImages(message.member, settings)) {
       if (message.attachments.size > 0) {
         await message.delete().catch(() => {});
         return message.channel.send({
           embeds: [new EmbedBuilder()
             .setColor('#ff0000')
-            .setDescription(`🚫 ${getAgeRestrictionMessage(message.member, settings)}`)
+            .setDescription(`🚫 ${accountChecks.getAgeRestrictionMessage(message.member, settings)}`)
             .setFooter({ text: 'New Member Restriction' })],
         }).then(m => setTimeout(() => m.delete().catch(() => {}), 5000));
       }
@@ -79,10 +81,10 @@ module.exports = {
     }
 
     // Mass Mention Protection
-    if (settings.massMentionLimit && hasMassMentions(message.content, settings.massMentionLimit)) {
+    if (settings.massMentionLimit && raidProtection.hasMassMentions(message.content, settings.massMentionLimit)) {
       if (!message.member.permissions.has(PermissionFlagsBits.ManageMessages)) {
         await message.delete().catch(() => {});
-        const mentionCount = getMentionCount(message.content);
+        const mentionCount = raidProtection.getMentionCount(message.content);
         return message.channel.send({
           embeds: [new EmbedBuilder()
             .setColor('#ff0000')
@@ -94,7 +96,7 @@ module.exports = {
 
     // Duplicate Message Detection
     if (settings.duplicateDetection) {
-      const dupResult = trackMessage(message);
+      const dupResult = duplicateDetection.trackMessage(message);
       if (dupResult.isDuplicate) {
         await message.delete().catch(() => {});
         return message.channel.send({
@@ -108,7 +110,7 @@ module.exports = {
 
     // Link Reputation Check
     if (settings.linkReputationCheck && !message.member.permissions.has(PermissionFlagsBits.ManageMessages)) {
-      const linkResult = checkMessage(message.content);
+      const linkResult = linkChecker.checkMessage(message.content);
       if (linkResult.isHighRisk) {
         await message.delete().catch(() => {});
         return message.channel.send({
@@ -129,7 +131,7 @@ module.exports = {
 
     // Anti-Scam
     if (settings.antiScam) {
-      const scamResult = detectScam(message.content);
+      const scamResult = scamPatterns.detectScam(message.content);
       if (scamResult.isScam) {
         if (settings.scamWhitelist && settings.scamWhitelist.includes(message.author.id)) {
           return;
@@ -137,7 +139,7 @@ module.exports = {
 
         await message.delete().catch(() => {});
 
-        const description = getScamDescription(scamResult.categories);
+        const description = scamPatterns.getScamDescription(scamResult.categories);
 
         if (settings.scamAction === 'mute' && settings.mutedRole) {
           await message.member.roles.add(settings.mutedRole).catch(() => {});
