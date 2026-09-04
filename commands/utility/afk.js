@@ -30,4 +30,25 @@ module.exports = {
     message.reply({ embeds: [embed] });
   },
   afkUsers,
+  checkAFK(message) {
+    const key = `${message.guild.id}_${message.author.id}`;
+    if (afkUsers.has(key)) {
+      afkUsers.delete(key);
+      message.reply({ embeds: [new (require('discord.js').EmbedBuilder)()
+        .setColor(0x22c55e)
+        .setTitle('Welcome Back!')
+        .setDescription(`${message.author}, your AFK has been removed.`)] }).catch(() => {});
+    }
+    message.mentions.users.forEach(user => {
+      const mentionKey = `${message.guild.id}_${user.id}`;
+      const afkData = afkUsers.get(mentionKey);
+      if (afkData) {
+        const time = Math.floor((Date.now() - afkData.since) / 60000);
+        message.reply({ embeds: [new (require('discord.js').EmbedBuilder)()
+          .setColor(0xeab308)
+          .setTitle('AFK User')
+          .setDescription(`${user} is AFK: **${afkData.reason}** (${time}m ago)`)] }).catch(() => {});
+      }
+    });
+  },
 };
