@@ -25,7 +25,13 @@ function startDashboard(client) {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
 
+  const renderUrl = process.env.RENDER_EXTERNAL_URL || process.env.RENDER_URL || (process.env.RENDER ? `https://${process.env.RENDER_SERVICE_NAME}.onrender.com` : '');
+  const publicUrl = renderUrl || process.env.PUBLIC_URL || '';
   const isProduction = process.env.RENDER || process.env.NODE_ENV === 'production';
+  // A secure cookie is only valid over HTTPS. NODE_ENV=production is also
+  // commonly used when running the dashboard locally, where forcing it causes
+  // Passport to lose the session and repeatedly request Discord authorization.
+  const usesSecureCookies = publicUrl.startsWith('https://');
 
   app.use(session({
     secret: client.config.sessionSecret || 'discord-bot-secret',
@@ -33,8 +39,8 @@ function startDashboard(client) {
     saveUninitialized: false,
     cookie: {
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      secure: usesSecureCookies,
+      sameSite: usesSecureCookies ? 'none' : 'lax',
     }
   }));
 
@@ -45,9 +51,6 @@ function startDashboard(client) {
   passport.deserializeUser((obj, done) => done(null, obj));
 
   // Detect if running on Render or localhost
-  const renderUrl = process.env.RENDER_EXTERNAL_URL || process.env.RENDER_URL || (process.env.RENDER ? `https://${process.env.RENDER_SERVICE_NAME}.onrender.com` : '');
-  const publicUrl = renderUrl || process.env.PUBLIC_URL || '';
-
   // Auto-detect callback URL
   let callbackURL = client.config.callbackURL;
   if (isProduction && publicUrl) {

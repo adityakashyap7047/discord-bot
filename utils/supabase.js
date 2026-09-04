@@ -23,16 +23,18 @@ function getClient() { return supabase; }
 // ============ GUILD SETTINGS ============
 async function getGuildSettingsSupabase(guildId) {
   if (!available) return null;
-  const { data } = await supabase.from('guild_settings').select('*').eq('guild_id', guildId).maybeSingle();
+  const { data, error } = await supabase.from('guild_settings').select('*').eq('guild_id', guildId).maybeSingle();
+  if (error) throw error;
   return data ? data.settings : null;
 }
 
 async function upsertGuildSettings(guildId, settings) {
   if (!available) return;
-  await supabase.from('guild_settings').upsert(
+  const { error } = await supabase.from('guild_settings').upsert(
     { guild_id: guildId, settings, updated_at: new Date().toISOString() },
     { onConflict: 'guild_id' }
   );
+  if (error) throw error;
 }
 
 // ============ CUSTOM COMMAND LOOKUP ============

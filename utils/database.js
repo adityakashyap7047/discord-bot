@@ -197,12 +197,16 @@ async function getGuildSettings(guildId) {
 
   // Try Supabase first
   if (supa.isAvailable()) {
-    const supaSettings = await supa.getGuildSettingsSupabase(guildId);
-    if (supaSettings) {
-      // Merge with defaults so new keys are always present
-      const merged = { guildId, ...defaultSettings, ...supaSettings };
-      db.guild_settings[guildId] = merged;
-      return merged;
+    try {
+      const supaSettings = await supa.getGuildSettingsSupabase(guildId);
+      if (supaSettings) {
+        // Merge with defaults so new keys are always present
+        const merged = { guildId, ...defaultSettings, ...supaSettings };
+        db.guild_settings[guildId] = merged;
+        return merged;
+      }
+    } catch (error) {
+      console.error('[DB] Supabase settings read error:', error.message);
     }
   }
 
