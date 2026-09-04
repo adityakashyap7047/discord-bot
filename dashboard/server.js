@@ -78,7 +78,9 @@ function startDashboard(client) {
     const guild = client.guilds.cache.get(req.params.guildId);
     if (!guild) return res.redirect('/dashboard');
     const userGuild = req.user.guilds.find(g => g.id === req.params.guildId);
-    if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) return res.redirect('/dashboard');
+    if (!userGuild) return res.redirect('/dashboard');
+    const perms = parseInt(userGuild.permissions);
+    if ((perms & 0x20) !== 0x20 && (perms & 0x8) !== 0x8) return res.redirect('/dashboard');
     req.guild = guild;
     req.guildSettings = getGuildSettings(guild.id);
     next();
@@ -120,7 +122,8 @@ function startDashboard(client) {
     const botGuilds = client.guilds.cache;
 
     const guildsWithAccess = allGuilds.filter(g => {
-      const hasManageServer = (parseInt(g.permissions) & 0x20) === 0x20;
+      const perms = parseInt(g.permissions);
+      const hasManageServer = (perms & 0x20) === 0x20 || (perms & 0x8) === 0x8;
       return hasManageServer;
     }).map(g => ({
       ...g,
