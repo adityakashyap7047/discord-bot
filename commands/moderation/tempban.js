@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 const { successEmbed, errorEmbed } = require('../../utils/helpers');
+const { getGuildSettings, updateGuildSetting } = require('../../utils/database');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -38,22 +39,23 @@ module.exports = {
 
       await member.ban({ reason: `[TEMPBAN ${durationStr}] ${reason}` });
 
-      const db = client.db;
-      if (db) {
-        const settings = db.getGuildSettings(message.guild.id);
+      try {
+        const settings = getGuildSettings(message.guild.id);
         const tempbans = settings.tempbans || [];
         tempbans.push({ userId: user.id, expiresAt: Date.now() + timeMs, reason });
-        db.updateGuildSetting(message.guild.id, 'tempbans', tempbans);
+        updateGuildSetting(message.guild.id, 'tempbans', tempbans);
+      } catch (e) {
+        console.error('[TEMPBAN DB ERROR]', e);
       }
 
       setTimeout(async () => {
         try {
           await message.guild.members.unban(user.id, 'Tempban expired');
-          if (db) {
-            const updated = db.getGuildSettings(message.guild.id);
+          try {
+            const updated = getGuildSettings(message.guild.id);
             const remaining = (updated.tempbans || []).filter(t => t.userId !== user.id);
-            db.updateGuildSetting(message.guild.id, 'tempbans', remaining);
-          }
+            updateGuildSetting(message.guild.id, 'tempbans', remaining);
+          } catch (e) {}
         } catch (e) {
           console.error('[TEMPBAN AUTO-UNBAN ERROR]', e);
         }

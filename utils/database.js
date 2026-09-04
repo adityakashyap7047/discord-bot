@@ -5,6 +5,8 @@ const DB_DIR = path.join(__dirname, '..', 'data');
 const DB_FILE = path.join(DB_DIR, 'bot.json');
 
 let cache = null;
+let saveTimeout = null;
+let dirty = false;
 
 function ensureDir() {
   if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
@@ -40,33 +42,50 @@ function loadDB() {
   ensureDir();
   if (!fs.existsSync(DB_FILE)) {
     cache = getDefaultDB();
-    saveDB(cache);
+    writeDB(cache);
     return cache;
   }
   try {
     const raw = fs.readFileSync(DB_FILE, 'utf8');
     cache = JSON.parse(raw);
+    if (!cache || typeof cache !== 'object' || Array.isArray(cache)) {
+      throw new Error('DB root is not an object');
+    }
   } catch (err) {
-    console.error('[DB] Failed to parse bot.json, creating backup and resetting:', err.message);
+    console.error('[DB] Failed to parse bot.json:', err.message);
     try {
       fs.copyFileSync(DB_FILE, DB_FILE + '.corrupt.' + Date.now());
     } catch (_) {}
     cache = getDefaultDB();
-    saveDB(cache);
+    writeDB(cache);
   }
   return cache;
 }
 
-function saveDB(data) {
-  cache = data;
+function writeDB(data) {
   ensureDir();
   const tmp = DB_FILE + '.tmp';
   try {
     fs.writeFileSync(tmp, JSON.stringify(data, null, 2));
-    fs.renameSync(tmp, DB_FILE);
-  } catch (err) {
-    console.error('[DB] Failed to save:', err.message);
+    fs.copyFileSync(tmp, DB_FILE);
     try { fs.unlinkSync(tmp); } catch (_) {}
+  } catch (err) {
+    console.error('[DB] Write failed:', err.message);
+    try { fs.unlinkSync(tmp); } catch (_) {}
+  }
+}
+
+function saveDB(data) {
+  cache = data;
+  dirty = true;
+  if (!saveTimeout) {
+    saveTimeout = setTimeout(() => {
+      if (dirty && cache) {
+        writeDB(cache);
+        dirty = false;
+      }
+      saveTimeout = null;
+    }, 1000);
   }
 }
 

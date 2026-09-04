@@ -53,7 +53,7 @@ function startDashboard(client) {
   if (isProduction && publicUrl) {
     callbackURL = publicUrl + '/auth/callback';
   }
-  if (!callbackURL.startsWith('http')) {
+  if (!callbackURL || !callbackURL.startsWith('http')) {
     callbackURL = 'http://localhost:' + client.config.port + '/auth/callback';
   }
 

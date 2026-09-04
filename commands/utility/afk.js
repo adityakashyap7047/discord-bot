@@ -9,7 +9,7 @@ module.exports = {
     .addStringOption(opt => opt.setName('reason').setDescription('AFK reason')),
   cooldown: 3,
   async execute(message, args, client) {
-    const isSlash = message.isChatInputCommand;
+    const isSlash = typeof message.options !== 'undefined' && message.isChatInputCommand;
     const reason = isSlash ? (message.options.getString('reason') || 'AFK') : (args.join(' ') || 'AFK');
     const key = `${message.guild.id}_${message.author.id}`;
 

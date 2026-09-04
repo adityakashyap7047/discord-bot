@@ -6,16 +6,27 @@ const db = require('./utils/database');
 const { startDashboard } = require('./dashboard/server');
 
 process.on('uncaughtException', (err) => {
-  console.error('[FATAL] Uncaught Exception:', err);
-  process.exit(1);
+  console.error('[UNCAUGHT] Exception:', err.message);
+  console.error(err.stack);
+  if (err.message && (err.message.includes('read ECONNRESET') || err.message.includes('write EPIPE') || err.message.includes('ETHOSTUNREACH'))) {
+    console.error('[FATAL] Network error detected, restarting in 3s...');
+    setTimeout(() => process.exit(1), 3000);
+  }
 });
 
 process.on('unhandledRejection', (reason) => {
-  console.error('[FATAL] Unhandled Rejection:', reason);
+  console.error('[UNCAUGHT] Rejection:', reason);
 });
 
 function gracefulShutdown(signal) {
   console.log(`[SHUTDOWN] Received ${signal}, shutting down gracefully...`);
+  try {
+    const db = require('./utils/database');
+    if (db && typeof db.saveDB === 'function') {
+      const data = db.loadDB ? db.loadDB() : null;
+      if (data) db.saveDB(data);
+    }
+  } catch (_) {}
   try {
     client.destroy();
     console.log('[SHUTDOWN] Discord client destroyed');
@@ -133,6 +144,15 @@ client.once('ready', () => {
   setInterval(() => {
     if (client.spamCache) client.spamCache.clear();
   }, 300000);
+
+  setInterval(() => {
+    const mem = process.memoryUsage();
+    const heapMB = Math.round(mem.heapUsed / 1024 / 1024);
+    if (heapMB > 800) {
+      console.warn(`[MEMORY] High usage: ${heapMB}MB heap`);
+    }
+    if (global.gc) global.gc();
+  }, 60000);
 
   const publicUrl = process.env.RENDER_EXTERNAL_URL || process.env.RENDER_URL || (process.env.RENDER ? `https://${process.env.RENDER_SERVICE_NAME}.onrender.com` : '');
   if (publicUrl) {
