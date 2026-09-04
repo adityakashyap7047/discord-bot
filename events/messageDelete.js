@@ -24,5 +24,15 @@ module.exports = {
       embed.addFields({ name: 'Attachments', value: message.attachments.map(a => a.url).join('\n').slice(0, 1024) });
     }
     channel.send({ embeds: [embed] }).catch(() => {});
+
+    // Snipe support
+    try {
+      const snipeCmd = require('../commands/utility/snipe');
+      snipeCmd.snipedMessages.set(message.channel.id, {
+        author: `${message.author.tag}`,
+        content: message.content,
+        timestamp: Date.now(),
+      });
+    } catch (e) {}
   },
 };

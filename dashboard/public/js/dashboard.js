@@ -1,7 +1,7 @@
 function showToast(msg, type = 'success') {
   const t = document.createElement('div');
   t.className = `toast toast-${type}`;
-  t.innerHTML = `${type === 'success' ? '&#10003;' : '&#10007;'} ${msg}`;
+  t.innerHTML = `${type === 'success' ? '✓' : '✗'} ${msg}`;
   document.body.appendChild(t);
   setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 2500);
 }
@@ -57,3 +57,26 @@ const observer = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Particle effect for cards
+document.querySelectorAll('.card, .stat, .sc').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    el.style.boxShadow = '0 0 40px rgba(0,240,255,0.15), 0 0 80px rgba(255,0,255,0.05)';
+  });
+  el.addEventListener('mouseleave', () => {
+    el.style.boxShadow = '';
+  });
+});
+
+// Smooth page transitions
+document.querySelectorAll('.sb-link').forEach(link => {
+  link.addEventListener('click', function(e) {
+    const href = this.getAttribute('href');
+    if (href && !href.startsWith('http') && !href.startsWith('#')) {
+      e.preventDefault();
+      document.body.style.opacity = '0';
+      document.body.style.transition = 'opacity 0.2s';
+      setTimeout(() => { window.location.href = href; }, 200);
+    }
+  });
+});

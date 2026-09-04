@@ -2,38 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Commands - Bot Boy NOTIX</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
+  <title>Command Arsenal — VARUNASTRA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    .cmd-grid{display:grid;gap:1.3rem;margin-top:1rem}
-    .cmd-cat{background:rgba(15,15,25,0.8);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;backdrop-filter:blur(20px);transition:all .35s}
-    .cmd-cat:hover{border-color:rgba(139,92,246,0.25);box-shadow:var(--glow-sm)}
-    .cmd-cat-head{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
-    .cmd-cat-head h3{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:0.6rem;letter-spacing:-0.3px}
-    .cmd-cat-head .arrow{font-size:0.8rem;color:var(--text3);transition:transform .3s}
-    .cmd-cat.open .arrow{transform:rotate(180deg)}
-    .cmd-cat-body{padding:0 1.5rem;max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s ease}
-    .cmd-cat.open .cmd-cat-body{max-height:2000px;padding:1rem 1.5rem 1.5rem}
-    .cmd-desc{font-size:0.8rem;color:var(--text3);margin-bottom:1rem;line-height:1.5}
-    .cmd-table{width:100%;border-collapse:collapse}
-    .cmd-table th{text-align:left;padding:0.5rem 0.75rem;font-size:0.6rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);font-weight:700;border-bottom:1px solid var(--border)}
-    .cmd-table td{padding:0.6rem 0.75rem;font-size:0.82rem;border-bottom:1px solid rgba(139,92,246,0.04);vertical-align:top}
-    .cmd-table tr:last-child td{border-bottom:none}
-    .cmd-table tr{transition:background .2s}.cmd-table tr:hover{background:rgba(139,92,246,0.03)}
-    .cmd-name{font-weight:700;color:var(--accent2)}
-    .cmd-formats{display:flex;flex-direction:column;gap:0.25rem}
-    .cmd-format{font-size:0.75rem;color:var(--text3);background:rgba(139,92,246,0.06);padding:0.2rem 0.5rem;border-radius:6px;display:inline-block;width:fit-content;border:1px solid rgba(139,92,246,0.08)}
-    .cmd-format code{color:var(--accent2);font-family:'JetBrains Mono',monospace}
-    .mobile-tip{background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(236,72,153,0.05));border:1px solid rgba(139,92,246,0.15);border-radius:var(--r);padding:1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--bg:#030108;--bg2:rgba(5,2,15,0.85);--border:rgba(0,212,255,0.12);--border2:rgba(0,212,255,0.2);--text:#e0f0ff;--text2:#7a9bb5;--text3:#3d5a73;--cyan:#00d4ff;--magenta:#bf5af2;--green:#30d158;--red:#ff2d55;--r:16px;--rs:10px;--glow-sm:0 0 25px rgba(0,212,255,0.06)}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+    body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,212,255,0.003) 2px,rgba(0,212,255,0.003) 4px)}
+    a{color:var(--cyan);text-decoration:none;transition:all .2s}a:hover{color:#fff}
+    .nav{display:flex;justify-content:space-between;align-items:center;padding:0 3rem;height:72px;background:rgba(3,1,8,0.8);backdrop-filter:blur(30px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+    .nav .logo{font-family:'Orbitron',monospace;font-weight:900;font-size:1rem;letter-spacing:3px;display:flex;align-items:center;gap:0.7rem;text-transform:uppercase}
+    .nav .logo span{background:linear-gradient(135deg,var(--cyan),var(--magenta));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .nav-r{display:flex;align-items:center;gap:0.8rem}
+    .btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.6rem 1.4rem;border-radius:var(--rs);font-family:'Orbitron',monospace;font-weight:700;font-size:0.7rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border:none;transition:all .25s;position:relative;overflow:hidden}
+    .btn:active{transform:scale(0.97)}
+    .btn-p{background:linear-gradient(135deg,var(--cyan),var(--magenta));color:#000;box-shadow:0 0 25px rgba(0,212,255,0.2)}.btn-p:hover{box-shadow:0 0 50px rgba(0,212,255,0.4);transform:translateY(-2px);color:#000}
+    .btn-sm{padding:0.38rem 0.9rem;font-size:0.65rem}
+    .container{max-width:1000px;margin:0 auto;padding:2.5rem 2rem;position:relative;z-index:1}
+    .container h1{font-family:'Orbitron',monospace;font-size:2rem;font-weight:900;letter-spacing:3px;text-transform:uppercase;margin-bottom:0.5rem}
+    .container h1 .cyan{color:var(--cyan);text-shadow:0 0 20px rgba(0,212,255,0.3)}
+    .container h1 .magenta{color:var(--magenta);text-shadow:0 0 20px rgba(191,90,242,0.3)}
+    .sub{color:var(--text2);margin-bottom:2rem;font-size:0.95rem;line-height:1.6}
+    .mobile-tip{background:rgba(0,212,255,0.03);border:1px solid var(--border2);border-radius:var(--r);padding:1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
     .mobile-tip .tip-icon{font-size:2rem;flex-shrink:0}
-    .mobile-tip .tip-text h3{font-size:0.95rem;font-weight:700;margin-bottom:0.3rem}
-    .mobile-tip .tip-text p{font-size:0.82rem;color:var(--text2);line-height:1.5}
+    .mobile-tip .tip-text h3{font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:700;margin-bottom:0.3rem;letter-spacing:1px}
+    .mobile-tip .tip-text p{font-size:0.85rem;color:var(--text2);line-height:1.5}
+    .cmd-grid{display:grid;gap:1.3rem;margin-top:1rem}
+    .cmd-cat{background:rgba(5,2,15,0.9);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;backdrop-filter:blur(20px);transition:all .4s}
+    .cmd-cat:hover{border-color:var(--border2);box-shadow:var(--glow-sm)}
+    .cmd-cat-head{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1.5rem;border-bottom:1px solid transparent;cursor:pointer;user-select:none;transition:all .3s}
+    .cmd-cat.open .cmd-cat-head{border-bottom-color:var(--border)}
+    .cmd-cat-head h3{font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:700;display:flex;align-items:center;gap:0.6rem;letter-spacing:2px;text-transform:uppercase}
+    .cmd-cat-head .cnt{font-family:'JetBrains Mono',monospace;font-size:0.6rem;padding:0.2rem 0.6rem;border-radius:20px;background:rgba(0,212,255,0.08);color:var(--cyan);border:1px solid var(--border2);font-weight:600}
+    .cmd-cat-head .arrow{font-size:0.7rem;color:var(--text3);transition:transform .3s}
+    .cmd-cat.open .arrow{transform:rotate(180deg)}
+    .cmd-cat-body{padding:0;max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s ease}
+    .cmd-cat.open .cmd-cat-body{max-height:5000px;padding:1rem 1.5rem 1.5rem}
+    .cmd-desc{font-size:0.82rem;color:var(--text3);margin-bottom:1rem;line-height:1.5}
+    .cmd-table{width:100%;border-collapse:collapse}
+    .cmd-table th{text-align:left;padding:0.5rem 0.75rem;font-family:'JetBrains Mono',monospace;font-size:0.58rem;text-transform:uppercase;letter-spacing:2px;color:var(--text3);font-weight:700;border-bottom:1px solid var(--border)}
+    .cmd-table td{padding:0.6rem 0.75rem;font-size:0.82rem;border-bottom:1px solid rgba(0,212,255,0.03);vertical-align:top}
+    .cmd-table tr:last-child td{border-bottom:none}
+    .cmd-table tr{transition:background .2s}.cmd-table tr:hover{background:rgba(0,212,255,0.02)}
+    .cmd-name{font-family:'Orbitron',monospace;font-weight:700;color:var(--cyan);font-size:0.78rem;letter-spacing:0.5px}
+    .cmd-format{font-size:0.75rem;color:var(--text3);background:rgba(0,212,255,0.03);padding:0.2rem 0.5rem;border-radius:6px;display:inline-block;width:fit-content;border:1px solid var(--border)}
+    .cmd-format code{color:var(--cyan);font-family:'JetBrains Mono',monospace}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.2);border-radius:3px}
+    @media(max-width:768px){.nav{padding:0 1.5rem}.container h1{font-size:1.4rem}.cmd-table{font-size:0.75rem}}
   </style>
 </head>
 <body>
-  <div class="nav">
-    <a href="/" class="logo"><span>Bot Boy NOTIX</span></a>
+  <nav class="nav">
+    <a href="/" class="logo"><span>VARUNASTRA</span></a>
     <div class="nav-r">
       <% if (user) { %>
         <span style="font-size:0.85rem;font-weight:500;color:var(--text2);margin-right:0.5rem"><%= user.username %></span>
@@ -42,126 +62,139 @@
         <a href="/auth/login" class="btn btn-p btn-sm">Login</a>
       <% } %>
     </div>
-  </div>
-  <div style="max-width:1000px;margin:0 auto;padding:2.5rem 2rem;position:relative;z-index:1">
-      <h1>&#9889; All Commands</h1>
-      <p class="sub">Complete list of all bot commands. Use <code>/</code> on mobile for easy access!</p>
-
-      <div class="mobile-tip">
-        <div class="tip-icon">&#128241;</div>
-        <div class="tip-text">
-          <h3>Mobile Users</h3>
-          <p>Type <strong>/</strong> in any channel to see all commands with autocomplete. Select a command and fill in the options using Discord's built-in UI - no need to type channel names or roles manually!</p>
-        </div>
+  </nav>
+  <div class="container">
+    <h1><span class="cyan">COMMAND</span> <span class="magenta">ARSENAL</span></h1>
+    <p class="sub">Complete list of all <strong>60+</strong> commands. Use <code style="color:var(--cyan);background:rgba(0,212,255,0.08);padding:0.15rem 0.4rem;border-radius:5px;font-family:'JetBrains Mono',monospace">/</code> on mobile for easy access!</p>
+    <div class="mobile-tip">
+      <div class="tip-icon">📱</div>
+      <div class="tip-text">
+        <h3>Mobile Users</h3>
+        <p>Type <strong>/</strong> in any channel to see all commands with autocomplete. Select a command and fill in the options using Discord's built-in UI!</p>
       </div>
-
-      <div class="cmd-grid">
-        <% const commands = [
-          { cat: 'Moderation', icon: '&#128737;', desc: 'Keep your server safe and organized', cmds: [
-            { name: 'ban', slash: '/ban user:@user reason:Spamming', prefix: '!ban @user Spamming' },
-            { name: 'kick', slash: '/kick user:@user reason:Rule violation', prefix: '!kick @user Rule violation' },
-            { name: 'mute', slash: '/mute user:@user duration:10m reason:Spam', prefix: '!mute @user 10m Spam' },
-            { name: 'warn', slash: '/warn user:@user reason:Being rude', prefix: '!warn @user Being rude' },
-            { name: 'warnings', slash: '/warnings user:@user', prefix: '!warnings @user' },
-            { name: 'purge', slash: '/purge amount:50', prefix: '!purge 50' },
-            { name: 'nick', slash: '/nick user:@user name:NewNick', prefix: '!nick @user NewNick' },
-            { name: 'slowmode', slash: '/slowmode channel:#channel seconds:10', prefix: '!slowmode #channel 10' },
-            { name: 'lock', slash: '/lock channel:#channel reason:Raid', prefix: '!lock #channel Raid' },
-            { name: 'unlock', slash: '/unlock channel:#channel', prefix: '!unlock #channel' },
-          ]},
-          { cat: 'Anti-Scam & Security', icon: '&#128683;', desc: 'Protect your community from scams and raids', cmds: [
-            { name: 'antiscam enable', slash: '/antiscam enable', prefix: '!antiscam enable' },
-            { name: 'antiscam disable', slash: '/antiscam disable', prefix: '!antiscam disable' },
-            { name: 'antiscam action', slash: '/antiscam action type:Ban', prefix: '!antiscam action ban' },
-            { name: 'antiscam logchannel', slash: '/antiscam logchannel channel:#logs', prefix: '!antiscam logchannel #logs' },
-            { name: 'antiscam whitelist', slash: '/antiscam whitelist user:@user', prefix: '!antiscam whitelist @user' },
-            { name: 'antiscam status', slash: '/antiscam status', prefix: '!antiscam status' },
-            { name: 'verification enable', slash: '/verification enable', prefix: '!verification enable' },
-            { name: 'verification disable', slash: '/verification disable', prefix: '!verification disable' },
-            { name: 'verification channel', slash: '/verification channel channel:#verify', prefix: '!verification channel #verify' },
-            { name: 'verification role', slash: '/verification role role:@Verified', prefix: '!verification role @Verified' },
-            { name: 'verification status', slash: '/verification status', prefix: '!verification status' },
-            { name: 'raid enable', slash: '/raid enable', prefix: '!raid enable' },
-            { name: 'raid disable', slash: '/raid disable', prefix: '!raid disable' },
-            { name: 'raid threshold', slash: '/raid threshold count:10', prefix: '!raid threshold 10' },
-            { name: 'raid timeframe', slash: '/raid timeframe seconds:60', prefix: '!raid timeframe 60' },
-            { name: 'raid lockdown', slash: '/raid lockdown minutes:30', prefix: '!raid lockdown 30' },
-            { name: 'raid unlock', slash: '/raid unlock', prefix: '!raid unlock' },
-            { name: 'raid status', slash: '/raid status', prefix: '!raid status' },
-          ]},
-          { cat: 'Setup & Configuration', icon: '&#9881;', desc: 'Configure your server settings', cmds: [
-            { name: 'setup', slash: '/setup', prefix: '!setup' },
-            { name: 'setwelcome', slash: '/setwelcome channel:#welcome message:Welcome {user}!', prefix: '!setwelcome #welcome Welcome {user}!' },
-            { name: 'setgoodbye', slash: '/setgoodbye channel:#goodbye message:Goodbye {user}!', prefix: '!setgoodbye #goodbye Goodbye {user}!' },
-            { name: 'setlog', slash: '/setlog channel:#mod-logs', prefix: '!setlog #mod-logs' },
-            { name: 'setprefix', slash: '/setprefix prefix:?', prefix: '!setprefix ?' },
-            { name: 'setautorole', slash: '/setautorole role:@Member', prefix: '!setautorole @Member' },
-            { name: 'automod', slash: '/automod feature:antispam toggle:on', prefix: '!automod antispam on' },
-          ]},
-          { cat: 'Utility', icon: '&#128269;', desc: 'Info and utility commands', cmds: [
-            { name: 'ping', slash: '/ping', prefix: '!ping' },
-            { name: 'help', slash: '/help', prefix: '!help' },
-            { name: 'avatar', slash: '/avatar user:@user', prefix: '!avatar @user' },
-            { name: 'userinfo', slash: '/userinfo user:@user', prefix: '!userinfo @user' },
-            { name: 'serverinfo', slash: '/serverinfo', prefix: '!serverinfo' },
-            { name: 'poll', slash: '/poll question:Best language? options:JS,Python,Java', prefix: '!poll Best language? JS Python Java' },
-            { name: 'remind', slash: '/remind time:30m message:Check oven', prefix: '!remind 30m Check oven' },
-            { name: 'level', slash: '/level user:@user', prefix: '!level @user' },
-            { name: 'msg', slash: '/msg channel:#channel message:Hello!', prefix: '!msg #channel Hello!' },
-          ]},
-          { cat: 'Fun', icon: '&#127917;', desc: 'Fun commands to play with', cmds: [
-            { name: '8ball', slash: '/8ball question:Will I win?', prefix: '!8ball Will I win?' },
-            { name: 'roll', slash: '/roll sides:20', prefix: '!roll 20' },
-            { name: 'decide', slash: '/decide options:Pizza,Pasta', prefix: '!decide Pizza Pasta' },
-            { name: 'say', slash: '/say message:Hello everyone!', prefix: '!say Hello everyone!' },
-            { name: 'reverse', slash: '/reverse text:Hello World', prefix: '!reverse Hello World' },
-          ]},
-          { cat: 'Custom Commands', icon: '&#9993;', desc: 'Create your own custom commands', cmds: [
-            { name: 'addcommand', slash: '/addcommand name:hello response:Hello {user}!', prefix: '!addcommand hello Hello {user}!' },
-            { name: 'removecommand', slash: '/removecommand name:hello', prefix: '!removecommand hello' },
-            { name: 'listcommands', slash: '/listcommands', prefix: '!listcommands' },
-          ]},
-          { cat: 'Tickets', icon: '&#127915;', desc: 'Support ticket system', cmds: [
-            { name: 'ticket setup', slash: '/ticket setup category:#tickets support-role:@Support', prefix: '!ticket setup #tickets @Support' },
-            { name: 'ticket panel', slash: '/ticket panel channel:#support', prefix: '!ticket panel #support' },
-            { name: 'ticket close', slash: '/ticket close', prefix: '!ticket close' },
-          ]},
-          { cat: 'Giveaways', icon: '&#127873;', desc: 'Host giveaways in your server', cmds: [
-            { name: 'giveaway', slash: '/giveaway channel:#giveaways prize:Discord Nitro duration:24h winners:1', prefix: '!giveaway #giveaways Discord Nitro 24h 1' },
-          ]},
-          { cat: 'Reaction Roles', icon: '&#127917;', desc: 'Self-assignable roles via reactions', cmds: [
-            { name: 'reactionrole', slash: '/reactionrole channel:#roles message-id:1234567890 role:@Role emoji:&#127917;', prefix: '!reactionrole #roles 1234567890 @Role &#127917;' },
-          ]},
-          { cat: 'Leveling', icon: '&#128200;', desc: 'XP and level system', cmds: [
-            { name: 'level', slash: '/level user:@user', prefix: '!level @user' },
-          ]},
-        ]; %>
-
-        <% commands.forEach((cat, ci) => { %>
-          <div class="cmd-cat<%= ci < 3 ? ' open' : '' %>" data-idx="<%= ci %>">
-            <div class="cmd-cat-head" onclick="this.parentElement.classList.toggle('open')">
-              <h3><span><%= cat.icon %></span> <%= cat.cat %> <span class="badge b-blue"><%= cat.cmds.length %></span></h3>
-              <span class="arrow">&#9660;</span>
-            </div>
-            <div class="cmd-cat-body">
-              <p class="cmd-desc"><%= cat.desc %></p>
-              <table class="cmd-table">
-                <thead><tr><th style="width:25%">Command</th><th style="width:37.5%">Slash Format (Mobile)</th><th style="width:37.5%">Prefix Format (Desktop)</th></tr></thead>
-                <tbody>
-                  <% cat.cmds.forEach(cmd => { %>
-                    <tr>
-                      <td class="cmd-name"><%= cmd.name %></td>
-                      <td><div class="cmd-formats"><span class="cmd-format"><code><%= cmd.slash %></code></span></div></td>
-                      <td><div class="cmd-formats"><span class="cmd-format"><code><%= cmd.prefix %></code></span></div></td>
-                    </tr>
-                  <% }); %>
-                </tbody>
-              </table>
-            </div>
+    </div>
+    <div class="cmd-grid">
+      <% const commands = [
+        { cat: 'Economy & Gambling', icon: '💰', desc: '10 commands to build your fortune', cmds: [
+          { name: 'daily', slash: '/daily', prefix: '!daily' },
+          { name: 'balance', slash: '/balance @user', prefix: '!balance @user' },
+          { name: 'work', slash: '/work', prefix: '!work' },
+          { name: 'beg', slash: '/beg', prefix: '!beg' },
+          { name: 'deposit', slash: '/deposit amount:500', prefix: '!deposit 500' },
+          { name: 'withdraw', slash: '/withdraw amount:500', prefix: '!withdraw 500' },
+          { name: 'give', slash: '/give user:@user amount:100', prefix: '!give @user 100' },
+          { name: 'rob', slash: '/rob @user', prefix: '!rob @user' },
+          { name: 'slots', slash: '/slots bet:100', prefix: '!slots 100' },
+          { name: 'economyboard', slash: '/economyboard', prefix: '!economyboard' },
+        ]},
+        { cat: 'Moderation', icon: '🛡️', desc: '15 commands for complete server control', cmds: [
+          { name: 'ban', slash: '/ban user:@user reason:Spamming', prefix: '!ban @user Spamming' },
+          { name: 'kick', slash: '/kick user:@user reason:Rule violation', prefix: '!kick @user Rule violation' },
+          { name: 'mute', slash: '/mute user:@user duration:10m', prefix: '!mute @user 10m' },
+          { name: 'unmute', slash: '/unmute user:@user', prefix: '!unmute @user' },
+          { name: 'warn', slash: '/warn user:@user reason:Being rude', prefix: '!warn @user Being rude' },
+          { name: 'warnings', slash: '/warnings user:@user', prefix: '!warnings @user' },
+          { name: 'purge', slash: '/purge amount:50', prefix: '!purge 50' },
+          { name: 'tempban', slash: '/tempban user:@user duration:7d', prefix: '!tempban @user 7d' },
+          { name: 'nick', slash: '/nick user:@user name:NewNick', prefix: '!nick @user NewNick' },
+          { name: 'slowmode', slash: '/slowmode channel:#channel seconds:10', prefix: '!slowmode #channel 10' },
+          { name: 'lock', slash: '/lock channel:#channel reason:Raid', prefix: '!lock #channel Raid' },
+          { name: 'unlock', slash: '/unlock channel:#channel', prefix: '!unlock #channel' },
+          { name: 'serverlock', slash: '/serverlock action:lock', prefix: '' },
+          { name: 'nuke', slash: '/nuke channel:#channel', prefix: '' },
+          { name: 'prune', slash: '/prune days:30', prefix: '' },
+        ]},
+        { cat: 'Anti-Scam & Security', icon: '🚫', desc: 'AI-powered threat detection', cmds: [
+          { name: 'antiscam', slash: '/antiscam enable|disable|status', prefix: '!antiscam enable' },
+          { name: 'verification', slash: '/verification channel|role|enable|disable', prefix: '!verification channel #verify' },
+          { name: 'raid', slash: '/raid enable|disable|threshold|unlock', prefix: '!raid enable' },
+        ]},
+        { cat: 'Setup & Configuration', icon: '⚙️', desc: 'Configure your server', cmds: [
+          { name: 'setup', slash: '/setup', prefix: '!setup' },
+          { name: 'setwelcome', slash: '/setwelcome channel:#welcome message:Welcome {user}!', prefix: '!setwelcome #welcome Welcome {user}!' },
+          { name: 'setgoodbye', slash: '/setgoodbye channel:#goodbye', prefix: '!setgoodbye #goodbye' },
+          { name: 'setlog', slash: '/setlog channel:#mod-logs', prefix: '!setlog #mod-logs' },
+          { name: 'setprefix', slash: '/setprefix prefix:?', prefix: '!setprefix ?' },
+          { name: 'setautorole', slash: '/setautorole role:@Member', prefix: '!setautorole @Member' },
+          { name: 'automod', slash: '/automod feature:antispam toggle:on', prefix: '!automod antispam on' },
+        ]},
+        { cat: 'Utility', icon: '🔍', desc: '12 info and utility commands', cmds: [
+          { name: 'ping', slash: '/ping', prefix: '!ping' },
+          { name: 'help', slash: '/help', prefix: '!help' },
+          { name: 'avatar', slash: '/avatar user:@user', prefix: '!avatar @user' },
+          { name: 'userinfo', slash: '/userinfo user:@user', prefix: '!userinfo @user' },
+          { name: 'serverinfo', slash: '/serverinfo', prefix: '!serverinfo' },
+          { name: 'membercount', slash: '/membercount', prefix: '!membercount' },
+          { name: 'rolelist', slash: '/rolelist', prefix: '!rolelist' },
+          { name: 'invitecount', slash: '/invitecount @user', prefix: '!invitecount @user' },
+          { name: 'poll', slash: '/poll question:Best language? options:JS,Python', prefix: '!poll Best language? JS Python' },
+          { name: 'remind', slash: '/remind time:30m message:Check oven', prefix: '!remind 30m Check oven' },
+          { name: 'msg', slash: '/msg channel:#channel message:Hello!', prefix: '!msg #channel Hello!' },
+          { name: 'level', slash: '/level user:@user', prefix: '!level @user' },
+        ]},
+        { cat: 'Info', icon: 'ℹ️', desc: 'Bot information commands', cmds: [
+          { name: 'botinfo', slash: '/botinfo', prefix: '!botinfo' },
+          { name: 'uptime', slash: '/uptime', prefix: '!uptime' },
+        ]},
+        { cat: 'Fun & Games', icon: '🎮', desc: '14 entertainment commands', cmds: [
+          { name: '8ball', slash: '/8ball question:Will I win?', prefix: '!8ball Will I win?' },
+          { name: 'roll', slash: '/roll sides:20', prefix: '!roll 20' },
+          { name: 'decide', slash: '/decide options:Pizza,Pasta', prefix: '!decide Pizza Pasta' },
+          { name: 'say', slash: '/say message:Hello everyone!', prefix: '!say Hello everyone!' },
+          { name: 'reverse', slash: '/reverse text:Hello World', prefix: '!reverse Hello World' },
+          { name: 'coinflip', slash: '/coinflip', prefix: '!coinflip' },
+          { name: 'joke', slash: '/joke', prefix: '!joke' },
+          { name: 'quote', slash: '/quote', prefix: '!quote' },
+          { name: 'ship', slash: '/ship @user1 @user2', prefix: '!ship @user1 @user2' },
+          { name: 'rate', slash: '/rate thing:This bot', prefix: '!rate This bot' },
+          { name: 'choose', slash: '/choose options:Pizza,Pasta,Burger', prefix: '!choose Pizza Pasta Burger' },
+          { name: 'ascii', slash: '/ascii text:Hello font:bubbles', prefix: '' },
+          { name: 'wouldyourather', slash: '/wouldyourather', prefix: '!wouldyourather' },
+          { name: 'trivia', slash: '/trivia', prefix: '!trivia' },
+        ]},
+        { cat: 'Custom Commands', icon: '✉️', desc: 'Create your own commands', cmds: [
+          { name: 'addcommand', slash: '/addcommand name:hello response:Hello {user}!', prefix: '!addcommand hello Hello {user}!' },
+          { name: 'removecommand', slash: '/removecommand name:hello', prefix: '!removecommand hello' },
+          { name: 'listcommands', slash: '/listcommands', prefix: '!listcommands' },
+        ]},
+        { cat: 'Tickets', icon: '🎫', desc: 'Support ticket system', cmds: [
+          { name: 'ticket setup', slash: '/ticket setup', prefix: '!ticket setup #tickets @Support' },
+          { name: 'ticket panel', slash: '/ticket panel', prefix: '!ticket panel' },
+          { name: 'ticket close', slash: '/ticket close', prefix: '!ticket close' },
+        ]},
+        { cat: 'Giveaways', icon: '🎁', desc: 'Host giveaways', cmds: [
+          { name: 'giveaway start', slash: '/giveaway channel:#ch prize:Nitro duration:24h winners:1', prefix: '!giveaway #ch Nitro 24h 1' },
+          { name: 'giveaway end', slash: '/giveaway end', prefix: '!giveaway end' },
+          { name: 'giveaway reroll', slash: '/giveaway reroll', prefix: '!giveaway reroll' },
+        ]},
+        { cat: 'Reaction Roles', icon: '🎭', desc: 'Self-assignable roles', cmds: [
+          { name: 'reactionrole', slash: '/reactionrole channel:#roles', prefix: '!reactionrole #roles 123 @Role emoji' },
+        ]},
+      ]; %>
+      <% commands.forEach((cat, ci) => { %>
+        <div class="cmd-cat<%= ci < 2 ? ' open' : '' %>" data-idx="<%= ci %>">
+          <div class="cmd-cat-head" onclick="this.parentElement.classList.toggle('open')">
+            <h3><span><%= cat.icon %></span> <%= cat.cat %> <span class="cnt"><%= cat.cmds.length %></span></h3>
+            <span class="arrow">▼</span>
           </div>
-        <% }); %>
-      </div>
+          <div class="cmd-cat-body">
+            <p class="cmd-desc"><%= cat.desc %></p>
+            <table class="cmd-table">
+              <thead><tr><th style="width:22%">Command</th><th style="width:39%">Slash (Mobile)</th><th style="width:39%">Prefix (Desktop)</th></tr></thead>
+              <tbody>
+                <% cat.cmds.forEach(cmd => { %>
+                  <tr>
+                    <td class="cmd-name"><%= cmd.name %></td>
+                    <td><span class="cmd-format"><code><%= cmd.slash %></code></span></td>
+                    <td><span class="cmd-format"><code><%= cmd.prefix %></code></span></td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% }); %>
+    </div>
   </div>
-  <script src="/js/dashboard.js"></script>
 </body>
 </html>

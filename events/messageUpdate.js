@@ -23,5 +23,16 @@ module.exports = {
       )
       .setTimestamp();
     channel.send({ embeds: [embed] }).catch(() => {});
+
+    // Edit snipe support
+    try {
+      const editSnipeCmd = require('../commands/utility/editsnipe');
+      editSnipeCmd.editSnipedMessages.set(oldMessage.channel.id, {
+        author: `${oldMessage.author.tag}`,
+        before: oldMessage.content,
+        after: newMessage.content,
+        timestamp: Date.now(),
+      });
+    } catch (e) {}
   },
 };

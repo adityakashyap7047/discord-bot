@@ -5,6 +5,7 @@ const { canSendLinks, canSendImages, getAgeRestrictionMessage } = require('../ut
 const { hasMassMentions, getMentionCount } = require('../utils/raidProtection');
 const { trackMessage } = require('../utils/duplicateDetection');
 const { checkMessage } = require('../utils/linkChecker');
+const afkCmd = require('../commands/utility/afk');
 
 module.exports = {
   name: Events.MessageCreate,
@@ -13,6 +14,9 @@ module.exports = {
     if (message.author.bot) return;
     if (!message.guild) return;
     if (!message.member) return;
+
+    // AFK check
+    afkCmd.checkAFK(message);
 
     const settings = getGuildSettings(message.guild.id);
     const prefix = settings.prefix || client.config.prefix;

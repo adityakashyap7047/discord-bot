@@ -26,6 +26,12 @@ function getDefaultDB() {
     autoroles: [],
     goodbye_config: {},
     welcome_config: {},
+    economy: [],
+    inventories: [],
+    profiles: {},
+    marriages: [],
+    reputation: [],
+    notes: [],
   };
 }
 
@@ -383,6 +389,153 @@ function getGuildStats(guildId) {
   };
 }
 
+// ============ ECONOMY ============
+function getEconomy(guildId, userId) {
+  const db = loadDB();
+  if (!db.economy) db.economy = [];
+  let entry = db.economy.find(e => e.guildId === guildId && e.userId === userId);
+  if (!entry) {
+    entry = { guildId, userId, wallet: 0, bank: 0, lastDaily: 0, lastWork: 0, lastRob: 0 };
+    db.economy.push(entry);
+    saveDB(db);
+  }
+  return entry;
+}
+
+function updateEconomy(guildId, userId, updates) {
+  const db = loadDB();
+  if (!db.economy) db.economy = [];
+  let entry = db.economy.find(e => e.guildId === guildId && e.userId === userId);
+  if (!entry) {
+    entry = { guildId, userId, wallet: 0, bank: 0, lastDaily: 0, lastWork: 0, lastRob: 0 };
+    db.economy.push(entry);
+  }
+  Object.assign(entry, updates);
+  saveDB(db);
+  return entry;
+}
+
+function getEconomyLeaderboard(guildId) {
+  const db = loadDB();
+  return (db.economy || [])
+    .filter(e => e.guildId === guildId)
+    .sort((a, b) => ((b.wallet || 0) + (b.bank || 0)) - ((a.wallet || 0) + (a.bank || 0)))
+    .slice(0, 10);
+}
+
+// ============ INVENTORY ============
+function getInventory(guildId, userId) {
+  const db = loadDB();
+  if (!db.inventories) db.inventories = [];
+  let entry = db.inventories.find(e => e.guildId === guildId && e.userId === userId);
+  if (!entry) {
+    entry = { guildId, userId, items: {} };
+    db.inventories.push(entry);
+    saveDB(db);
+  }
+  return entry;
+}
+
+function updateInventory(guildId, userId, items) {
+  const db = loadDB();
+  if (!db.inventories) db.inventories = [];
+  let entry = db.inventories.find(e => e.guildId === guildId && e.userId === userId);
+  if (!entry) {
+    entry = { guildId, userId, items: {} };
+    db.inventories.push(entry);
+  }
+  entry.items = items;
+  saveDB(db);
+  return entry;
+}
+
+// ============ PROFILES ============
+function getProfile(userId) {
+  const db = loadDB();
+  if (!db.profiles) db.profiles = {};
+  if (!db.profiles[userId]) {
+    db.profiles[userId] = { bio: '', banner: '', color: '#8b5cf6' };
+    saveDB(db);
+  }
+  return db.profiles[userId];
+}
+
+function updateProfile(userId, updates) {
+  const db = loadDB();
+  if (!db.profiles) db.profiles = {};
+  if (!db.profiles[userId]) db.profiles[userId] = { bio: '', banner: '', color: '#8b5cf6' };
+  Object.assign(db.profiles[userId], updates);
+  saveDB(db);
+}
+
+// ============ MARRIAGES ============
+function getMarriage(userId) {
+  const db = loadDB();
+  if (!db.marriages) db.marriages = [];
+  return db.marriages.find(m => m.user1 === userId || m.user2 === userId);
+}
+
+function addMarriage(user1, user2) {
+  const db = loadDB();
+  if (!db.marriages) db.marriages = [];
+  db.marriages.push({ user1, user2, marriedAt: new Date().toISOString() });
+  saveDB(db);
+}
+
+function removeMarriage(userId) {
+  const db = loadDB();
+  if (!db.marriages) db.marriages = [];
+  db.marriages = db.marriages.filter(m => m.user1 !== userId && m.user2 !== userId);
+  saveDB(db);
+}
+
+// ============ REPUTATION ============
+function getReputation(userId) {
+  const db = loadDB();
+  if (!db.reputation) db.reputation = [];
+  return db.reputation.filter(r => r.userId === userId);
+}
+
+function addReputation(userId, fromUserId) {
+  const db = loadDB();
+  if (!db.reputation) db.reputation = [];
+  db.reputation.push({ userId, fromUserId, timestamp: new Date().toISOString() });
+  saveDB(db);
+}
+
+function hasGivenRep(userId, targetId) {
+  const db = loadDB();
+  if (!db.reputation) db.reputation = [];
+  return db.reputation.some(r => r.userId === targetId && r.fromUserId === userId);
+}
+
+// ============ NOTES ============
+function getNotes(userId) {
+  const db = loadDB();
+  if (!db.notes) db.notes = [];
+  return db.notes.filter(n => n.userId === userId);
+}
+
+function addNote(userId, title, content) {
+  const db = loadDB();
+  if (!db.notes) db.notes = [];
+  db.notes.push({ userId, title, content, createdAt: new Date().toISOString() });
+  saveDB(db);
+}
+
+function removeNote(userId, title) {
+  const db = loadDB();
+  if (!db.notes) db.notes = [];
+  db.notes = db.notes.filter(n => !(n.userId === userId && n.title.toLowerCase() === title.toLowerCase()));
+  saveDB(db);
+}
+
+function getNote(userId, title) {
+  const db = loadDB();
+  if (!db.notes) db.notes = [];
+  return db.notes.find(n => n.userId === userId && n.title.toLowerCase() === title.toLowerCase());
+}
+
 module.exports = {
   loadDB, saveDB, getGuildSettings, updateGuildSetting, updateGuildSettings,
   addWarning, getWarnings, clearWarnings,
@@ -396,4 +549,10 @@ module.exports = {
   getStarboard, addStarboard,
   addEmbed, removeEmbed, getEmbeds, getEmbed,
   getGuildStats,
+  getEconomy, updateEconomy, getEconomyLeaderboard,
+  getInventory, updateInventory,
+  getProfile, updateProfile,
+  getMarriage, addMarriage, removeMarriage,
+  getReputation, addReputation, hasGivenRep,
+  getNotes, addNote, removeNote, getNote,
 };

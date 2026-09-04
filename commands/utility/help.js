@@ -8,80 +8,78 @@ module.exports = {
     const prefix = client.config.prefix;
 
     const categories = {
+      'Economy & Gambling': {
+        cmds: ['daily', 'balance', 'work', 'beg', 'deposit', 'withdraw', 'give', 'rob', 'slots', 'economyboard'],
+        desc: 'Earn, save, gamble, and trade coins',
+      },
       'Moderation': {
-        cmds: ['ban', 'kick', 'mute', 'warn', 'warnings', 'purge', 'nick', 'slowmode', 'lock', 'unlock'],
-        desc: 'Kick, ban, mute, warn, purge, slowmode, lock/unlock',
+        cmds: ['ban', 'kick', 'mute', 'unmute', 'warn', 'warnings', 'purge', 'tempban', 'nick', 'slowmode', 'lock', 'unlock', 'serverlock', 'nuke', 'prune'],
+        desc: 'Complete moderation toolkit',
       },
       'Anti-Scam & Security': {
         cmds: ['antiscam', 'verification', 'raid'],
-        desc: 'Scam detection, verification system, raid protection',
-        slashExamples: '/antiscam enable | /verification channel #channel | /raid threshold count:10',
+        desc: 'Scam detection, verification, raid protection',
       },
       'Utility': {
-        cmds: ['ping', 'help', 'avatar', 'userinfo', 'serverinfo', 'poll', 'remind', 'level', 'msg'],
-        desc: 'Info commands, polls, reminders, leveling',
+        cmds: ['ping', 'help', 'avatar', 'userinfo', 'serverinfo', 'membercount', 'rolelist', 'invitecount', 'poll', 'remind', 'level', 'msg'],
+        desc: 'Info, tools, and server utilities',
       },
-      'Fun': {
-        cmds: ['8ball', 'roll', 'decide', 'say', 'reverse'],
-        desc: '8ball, dice roll, random decision, say, reverse',
+      'Info': {
+        cmds: ['botinfo', 'uptime'],
+        desc: 'Bot status and information',
+      },
+      'Fun & Games': {
+        cmds: ['8ball', 'roll', 'decide', 'say', 'reverse', 'coinflip', 'joke', 'quote', 'ship', 'rate', 'choose', 'ascii', 'wouldyourather', 'trivia'],
+        desc: 'Games, jokes, and entertainment',
       },
       'Setup': {
         cmds: ['setup', 'setwelcome', 'setgoodbye', 'setlog', 'setprefix', 'setautorole', 'automod'],
-        desc: 'Server configuration, welcome/goodbye, logging, auto-mod',
-        slashExamples: '/setup | /setwelcome channel:#channel message:Hello {user}! | /automod antispam on',
+        desc: 'Server configuration',
       },
       'Custom Commands': {
         cmds: ['addcommand', 'removecommand', 'listcommands'],
-        desc: 'Create, remove, and list custom commands',
+        desc: 'Create custom commands',
       },
       'Reaction Roles': {
         cmds: ['reactionrole'],
-        desc: 'Self-assignable reaction roles',
+        desc: 'Self-assignable roles',
       },
       'Events': {
         cmds: ['giveaway', 'ticket'],
-        desc: 'Giveaways and ticket system',
-        slashExamples: '/ticket setup category:#channel support-role:@role | /ticket panel channel:#channel',
+        desc: 'Giveaways and tickets',
       },
     };
 
     const embed = new EmbedBuilder()
-      .setColor(0x8b5cf6)
-      .setTitle('Command List')
+      .setColor(0x00d4ff)
+      .setTitle('⚡ VARUNASTRA — Command Arsenal')
       .setDescription(
         isSlash
-          ? 'Type `/` on mobile to see all commands with autocomplete!\nOr use the prefix `!` on desktop.'
-          : `Use the prefix \`${prefix}\` before each command.\nOr type \`/\` on mobile for autocomplete!`
+          ? 'Type `/` to see all commands with autocomplete!\nOr use the prefix `!` on desktop.'
+          : `Use the prefix \`${prefix}\` before each command.\nOr type \`/\` for autocomplete!`
       )
       .setTimestamp();
 
     for (const [cat, data] of Object.entries(categories)) {
       const cmdList = data.cmds.map(c => `\`${c}\``).join(', ');
-      let value = cmdList;
-      if (data.desc) value += `\n${data.desc}`;
-      if (data.slashExamples) value += `\n**Slash:** \`${data.slashExamples}\``;
-      embed.addFields({ name: cat, value });
+      embed.addFields({ name: cat, value: `${cmdList}\n_${data.desc}_` });
     }
 
     embed.addFields(
       { name: 'Auto-Mod Toggles', value: [
-        '`!automod automod` / `/automod feature:automod`',
-        '`!automod antispam` / `/automod feature:antispam`',
-        '`!automod antilink` / `/automod feature:antilink`',
-        '`!automod antiscam` / `/automod feature:antiscam`',
-        '`!automod accountagegate` / `/automod feature:accountagegate`',
-        '`!automod newmemberrestriction` / `/automod feature:newmemberrestriction`',
-        '`!automod duplicate` / `/automod feature:duplicate`',
-        '`!automod linkcheck` / `/automod feature:linkcheck`',
-        '`!automod massmention` / `/automod feature:massmention`',
+        '`!automod automod` — Bad word filter',
+        '`!automod antispam` — Flood/spam detection',
+        '`!automod antilink` — Block links',
+        '`!automod antiscam` — Scam detection',
+        '`!automod accountagegate` — Account age gate',
+        '`!automod duplicate` — Duplicate message filter',
+        '`!automod massmention` — Mass mention limit',
         '',
         'Usage: `!automod <feature> on/off` or `/automod feature:<name> toggle:on`',
       ].join('\n'), inline: false },
     );
 
-    if (!isSlash) {
-      embed.setFooter({ text: 'Tip: Type / on mobile for easy command access!' });
-    }
+    embed.setFooter({ text: `${client.commands.size} commands | VARUNASTRA — Divine Power` });
 
     message.reply({ embeds: [embed] });
   },

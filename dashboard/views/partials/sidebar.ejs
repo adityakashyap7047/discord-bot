@@ -3,32 +3,32 @@
     <% if (guild.icon) { %>
       <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png?size=128" alt="">
     <% } else { %>
-      <div class="ph" style="width:42px;height:42px;font-size:1rem;border-radius:14px;"><%= guild.name.charAt(0) %></div>
+      <div class="ph" style="width:44px;height:44px;font-size:1rem;border-radius:14px;background:linear-gradient(135deg,var(--neon-blue),var(--neon-purple));display:flex;align-items:center;justify-content:center;font-weight:800;box-shadow:0 0 15px rgba(0,212,255,0.2)"><%= guild.name.charAt(0) %></div>
     <% } %>
     <div>
       <div class="nm"><%= guild.name %></div>
       <div class="id"><%= guild.id %></div>
     </div>
   </div>
-  <a href="/dashboard" class="sb-link" style="font-size:0.8rem;color:var(--text3);">&#8592; All Servers</a>
-  <a href="/dashboard/servers" class="sb-link" style="font-size:0.8rem;color:var(--text3);"><span class="ic">&#127760;</span> Bot Servers</a>
+  <a href="/dashboard" class="sb-link" style="font-size:0.8rem;color:var(--text3);">← All Servers</a>
+  <a href="/dashboard/servers" class="sb-link" style="font-size:0.8rem;color:var(--text3);"><span class="ic">🌐</span> Bot Servers</a>
   <div class="sb-sect">Configuration</div>
-  <a href="/dashboard/<%= guild.id %>" class="sb-link <%= currentPage === 'settings' ? 'active' : '' %>"><span class="ic">&#9881;</span> General</a>
-  <a href="/dashboard/<%= guild.id %>/welcome" class="sb-link <%= currentPage === 'welcome' ? 'active' : '' %>"><span class="ic">&#128075;</span> Welcome / Goodbye</a>
-  <a href="/dashboard/<%= guild.id %>/moderation" class="sb-link <%= currentPage === 'moderation' ? 'active' : '' %>"><span class="ic">&#128737;</span> Moderation</a>
-  <a href="/dashboard/<%= guild.id %>/logging" class="sb-link <%= currentPage === 'logging' ? 'active' : '' %>"><span class="ic">&#128203;</span> Logging</a>
+  <a href="/dashboard/<%= guild.id %>" class="sb-link <%= currentPage === 'settings' ? 'active' : '' %>"><span class="ic">⚙</span> General</a>
+  <a href="/dashboard/<%= guild.id %>/welcome" class="sb-link <%= currentPage === 'welcome' ? 'active' : '' %>"><span class="ic">👋</span> Welcome / Goodbye</a>
+  <a href="/dashboard/<%= guild.id %>/moderation" class="sb-link <%= currentPage === 'moderation' ? 'active' : '' %>"><span class="ic">🛡️</span> Moderation</a>
+  <a href="/dashboard/<%= guild.id %>/logging" class="sb-link <%= currentPage === 'logging' ? 'active' : '' %>"><span class="ic">📋</span> Logging</a>
   <div class="sb-sect">Features</div>
-  <a href="/dashboard/<%= guild.id %>/roles" class="sb-link <%= currentPage === 'roles' ? 'active' : '' %>"><span class="ic">&#127917;</span> Roles</a>
-  <a href="/dashboard/<%= guild.id %>/levels" class="sb-link <%= currentPage === 'levels' ? 'active' : '' %>"><span class="ic">&#128200;</span> Level System</a>
-  <a href="/dashboard/<%= guild.id %>/starboard" class="sb-link <%= currentPage === 'starboard' ? 'active' : '' %>"><span class="ic">&#11088;</span> Starboard</a>
-  <a href="/dashboard/<%= guild.id %>/invites" class="sb-link <%= currentPage === 'invites' ? 'active' : '' %>"><span class="ic">&#128279;</span> Invite Tracker</a>
-  <a href="/dashboard/<%= guild.id %>/tickets" class="sb-link <%= currentPage === 'tickets' ? 'active' : '' %>"><span class="ic">&#127915;</span> Tickets</a>
-  <a href="/dashboard/<%= guild.id %>/giveaways" class="sb-link <%= currentPage === 'giveaways' ? 'active' : '' %>"><span class="ic">&#127873;</span> Giveaways</a>
-  <a href="/dashboard/<%= guild.id %>/antiscam" class="sb-link <%= currentPage === 'antiscam' ? 'active' : '' %>"><span class="ic">&#128683;</span> Anti-Scam</a>
+  <a href="/dashboard/<%= guild.id %>/roles" class="sb-link <%= currentPage === 'roles' ? 'active' : '' %>"><span class="ic">🎭</span> Roles</a>
+  <a href="/dashboard/<%= guild.id %>/levels" class="sb-link <%= currentPage === 'levels' ? 'active' : '' %>"><span class="ic">📈</span> Level System</a>
+  <a href="/dashboard/<%= guild.id %>/starboard" class="sb-link <%= currentPage === 'starboard' ? 'active' : '' %>"><span class="ic">⭐</span> Starboard</a>
+  <a href="/dashboard/<%= guild.id %>/invites" class="sb-link <%= currentPage === 'invites' ? 'active' : '' %>"><span class="ic">🔗</span> Invite Tracker</a>
+  <a href="/dashboard/<%= guild.id %>/tickets" class="sb-link <%= currentPage === 'tickets' ? 'active' : '' %>"><span class="ic">🎫</span> Tickets</a>
+  <a href="/dashboard/<%= guild.id %>/giveaways" class="sb-link <%= currentPage === 'giveaways' ? 'active' : '' %>"><span class="ic">🎁</span> Giveaways</a>
+  <a href="/dashboard/<%= guild.id %>/antiscam" class="sb-link <%= currentPage === 'antiscam' ? 'active' : '' %>"><span class="ic">🚫</span> Anti-Scam</a>
   <div class="sb-sect">Customization</div>
-  <a href="/dashboard/<%= guild.id %>/commands" class="sb-link <%= currentPage === 'commands' ? 'active' : '' %>"><span class="ic">&#9889;</span> Custom Commands</a>
-  <a href="/dashboard/<%= guild.id %>/embeds" class="sb-link <%= currentPage === 'embeds' ? 'active' : '' %>"><span class="ic">&#127912;</span> Embed Builder</a>
-  <a href="/dashboard/<%= guild.id %>/reactionroles" class="sb-link <%= currentPage === 'reactionroles' ? 'active' : '' %>"><span class="ic">&#127917;</span> Reaction Roles</a>
+  <a href="/dashboard/<%= guild.id %>/commands" class="sb-link <%= currentPage === 'commands' ? 'active' : '' %>"><span class="ic">⚡</span> Custom Commands</a>
+  <a href="/dashboard/<%= guild.id %>/embeds" class="sb-link <%= currentPage === 'embeds' ? 'active' : '' %>"><span class="ic">🎨</span> Embed Builder</a>
+  <a href="/dashboard/<%= guild.id %>/reactionroles" class="sb-link <%= currentPage === 'reactionroles' ? 'active' : '' %>"><span class="ic">🎭</span> Reaction Roles</a>
   <div class="sb-sect">Info</div>
-  <a href="/commandlist" class="sb-link" target="_blank"><span class="ic">&#128220;</span> All Commands</a>
+  <a href="/commandlist" class="sb-link" target="_blank"><span class="ic">📜</span> All Commands</a>
 </div>

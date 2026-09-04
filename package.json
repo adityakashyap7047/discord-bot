@@ -1,7 +1,7 @@
 {
-  "name": "discord-bot-dashboard",
-  "version": "1.0.0",
-  "description": "Full-featured Discord bot with web dashboard",
+  "name": "varunastra",
+  "version": "2.0.0",
+  "description": "Varunastra — The Divine Arsenal for Your Server. Full-featured Discord bot with economy, moderation, social, image, and web dashboard.",
   "main": "index.js",
   "scripts": {
     "start": "pm2 start ecosystem.config.js",
@@ -23,4 +23,5 @@
   "devDependencies": {
     "pm2": "^7.0.4"
   }
+}
 }

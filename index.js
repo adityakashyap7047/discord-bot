@@ -94,15 +94,19 @@ db.loadDB();
 startDashboard(client);
 
 client.once('ready', () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
+  console.log(`✅ VARUNASTRA | Logged in as ${client.user.tag} | ${client.commands.size} commands loaded`);
 
   const statuses = [
-    { name: 'with absolute power | /help', type: 3 },
-    { name: 'God Mode | 𝕲𝖚𝖞 𝖜𝖎𝖙𝖍 𝖆𝖑𝖑 𝖕𝖔𝖜𝖊𝖗𝖘', type: 3 },
-    { name: 'with the server rules ⚡', type: 3 },
+    { name: '⚡ with divine power | /help', type: 3 },
+    { name: '🛡️ protecting servers', type: 3 },
+    { name: `${client.commands.size} commands loaded`, type: 3 },
     { name: `in ${client.guilds.cache.size} servers`, type: 3 },
-    { name: `${client.users.cache.size.toLocaleString()} users`, type: 3 },
-    { name: '!help | Dashboard', type: 3 },
+    { name: `${client.users.cache.size.toLocaleString()} users | /botinfo`, type: 3 },
+    { name: '💰 economy | gambling | trading', type: 3 },
+    { name: '🚫 anti-scam active', type: 3 },
+    { name: '🎮 fun | trivia | jokes', type: 3 },
+    { name: '⚙️ dashboard: /dashboard', type: 3 },
+    { name: '🚀 VARUNASTRA — Divine Weapon', type: 3 },
   ];
 
   let i = 0;
@@ -110,11 +114,24 @@ client.once('ready', () => {
     const status = statuses[i % statuses.length];
     client.user.setActivity(status.name, { type: status.type });
     i++;
-  }, 10000);
+  }, 8000);
 
   setInterval(() => {
     if (client.spamCache) client.spamCache.clear();
   }, 300000);
+
+  const publicUrl = process.env.RENDER_EXTERNAL_URL || process.env.RENDER_URL || (process.env.RENDER ? `https://${process.env.RENDER_SERVICE_NAME}.onrender.com` : '');
+  if (publicUrl) {
+    const http = require('http');
+    setInterval(() => {
+      http.get(publicUrl, (res) => {
+        console.log(`[KEEP-ALIVE] Pinged ${publicUrl} - Status: ${res.statusCode}`);
+      }).on('error', (err) => {
+        console.error('[KEEP-ALIVE] Ping failed:', err.message);
+      });
+    }, 10 * 60 * 1000);
+    console.log(`[KEEP-ALIVE] Pinger active for ${publicUrl}`);
+  }
 });
 
 client.login(client.config.token).catch((err) => {

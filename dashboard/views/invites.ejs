@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invites - <%= guild.name %></title>
+  <title>Invites - <%= guild.name %> — VARUNASTRA</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <div class="nav"><a href="/" class="logo"><span>Bot Boy NOTIX</span></a><div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div></div>
+  <div class="nav"><a href="/" class="logo"><span class="pulse-dot"></span><span>VARUNASTRA</span></a><div class="nav-r"><span style="font-size:0.85rem;font-weight:500;"><%= user.username %></span></div></div>
   <div class="layout" data-guild="<%= guild.id %>">
     <%- include('partials/sidebar') %>
     <div class="main">

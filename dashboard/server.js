@@ -12,6 +12,8 @@ const {
   getLogs, getGuildStats,
   getEmbeds, addEmbed, removeEmbed, getEmbed,
   getInvites,
+  getEconomy, updateEconomy, getEconomyLeaderboard,
+  getInventory,
 } = require('../utils/database');
 
 function startDashboard(client) {
@@ -603,6 +605,22 @@ function startDashboard(client) {
     });
   });
 
+  app.get('/api/bot/health', (req, res) => {
+    const mem = process.memoryUsage();
+    res.json({
+      status: 'online',
+      uptime: client.uptime,
+      ping: client.ws.ping,
+      memory: { heap: mem.heapUsed, total: mem.total },
+      guilds: client.guilds.cache.size,
+      users: client.users.cache.size,
+      channels: client.channels.cache.size,
+      commands: client.commands.size,
+      nodeVersion: process.version,
+      discordjs: require('discord.js').version,
+    });
+  });
+
   app.get('/api/guilds/:guildId/settings', isAuthenticated, (req, res) => {
     const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);
     if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
@@ -616,6 +634,72 @@ function startDashboard(client) {
       return res.status(403).json({ error: 'No permission' });
     }
     res.json(getGuildStats(req.params.guildId));
+  });
+
+  app.get('/api/guilds/:guildId/logs', isAuthenticated, (req, res) => {
+    const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);
+    if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
+      return res.status(403).json({ error: 'No permission' });
+    }
+    const limit = parseInt(req.query.limit) || 50;
+    res.json(getLogs(req.params.guildId, null, limit));
+  });
+
+  app.get('/api/guilds/:guildId/leaderboard', isAuthenticated, (req, res) => {
+    const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);
+    if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
+      return res.status(403).json({ error: 'No permission' });
+    }
+    res.json(getLeaderboard(req.params.guildId));
+  });
+
+  app.get('/api/guilds/:guildId/warnings', isAuthenticated, (req, res) => {
+    const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);
+    if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
+      return res.status(403).json({ error: 'No permission' });
+    }
+    const targetId = req.query.userId;
+    if (targetId) {
+      res.json(getWarnings(req.params.guildId, targetId));
+    } else {
+      res.json(getWarnings(req.params.guildId, null));
+    }
+  });
+
+  // ============ ECONOMY API ============
+  app.get('/api/guilds/:guildId/economy', isAuthenticated, (req, res) => {
+    const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);
+    if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
+      return res.status(403).json({ error: 'No permission' });
+    }
+    const entries = getEconomyLeaderboard(req.params.guildId);
+    res.json(entries.map(e => ({ userId: e.userId, wallet: e.wallet, bank: e.bank, total: (e.wallet || 0) + (e.bank || 0) })));
+  });
+
+  app.get('/api/guilds/:guildId/economy/:userId', isAuthenticated, (req, res) => {
+    const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);
+    if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
+      return res.status(403).json({ error: 'No permission' });
+    }
+    const entry = getEconomy(req.params.guildId, req.params.userId);
+    res.json(entry);
+  });
+
+  // ============ BOT FEATURES API ============
+  app.get('/api/features', (req, res) => {
+    res.json({
+      moderation: ['ban', 'kick', 'mute', 'unmute', 'warn', 'warnings', 'purge', 'tempban', 'softban', 'unban', 'massban', 'nuke', 'prune', 'nick', 'slowmode', 'lock', 'unlock', 'serverlock', 'antiscam', 'raid', 'verification', 'ticket', 'giveaway'],
+      economy: ['balance', 'daily', 'work', 'shop', 'buy', 'inventory', 'pay', 'coinflip', 'leaderboard', 'deposit', 'withdraw', 'rob', 'slots', 'beg', 'give', 'economyboard'],
+      social: ['profile', 'rep', 'marry', 'ship'],
+      advanced: ['calc', 'translate', 'remindme', 'notes', 'stats', 'uptime', 'serverlist', 'whois'],
+      image: ['meme', 'cat', 'dog', 'waifu', 'drink', 'howgay', 'rate', 'simprate'],
+      utility: ['ping', 'help', 'avatar', 'userinfo', 'serverinfo', 'membercount', 'rolelist', 'invitecount', 'poll', 'remind', 'msg', 'afk', 'base64', 'snipe', 'editsnipe', 'weather', 'channelinfo', 'boosters', 'level', 'members'],
+      fun: ['8ball', 'roll', 'decide', 'say', 'reverse', 'choose', 'ascii', 'wouldyourather', 'trivia', 'joke', 'quote', 'hug', 'slap', 'clap', 'roast', 'rps', 'hack', 'guy'],
+      setup: ['setup', 'setwelcome', 'setgoodbye', 'setlog', 'setprefix', 'setautorole', 'automod'],
+      custom: ['addcommand', 'removecommand', 'listcommands', 'reactionrole'],
+      info: ['botinfo', 'uptime'],
+      totalCommands: client.commands.size,
+    });
   });
 
   // Global error handler
