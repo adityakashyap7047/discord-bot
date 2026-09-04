@@ -18,8 +18,8 @@ module.exports = {
     if (!user) return message.reply({ embeds: [errorEmbed('Error', 'Mention a user to warn.')] });
     const reason = args.slice(1).join(' ') || 'No reason provided';
 
-    addWarning(message.guild.id, user.id, message.author.id, reason);
-    const warns = getWarnings(message.guild.id, user.id);
+    await addWarning(message.guild.id, user.id, message.author.id, reason);
+    const warns = await getWarnings(message.guild.id, user.id);
 
     message.reply({ embeds: [warnEmbed('Warned', `${user.tag} has been warned.\nReason: ${reason}\nTotal warnings: ${warns.length}`)] });
   },

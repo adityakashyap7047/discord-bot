@@ -215,7 +215,7 @@ module.exports = {
     // Level system
     if (settings.levelSystem && !message.content.startsWith(prefix)) {
       const xpGain = Math.floor(Math.random() * 15) + 5;
-      let levelData = getLevel(message.guild.id, message.author.id);
+      let levelData = await getLevel(message.guild.id, message.author.id);
       if (!levelData) {
         updateLevel(message.guild.id, message.author.id, xpGain, 1);
         levelData = { xp: xpGain, level: 1 };
@@ -245,7 +245,7 @@ module.exports = {
     // Custom commands
     const args = message.content.slice(prefix.length).trim().split(/ +/);
     const commandName = args.shift().toLowerCase();
-    const customCmd = getCustomCommand(message.guild.id, commandName);
+    const customCmd = await getCustomCommand(message.guild.id, commandName);
     if (customCmd) {
       return message.channel.send(customCmd.response.replace('{user}', `<@${message.author.id}>`));
     }

@@ -12,7 +12,7 @@ module.exports = {
     const channel = message.mentions.channels.first();
     if (!channel) return message.reply({ embeds: [errorEmbed('Error', 'Mention a channel.')] });
     updateGuildSetting(client.db, message.guild.id, 'welcomeChannel', channel.id);
-    updateGuildSetting(client.db, message.guild.id, 'welcomeEnabled', 1);
+    updateGuildSetting(client.db, message.guild.id, 'welcomeEnabled', true);
     if (args[1]) updateGuildSetting(client.db, message.guild.id, 'welcomeMessage', args.slice(1).join(' '));
     message.reply({ embeds: [successEmbed('Welcome Set', `Welcome channel set to ${channel}`)] });
   },

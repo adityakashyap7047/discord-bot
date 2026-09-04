@@ -12,7 +12,7 @@ module.exports = {
     const channel = message.mentions.channels.first();
     if (!channel) return message.reply({ embeds: [errorEmbed('Error', 'Mention a channel.')] });
     updateGuildSetting(client.db, message.guild.id, 'goodbyeChannel', channel.id);
-    updateGuildSetting(client.db, message.guild.id, 'goodbyeEnabled', 1);
+    updateGuildSetting(client.db, message.guild.id, 'goodbyeEnabled', true);
     if (args[1]) updateGuildSetting(client.db, message.guild.id, 'goodbyeMessage', args.slice(1).join(' '));
     message.reply({ embeds: [successEmbed('Goodbye Set', `Goodbye channel set to ${channel}`)] });
   },

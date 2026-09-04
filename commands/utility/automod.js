@@ -27,7 +27,7 @@ module.exports = {
       'duplicate': 'duplicateDetection',
       'linkcheck': 'linkReputationCheck',
       'suspiciousname': 'suspiciousUsernameDetection',
-      'massmention': 'massMentionProtection',
+      'massmention': 'massMentionLimit',
     };
 
     if (!feature || !features[feature]) {
@@ -52,7 +52,11 @@ module.exports = {
     }
 
     const key = features[feature];
-    updateGuildSetting(message.guild.id, key, toggle === 'on');
+    if (key === 'massMentionLimit') {
+      updateGuildSetting(message.guild.id, key, toggle === 'on' ? 5 : 0);
+    } else {
+      updateGuildSetting(message.guild.id, key, toggle === 'on');
+    }
 
     return message.reply({
       embeds: [new EmbedBuilder()

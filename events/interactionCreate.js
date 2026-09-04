@@ -25,8 +25,24 @@ module.exports = {
       timestamps.set(interaction.user.id, now);
       setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
 
+      const args = (interaction.options.data || []).map(opt => {
+        if (opt.user) return `<@${opt.user.id}>`;
+        if (opt.channel) return `<#${opt.channel.id}>`;
+        if (opt.role) return `<@&${opt.role.id}>`;
+        if (opt.value !== undefined) return String(opt.value);
+        return '';
+      }).filter(Boolean);
+
+      const source = Object.create(interaction);
+      source.author = interaction.user;
+      source.mentions = {
+        users: {
+          first: () => interaction.options.getUser('user') || interaction.options.data.find(o => o.type === 6)?.user || null,
+        },
+      };
+
       try {
-        await command.execute(interaction, client);
+        await command.execute(source, args, client);
       } catch (error) {
         console.error(`[SLASH COMMAND ERROR] ${command.data.name}:`, error);
         const reply = { content: 'There was an error executing this command!', ephemeral: true };

@@ -6,7 +6,15 @@ const path = require('path');
 const commands = [];
 const commandFolders = fs.readdirSync(path.join(__dirname, 'commands'));
 
+// These folders are excluded from slash registration (still work with ! prefix)
+// Discord has a 100 slash command limit
+const skipFolders = ['fun'];
+
 for (const folder of commandFolders) {
+  if (skipFolders.includes(folder)) {
+    console.log(`⏩ Skipping folder "${folder}" (prefix-only commands)`);
+    continue;
+  }
   const commandFiles = fs.readdirSync(path.join(__dirname, 'commands', folder)).filter(f => f.endsWith('.js'));
   for (const file of commandFiles) {
     const command = require(path.join(__dirname, 'commands', folder, file));
