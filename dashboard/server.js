@@ -172,19 +172,20 @@ function startDashboard(client) {
 
   app.post('/dashboard/:guildId/welcome', isAuthenticated, hasPermission, (req, res) => {
     const s = req.body;
+    const isValidImage = (url) => url && /^https?:\/\/.+\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(url);
     updateGuildSettings(req.guild.id, {
       welcomeEnabled: s.welcomeEnabled === 'on',
       welcomeChannel: s.welcomeChannel || null,
       welcomeMessage: s.welcomeMessage || 'Welcome {user} to {server}!',
       welcomeEmbed: s.welcomeEmbed === 'on',
       welcomeColor: s.welcomeColor || '#00ff00',
-      welcomeImage: s.welcomeImage || '',
+      welcomeImage: isValidImage(s.welcomeImage) ? s.welcomeImage : '',
       goodbyeEnabled: s.goodbyeEnabled === 'on',
       goodbyeChannel: s.goodbyeChannel || null,
       goodbyeMessage: s.goodbyeMessage || 'Goodbye {user}!',
       goodbyeEmbed: s.goodbyeEmbed === 'on',
       goodbyeColor: s.goodbyeColor || '#ff0000',
-      goodbyeImage: s.goodbyeImage || '',
+      goodbyeImage: isValidImage(s.goodbyeImage) ? s.goodbyeImage : '',
       boostMessage: s.boostMessage || '',
       boostChannel: s.boostChannel || null,
       welcomeRoles: s.welcomeRoles ? (Array.isArray(s.welcomeRoles) ? s.welcomeRoles : [s.welcomeRoles]) : [],

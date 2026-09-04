@@ -110,7 +110,9 @@ module.exports = {
             .setDescription(msg + inviterText)
             .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
             .setTimestamp();
-          if (settings.welcomeImage) embed.setImage(settings.welcomeImage);
+          if (settings.welcomeImage && /^https?:\/\/.+\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(settings.welcomeImage)) {
+            embed.setImage(settings.welcomeImage);
+          }
           embed.setFooter({ text: `Member #${member.guild.memberCount}` });
           channel.send({ embeds: [embed] }).catch(() => {});
         } else {

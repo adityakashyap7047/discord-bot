@@ -21,7 +21,9 @@ module.exports = {
             .setDescription(msg)
             .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
             .setTimestamp();
-          if (settings.goodbyeImage) embed.setImage(settings.goodbyeImage);
+          if (settings.goodbyeImage && /^https?:\/\/.+\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(settings.goodbyeImage)) {
+            embed.setImage(settings.goodbyeImage);
+          }
           channel.send({ embeds: [embed] }).catch(() => {});
         } else {
           const msg = (settings.goodbyeMessage || 'Goodbye {user}!')
