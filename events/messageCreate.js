@@ -16,7 +16,7 @@ module.exports = {
     if (!message.member) return;
 
     // AFK check
-    afkCmd.checkAFK(message);
+    try { afkCmd.checkAFK(message); } catch(e) { console.error('[AFK ERROR]', e.message); }
 
     const settings = getGuildSettings(message.guild.id);
     const prefix = settings.prefix || client.config.prefix;
@@ -271,8 +271,8 @@ module.exports = {
     try {
       await command.execute(message, args, client);
     } catch (error) {
-      console.error(error);
-      message.reply('There was an error executing that command!');
+      console.error(`[COMMAND ERROR] ${command.data.name}:`, error.message || error);
+      message.reply('There was an error executing that command!').catch(() => {});
     }
   },
 };

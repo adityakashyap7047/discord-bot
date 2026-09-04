@@ -7,11 +7,25 @@ const { startDashboard } = require('./dashboard/server');
 
 process.on('uncaughtException', (err) => {
   console.error('[FATAL] Uncaught Exception:', err);
+  process.exit(1);
 });
 
 process.on('unhandledRejection', (reason) => {
   console.error('[FATAL] Unhandled Rejection:', reason);
 });
+
+function gracefulShutdown(signal) {
+  console.log(`[SHUTDOWN] Received ${signal}, shutting down gracefully...`);
+  try {
+    client.destroy();
+    console.log('[SHUTDOWN] Discord client destroyed');
+  } catch (e) {
+    console.error('[SHUTDOWN] Error destroying client:', e);
+  }
+  process.exit(0);
+}
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 const client = new Client({
   intents: [
@@ -122,15 +136,23 @@ client.once('ready', () => {
 
   const publicUrl = process.env.RENDER_EXTERNAL_URL || process.env.RENDER_URL || (process.env.RENDER ? `https://${process.env.RENDER_SERVICE_NAME}.onrender.com` : '');
   if (publicUrl) {
-    const http = require('http');
-    setInterval(() => {
-      http.get(publicUrl, (res) => {
-        console.log(`[KEEP-ALIVE] Pinged ${publicUrl} - Status: ${res.statusCode}`);
-      }).on('error', (err) => {
+    const https = publicUrl.startsWith('https') ? require('https') : require('http');
+    function keepAlive() {
+      const req = https.get(publicUrl, { timeout: 15000 }, (res) => {
+        console.log(`[KEEP-ALIVE] Ping OK — Status: ${res.statusCode}`);
+        res.resume();
+      });
+      req.on('error', (err) => {
         console.error('[KEEP-ALIVE] Ping failed:', err.message);
       });
-    }, 10 * 60 * 1000);
-    console.log(`[KEEP-ALIVE] Pinger active for ${publicUrl}`);
+      req.on('timeout', () => {
+        req.destroy();
+        console.error('[KEEP-ALIVE] Ping timed out');
+      });
+    }
+    keepAlive();
+    setInterval(keepAlive, 8 * 60 * 1000);
+    console.log(`[KEEP-ALIVE] Pinger active for ${publicUrl} (every 8 min)`);
   }
 });
 

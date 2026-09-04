@@ -709,9 +709,12 @@ function startDashboard(client) {
   });
 
   const port = client.config.port || 3000;
-  app.listen(port, () => {
+  const server = app.listen(port, () => {
     console.log(`\n🌐 Dashboard: ${publicUrl || 'http://localhost:' + port}`);
     console.log(`🤖 Bot: ${client.user ? 'Connected' : 'Connecting...'}\n`);
+  });
+  server.on('error', (err) => {
+    console.error('[DASHBOARD] Server error:', err.message);
   });
 }
 
