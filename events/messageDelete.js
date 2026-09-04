@@ -1,5 +1,5 @@
 const { Events, EmbedBuilder } = require('discord.js');
-const { getGuildSettings } = require('../utils/database');
+const { getGuildSettings, addLog } = require('../utils/database');
 
 module.exports = {
   name: Events.MessageDelete,
@@ -24,6 +24,7 @@ module.exports = {
       embed.addFields({ name: 'Attachments', value: message.attachments.map(a => a.url).join('\n').slice(0, 1024) });
     }
     channel.send({ embeds: [embed] }).catch(() => {});
+    addLog(message.guild.id, 'message_delete', null, message.author.id, 'Message deleted', { channelId: message.channel.id });
 
     // Snipe support
     try {

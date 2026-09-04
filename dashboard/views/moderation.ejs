@@ -13,6 +13,8 @@
     <div class="main">
       <h1>&#128737; Moderation</h1>
       <p class="sub">Auto-moderation and moderation tools. Toggle features on/off instantly.</p>
+      <% if (typeof query !== 'undefined' && query.error) { %><p class="sub" style="color:#f87171"><%= query.error %></p><% } %>
+      <% if (typeof query !== 'undefined' && query.sent) { %><p class="sub" style="color:#4ade80"><%= query.sent %></p><% } %>
       <div class="card">
         <div class="card-h"><h2>&#128293; Auto-Moderation</h2><span class="badge <%= settings.autoMod || settings.antiSpam || settings.antiLink ? 'b-green' : 'b-red' %>"><%= settings.autoMod || settings.antiSpam || settings.antiLink ? 'Active' : 'Off' %></span></div>
         <div class="sw"><div class="info"><div class="t">&#128172; Bad Word Filter</div><div class="d">Delete messages with banned words</div></div><label class="toggle"><input type="checkbox" <%= settings.autoMod ? 'checked' : '' %> data-auto="autoMod"><span class="sl"></span></label></div>
@@ -39,6 +41,7 @@
         <div class="field"><label>Mass Mention Limit</label><input type="number" value="<%= settings.massMentionLimit || 5 %>" min="1" max="20" data-auto="massMentionLimit"><small>Max mentions per message (0 = disabled)</small></div>
         <div class="field"><label>Scam Action</label><select data-auto="scamAction"><option value="delete" <%= settings.scamAction === 'delete' ? 'selected' : '' %>>Delete Only</option><option value="mute" <%= settings.scamAction === 'mute' ? 'selected' : '' %>>Delete + Mute</option><option value="kick" <%= settings.scamAction === 'kick' ? 'selected' : '' %>>Delete + Kick</option><option value="ban" <%= settings.scamAction === 'ban' ? 'selected' : '' %>>Delete + Ban</option></select></div>
         <div class="field"><label>Scam Log Channel</label><select data-auto="scamLogChannel"><option value="">Select</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.scamLogChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option><% }); %></select></div>
+        <form action="/dashboard/<%= guild.id %>/test-message/moderation" method="POST"><button type="submit" class="btn btn-s">🧪 Send Test Moderation Alert</button></form>
       </div>
 
       <div class="card">

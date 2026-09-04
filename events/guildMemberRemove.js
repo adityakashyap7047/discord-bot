@@ -1,5 +1,5 @@
 const { Events, EmbedBuilder } = require('discord.js');
-const { getGuildSettings } = require('../utils/database');
+const { getGuildSettings, addLog } = require('../utils/database');
 
 module.exports = {
   name: Events.GuildMemberRemove,
@@ -51,6 +51,7 @@ module.exports = {
           .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
           .setTimestamp();
         logCh.send({ embeds: [embed] }).catch(() => {});
+        addLog(member.guild.id, 'member_leave', null, member.id, 'Member left the server');
       }
     }
   },

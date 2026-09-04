@@ -8,6 +8,20 @@ const DB_FILE = path.join(DB_DIR, 'bot.json');
 let cache = null;
 let saveTimeout = null;
 let dirty = false;
+const guildSaveQueues = new Map();
+
+function persistGuildSettings(guildId, settings) {
+  if (!supa.isAvailable()) return Promise.resolve();
+  const snapshot = JSON.parse(JSON.stringify(settings));
+  const previous = guildSaveQueues.get(guildId) || Promise.resolve();
+  const queued = previous
+    .catch(() => {})
+    .then(() => supa.upsertGuildSettings(guildId, snapshot));
+  guildSaveQueues.set(guildId, queued);
+  return queued.catch((error) => {
+    console.error('[DB] Supabase save error:', error.message);
+  });
+}
 
 function ensureDir() {
   if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
@@ -176,6 +190,11 @@ const defaultSettings = {
 async function getGuildSettings(guildId) {
   const db = loadDB();
 
+  // The in-memory value is the newest value during this process. Reading a
+  // slower remote copy here could otherwise make dashboard toggles appear to
+  // switch themselves off immediately after they are saved.
+  if (db.guild_settings[guildId]) return db.guild_settings[guildId];
+
   // Try Supabase first
   if (supa.isAvailable()) {
     const supaSettings = await supa.getGuildSettingsSupabase(guildId);
@@ -192,9 +211,7 @@ async function getGuildSettings(guildId) {
     db.guild_settings[guildId] = { guildId, ...defaultSettings };
     saveDB(db);
     // Save to Supabase if available
-    if (supa.isAvailable()) {
-      supa.upsertGuildSettings(guildId, db.guild_settings[guildId]).catch(e => console.error('[DB] Supabase save error:', e.message));
-    }
+    await persistGuildSettings(guildId, db.guild_settings[guildId]);
   }
   return db.guild_settings[guildId];
 }
@@ -205,9 +222,7 @@ async function updateGuildSetting(guildId, key, value) {
   db.guild_settings[guildId][key] = value;
   saveDB(db);
   // Persist to Supabase
-  if (supa.isAvailable()) {
-    supa.upsertGuildSettings(guildId, db.guild_settings[guildId]).catch(e => console.error('[DB] Supabase save error:', e.message));
-  }
+  await persistGuildSettings(guildId, db.guild_settings[guildId]);
 }
 
 async function updateGuildSettings(guildId, updates) {
@@ -216,9 +231,7 @@ async function updateGuildSettings(guildId, updates) {
   Object.assign(db.guild_settings[guildId], updates);
   saveDB(db);
   // Persist to Supabase
-  if (supa.isAvailable()) {
-    supa.upsertGuildSettings(guildId, db.guild_settings[guildId]).catch(e => console.error('[DB] Supabase save error:', e.message));
-  }
+  await persistGuildSettings(guildId, db.guild_settings[guildId]);
 }
 
 async function addWarning(guildId, userId, moderatorId, reason) {
@@ -414,7 +427,18 @@ async function addLog(guildId, type, moderatorId, targetId, reason, details) {
 }
 
 async function getLogs(guildId, type, limit = 50) {
-  if (supa.isAvailable()) return supa.getLogs(guildId, type, limit);
+  if (supa.isAvailable()) {
+    const logs = await supa.getLogs(guildId, type, limit);
+    return logs.map(log => ({
+      guildId: log.guild_id,
+      type: log.type,
+      moderatorId: log.moderator_id,
+      targetId: log.target_id,
+      reason: log.reason,
+      details: log.details,
+      timestamp: log.created_at,
+    }));
+  }
   const db = loadDB();
   return (db.logs || [])
     .filter(l => l.guildId === guildId && (!type || l.type === type))

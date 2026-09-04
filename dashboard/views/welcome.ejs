@@ -16,6 +16,8 @@
     <div class="main">
       <h1>&#128075; Welcome & Goodbye</h1>
       <p class="sub">Configure welcome and goodbye messages. All changes auto-save.</p>
+      <% if (typeof query !== 'undefined' && query.error) { %><p class="sub" style="color:#f87171"><%= query.error %></p><% } %>
+      <% if (typeof query !== 'undefined' && query.sent) { %><p class="sub" style="color:#4ade80"><%= query.sent %></p><% } %>
 
       <div class="card">
         <div class="card-h"><h2>&#128075; Welcome</h2><span class="badge <%= settings.welcomeEnabled ? 'b-green' : 'b-red' %>"><%= settings.welcomeEnabled ? 'ON' : 'OFF' %></span></div>
@@ -31,6 +33,7 @@
         <div style="margin-top:1rem;"><label style="font-weight:500;font-size:0.85rem;display:block;margin-bottom:0.5rem;">&#128065; Preview</label>
           <div class="msg-pre"><div class="mh"><div class="ma">B</div><div><div class="mn">Bot</div></div><div class="mt">Today</div></div><div class="mc"><strong style="color:var(--accent2);">@User</strong> <%= (settings.welcomeMessage || '').replace('{user}','').replace('{server}',guild.name).replace('{memberCount}',guild.memberCount) %></div><% if (settings.welcomeImage) { %><div style="margin-top:8px;"><img src="<%= settings.welcomeImage %>" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid rgba(139,92,246,0.3);" onerror="this.style.display='none'" alt="Welcome image"></div><% } %></div>
         </div>
+        <form action="/dashboard/<%= guild.id %>/test-message/welcome" method="POST" style="margin-top:1rem;"><button type="submit" class="btn btn-s">🧪 Send Test Welcome Message</button></form>
       </div>
 
       <div class="card">

@@ -13,9 +13,12 @@
     <div class="main">
       <h1>&#128203; Logging</h1>
       <p class="sub">Track what happens in your server.</p>
+      <% if (typeof query !== 'undefined' && query.error) { %><p class="sub" style="color:#f87171"><%= query.error %></p><% } %>
+      <% if (typeof query !== 'undefined' && query.sent) { %><p class="sub" style="color:#4ade80"><%= query.sent %></p><% } %>
       <div class="card">
         <div class="card-h"><h2>&#128196; Log Channel</h2></div>
         <div class="field"><label>Channel for logs</label><select data-auto="logChannel"><option value="">Select</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.logChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option><% }); %></select></div>
+        <form action="/dashboard/<%= guild.id %>/test-message/logging" method="POST"><button type="submit" class="btn btn-s">🧪 Send Test Log</button></form>
       </div>
       <div class="card">
         <div class="card-h"><h2>&#128196; What to Log</h2></div>

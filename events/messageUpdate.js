@@ -1,5 +1,5 @@
 const { Events, EmbedBuilder } = require('discord.js');
-const { getGuildSettings } = require('../utils/database');
+const { getGuildSettings, addLog } = require('../utils/database');
 
 module.exports = {
   name: Events.MessageUpdate,
@@ -23,6 +23,7 @@ module.exports = {
       )
       .setTimestamp();
     channel.send({ embeds: [embed] }).catch(() => {});
+    addLog(oldMessage.guild.id, 'message_edit', null, oldMessage.author.id, 'Message edited', { channelId: oldMessage.channel.id });
 
     // Edit snipe support
     try {

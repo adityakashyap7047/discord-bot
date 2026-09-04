@@ -13,11 +13,14 @@
     <div class="main">
       <h1>&#128200; Level System</h1>
       <p class="sub">XP and leveling for active members.</p>
+      <% if (typeof query !== 'undefined' && query.error) { %><p class="sub" style="color:#f87171"><%= query.error %></p><% } %>
+      <% if (typeof query !== 'undefined' && query.sent) { %><p class="sub" style="color:#4ade80"><%= query.sent %></p><% } %>
       <div class="card">
         <div class="card-h"><h2>&#128200; Settings</h2><span class="badge <%= settings.levelSystem ? 'b-green' : 'b-red' %>"><%= settings.levelSystem ? 'ON' : 'OFF' %></span></div>
         <div class="sw"><div class="info"><div class="t">Enable Level System</div><div class="d">Members gain XP by chatting</div></div><label class="toggle"><input type="checkbox" <%= settings.levelSystem ? 'checked' : '' %> data-auto="levelSystem"><span class="sl"></span></label></div>
         <div class="field" style="margin-top:1rem;"><label>Level-Up Channel</label><select data-auto="levelChannel"><option value="">Current channel</option><% channels.forEach(ch => { %><option value="<%= ch.id %>" <%= settings.levelChannel === ch.id ? 'selected' : '' %>>#<%= ch.name %></option><% }); %></select></div>
         <div class="field"><label>Level-Up Message</label><textarea rows="2" data-auto="levelUpMessage"><%= settings.levelUpMessage || '' %></textarea><small>Variables: <code>{user}</code> mention, <code>{level}</code> level</small></div>
+        <form action="/dashboard/<%= guild.id %>/test-message/level" method="POST"><button type="submit" class="btn btn-s">🧪 Send Test Level-Up Message</button></form>
       </div>
       <div class="card">
         <div class="card-h"><h2>&#127942; Leaderboard</h2><span class="badge b-blue"><%= leaderboard.length %> users</span></div>

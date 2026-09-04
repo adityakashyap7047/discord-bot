@@ -174,6 +174,7 @@ module.exports = {
           .setThumbnail(member.user.displayAvatarURL({ dynamic: true }))
           .setTimestamp();
         logCh.send({ embeds: [embed] }).catch(() => {});
+        addLog(member.guild.id, 'member_join', null, member.id, 'Member joined the server');
       }
     }
   },

@@ -143,7 +143,7 @@ function startDashboard(client) {
     res.render('server', { user: req.user, guild: g, settings, channels, roles, stats, currentPage: 'settings' });
   });
 
-  app.post('/dashboard/:guildId/update', isAuthenticated, hasPermission, (req, res) => {
+  app.post('/dashboard/:guildId/update', isAuthenticated, hasPermission, async (req, res) => {
     const s = req.body;
     const updates = {};
     for (const [key, value] of Object.entries(s)) {
@@ -157,7 +157,7 @@ function startDashboard(client) {
         updates[key] = value;
       }
     }
-    updateGuildSettings(req.guild.id, updates);
+    await updateGuildSettings(req.guild.id, updates);
     if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
       return res.json({ success: true });
     }
@@ -170,7 +170,7 @@ function startDashboard(client) {
     const settings = req.guildSettings;
     const channels = g.channels.cache.filter(c => c.type === 0).map(c => ({ id: c.id, name: c.name }));
     const roles = g.roles.cache.filter(r => r.id !== g.id).map(r => ({ id: r.id, name: r.name }));
-    res.render('welcome', { user: req.user, guild: g, settings, channels, roles, currentPage: 'welcome' });
+    res.render('welcome', { user: req.user, guild: g, settings, channels, roles, currentPage: 'welcome', query: req.query });
   });
 
   app.post('/dashboard/:guildId/welcome', isAuthenticated, hasPermission, (req, res) => {
@@ -202,7 +202,7 @@ function startDashboard(client) {
     const settings = req.guildSettings;
     const channels = g.channels.cache.filter(c => c.type === 0).map(c => ({ id: c.id, name: c.name }));
     const roles = g.roles.cache.filter(r => r.id !== g.id).map(r => ({ id: r.id, name: r.name }));
-    res.render('moderation', { user: req.user, guild: g, settings, channels, roles, currentPage: 'moderation' });
+    res.render('moderation', { user: req.user, guild: g, settings, channels, roles, currentPage: 'moderation', query: req.query });
   });
 
   app.post('/dashboard/:guildId/moderation', isAuthenticated, hasPermission, (req, res) => {
@@ -222,12 +222,12 @@ function startDashboard(client) {
   });
 
   // ============ LOGGING ============
-  app.get('/dashboard/:guildId/logging', isAuthenticated, hasPermission, (req, res) => {
+  app.get('/dashboard/:guildId/logging', isAuthenticated, hasPermission, async (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
     const channels = g.channels.cache.filter(c => c.type === 0).map(c => ({ id: c.id, name: c.name }));
-    const logs = getLogs(g.id, null, 50);
-    res.render('logging', { user: req.user, guild: g, settings, channels, logs, currentPage: 'logging' });
+    const logs = await getLogs(g.id, null, 50);
+    res.render('logging', { user: req.user, guild: g, settings, channels, logs, currentPage: 'logging', query: req.query });
   });
 
   app.post('/dashboard/:guildId/logging', isAuthenticated, hasPermission, (req, res) => {
@@ -241,6 +241,27 @@ function startDashboard(client) {
       voiceChannelLog: s.voiceChannelLog === 'on',
     });
     res.redirect(`/dashboard/${req.guild.id}/logging?saved=true`);
+  });
+
+  app.post('/dashboard/:guildId/test-message/logging', isAuthenticated, hasPermission, async (req, res) => {
+    const settings = await getGuildSettings(req.guild.id);
+    const channel = req.guild.channels.cache.get(settings.logChannel);
+    if (!channel || !channel.isTextBased() || typeof channel.send !== 'function') {
+      return res.redirect(`/dashboard/${req.guild.id}/logging?error=${encodeURIComponent('Choose a valid log channel before testing.')}`);
+    }
+    try {
+      const { EmbedBuilder } = require('discord.js');
+      await channel.send({ embeds: [new EmbedBuilder()
+        .setColor('#3b82f6')
+        .setTitle('Logging Test')
+        .setDescription('🧪 The bot can send messages to this log channel.')
+        .setFooter({ text: 'Dashboard test message' })
+        .setTimestamp()] });
+      return res.redirect(`/dashboard/${req.guild.id}/logging?sent=${encodeURIComponent('Logging test message sent successfully.')}`);
+    } catch (error) {
+      console.error('[DASHBOARD] Logging test failed:', error);
+      return res.redirect(`/dashboard/${req.guild.id}/logging?error=${encodeURIComponent('The bot could not send to this log channel. Check its permissions.')}`);
+    }
   });
 
   // ============ ROLES ============
@@ -359,7 +380,7 @@ function startDashboard(client) {
     const settings = req.guildSettings;
     const leaderboard = getLeaderboard(g.id);
     const channels = g.channels.cache.filter(c => c.type === 0).map(c => ({ id: c.id, name: c.name }));
-    res.render('levels', { user: req.user, guild: g, settings, leaderboard, channels, currentPage: 'levels' });
+    res.render('levels', { user: req.user, guild: g, settings, leaderboard, channels, currentPage: 'levels', query: req.query });
   });
 
   app.post('/dashboard/:guildId/levels', isAuthenticated, hasPermission, (req, res) => {
@@ -369,6 +390,51 @@ function startDashboard(client) {
       levelUpMessage: req.body.levelUpMessage || '🎉 {user} leveled up to **Level {level}**!',
     });
     res.redirect(`/dashboard/${req.guild.id}/levels?saved=true`);
+  });
+
+  // ============ MESSAGE TESTS ============
+  app.post('/dashboard/:guildId/test-message/:type', isAuthenticated, hasPermission, async (req, res) => {
+    const settings = await getGuildSettings(req.guild.id);
+    const { EmbedBuilder } = require('discord.js');
+    const type = req.params.type;
+    let channelId;
+    let payload;
+
+    if (type === 'welcome') {
+      channelId = settings.welcomeChannel;
+      const message = (settings.welcomeMessage || 'Welcome {user} to {server}!')
+        .replace('{user}', `<@${req.user.id}>`)
+        .replace('{server}', req.guild.name)
+        .replace('{memberCount}', req.guild.memberCount);
+      payload = settings.welcomeEmbed
+        ? { embeds: [new EmbedBuilder().setColor(settings.welcomeColor || '#00ff00').setDescription(message).setFooter({ text: 'Welcome message test' })] }
+        : { content: `🧪 **Welcome message test**\n${message}` };
+    } else if (type === 'level') {
+      channelId = settings.levelChannel;
+      if (!channelId) return res.redirect(`/dashboard/${req.guild.id}/levels?error=${encodeURIComponent('Choose a level-up channel before testing.')}`);
+      const message = (settings.levelUpMessage || '🎉 {user} leveled up to **Level {level}**!')
+        .replace('{user}', `<@${req.user.id}>`)
+        .replace('{level}', '1');
+      payload = { content: `🧪 **Level-up message test**\n${message}` };
+    } else if (type === 'moderation') {
+      channelId = settings.scamLogChannel || settings.logChannel;
+      payload = { embeds: [new EmbedBuilder().setColor('#f59e0b').setTitle('Auto-Moderation Test').setDescription('🧪 Your moderation alert channel is working correctly.').setFooter({ text: 'Dashboard test message' }).setTimestamp()] };
+    } else {
+      return res.status(400).send('Unknown test message type.');
+    }
+
+    const channel = req.guild.channels.cache.get(channelId);
+    const page = type === 'level' ? 'levels' : type === 'welcome' ? 'welcome' : 'moderation';
+    if (!channel || !channel.isTextBased() || typeof channel.send !== 'function') {
+      return res.redirect(`/dashboard/${req.guild.id}/${page}?error=${encodeURIComponent('Configure a valid text channel before testing.')}`);
+    }
+    try {
+      await channel.send(payload);
+      return res.redirect(`/dashboard/${req.guild.id}/${page}?sent=${encodeURIComponent('Test message sent successfully.')}`);
+    } catch (error) {
+      console.error('[DASHBOARD] Test message failed:', error);
+      return res.redirect(`/dashboard/${req.guild.id}/${page}?error=${encodeURIComponent('The bot could not send the test message. Check Send Messages and Embed Links permissions.')}`);
+    }
   });
 
   // ============ STARBORD ============
