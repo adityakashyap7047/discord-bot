@@ -3,6 +3,7 @@ const { Client, GatewayIntentBits, Collection, Partials } = require('discord.js'
 const fs = require('fs');
 const path = require('path');
 const db = require('./utils/database');
+const supa = require('./utils/supabase');
 const { startDashboard } = require('./dashboard/server');
 
 process.on('uncaughtException', (err) => {
@@ -115,6 +116,7 @@ client.on('shardDisconnect', (event, shardId) => {
   console.warn(`[SHARD ${shardId}] Disconnected (code: ${event.code})`);
 });
 
+supa.initSupabase();
 db.loadDB();
 startDashboard(client);
 

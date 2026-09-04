@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const supa = require('./supabase');
 
 const DB_DIR = path.join(__dirname, '..', 'data');
 const DB_FILE = path.join(DB_DIR, 'bot.json');
@@ -183,46 +184,54 @@ function updateGuildSettings(guildId, updates) {
   saveDB(db);
 }
 
-function addWarning(guildId, userId, moderatorId, reason) {
+async function addWarning(guildId, userId, moderatorId, reason) {
+  if (supa.isAvailable()) return supa.addWarning(guildId, userId, moderatorId, reason);
   const db = loadDB();
   db.warnings.push({ guildId, userId, moderatorId, reason, timestamp: new Date().toISOString() });
   saveDB(db);
 }
 
-function getWarnings(guildId, userId) {
+async function getWarnings(guildId, userId) {
+  if (supa.isAvailable()) return supa.getWarnings(guildId, userId);
   const db = loadDB();
   return db.warnings.filter(w => w.guildId === guildId && w.userId === userId);
 }
 
-function clearWarnings(guildId, userId) {
+async function clearWarnings(guildId, userId) {
+  if (supa.isAvailable()) return supa.clearWarnings(guildId, userId);
   const db = loadDB();
   db.warnings = db.warnings.filter(w => !(w.guildId === guildId && w.userId === userId));
   saveDB(db);
 }
 
-function addReactionRole(guildId, channelId, messageId, emoji, roleId) {
+async function addReactionRole(guildId, channelId, messageId, emoji, roleId) {
+  if (supa.isAvailable()) return supa.addReactionRole(guildId, channelId, messageId, emoji, roleId);
   const db = loadDB();
   db.reaction_roles.push({ guildId, channelId, messageId, emoji, roleId });
   saveDB(db);
 }
 
-function getReactionRoles(guildId) {
+async function getReactionRoles(guildId) {
+  if (supa.isAvailable()) return supa.getReactionRoles(guildId);
   const db = loadDB();
   return db.reaction_roles.filter(r => r.guildId === guildId);
 }
 
-function removeReactionRole(guildId, messageId, emoji) {
+async function removeReactionRole(guildId, messageId, emoji) {
+  if (supa.isAvailable()) return supa.removeReactionRole(guildId, messageId, emoji);
   const db = loadDB();
   db.reaction_roles = db.reaction_roles.filter(r => !(r.guildId === guildId && r.messageId === messageId && r.emoji === emoji));
   saveDB(db);
 }
 
-function getReactionRole(guildId, messageId, emoji) {
+async function getReactionRole(guildId, messageId, emoji) {
+  if (supa.isAvailable()) return supa.getReactionRole(guildId, messageId, emoji);
   const db = loadDB();
   return db.reaction_roles.find(r => r.guildId === guildId && r.messageId === messageId && r.emoji === emoji);
 }
 
-function addCustomCommand(guildId, name, response, createdBy) {
+async function addCustomCommand(guildId, name, response, createdBy) {
+  if (supa.isAvailable()) return supa.addCustomCommand(guildId, name, response, createdBy);
   const db = loadDB();
   const idx = db.custom_commands.findIndex(c => c.guildId === guildId && c.name === name);
   if (idx >= 0) {
@@ -235,28 +244,32 @@ function addCustomCommand(guildId, name, response, createdBy) {
   saveDB(db);
 }
 
-function removeCustomCommand(guildId, name) {
+async function removeCustomCommand(guildId, name) {
+  if (supa.isAvailable()) return supa.removeCustomCommand(guildId, name);
   const db = loadDB();
   db.custom_commands = db.custom_commands.filter(c => !(c.guildId === guildId && c.name === name));
   saveDB(db);
 }
 
-function getCustomCommand(guildId, name) {
+async function getCustomCommand(guildId, name) {
   const db = loadDB();
   return db.custom_commands.find(c => c.guildId === guildId && c.name === name);
 }
 
-function getCustomCommands(guildId) {
+async function getCustomCommands(guildId) {
+  if (supa.isAvailable()) return supa.getCustomCommands(guildId);
   const db = loadDB();
   return db.custom_commands.filter(c => c.guildId === guildId);
 }
 
-function getLevel(guildId, userId) {
+async function getLevel(guildId, userId) {
+  if (supa.isAvailable()) return supa.getLevel(guildId, userId);
   const db = loadDB();
   return db.level_system.find(l => l.guildId === guildId && l.userId === userId);
 }
 
-function updateLevel(guildId, userId, xp, level) {
+async function updateLevel(guildId, userId, xp, level) {
+  if (supa.isAvailable()) return supa.upsertLevel(guildId, userId, xp, level);
   const db = loadDB();
   const idx = db.level_system.findIndex(l => l.guildId === guildId && l.userId === userId);
   if (idx >= 0) {
@@ -268,7 +281,8 @@ function updateLevel(guildId, userId, xp, level) {
   saveDB(db);
 }
 
-function getLeaderboard(guildId) {
+async function getLeaderboard(guildId) {
+  if (supa.isAvailable()) return supa.getLeaderboard(guildId);
   const db = loadDB();
   return db.level_system
     .filter(l => l.guildId === guildId)
@@ -276,19 +290,22 @@ function getLeaderboard(guildId) {
     .slice(0, 20);
 }
 
-function addReminder(userId, channelId, reminder, remindAt) {
+async function addReminder(userId, channelId, reminder, remindAt) {
+  if (supa.isAvailable()) return supa.addReminder(userId, channelId, reminder, remindAt);
   const db = loadDB();
   db.reminders.push({ userId, channelId, reminder, remindAt });
   saveDB(db);
 }
 
-function removeReminder(userId, reminder) {
+async function removeReminder(userId, reminder) {
+  if (supa.isAvailable()) return supa.removeReminder(userId, reminder);
   const db = loadDB();
   db.reminders = db.reminders.filter(r => !(r.userId === userId && r.reminder === reminder));
   saveDB(db);
 }
 
-function addInvite(guildId, code, inviterId, uses) {
+async function addInvite(guildId, code, inviterId, uses) {
+  if (supa.isAvailable()) return supa.addInvite(guildId, code, inviterId, uses);
   const db = loadDB();
   if (!db.invites) db.invites = {};
   if (!db.invites[guildId]) db.invites[guildId] = {};
@@ -296,7 +313,8 @@ function addInvite(guildId, code, inviterId, uses) {
   saveDB(db);
 }
 
-function updateInvite(guildId, code, uses) {
+async function updateInvite(guildId, code, uses) {
+  if (supa.isAvailable()) return supa.updateInvite(guildId, code, uses);
   const db = loadDB();
   if (db.invites[guildId] && db.invites[guildId][code]) {
     db.invites[guildId][code].uses = uses;
@@ -304,7 +322,8 @@ function updateInvite(guildId, code, uses) {
   }
 }
 
-function getInvites(guildId) {
+async function getInvites(guildId) {
+  if (supa.isAvailable()) return supa.getInvites(guildId);
   const db = loadDB();
   return db.invites[guildId] || {};
 }
@@ -323,25 +342,29 @@ function getInviteLeaderboard(guildId) {
     .map(([userId, uses]) => ({ userId, uses }));
 }
 
-function addTempban(guildId, userId, expiresAt) {
+async function addTempban(guildId, userId, expiresAt) {
+  if (supa.isAvailable()) return supa.addTempban(guildId, userId, expiresAt);
   const db = loadDB();
   if (!db.tempbans) db.tempbans = [];
   db.tempbans.push({ guildId, userId, expiresAt });
   saveDB(db);
 }
 
-function removeTempban(guildId, userId) {
+async function removeTempban(guildId, userId) {
+  if (supa.isAvailable()) return supa.removeTempban(guildId, userId);
   const db = loadDB();
   db.tempbans = (db.tempbans || []).filter(t => !(t.guildId === guildId && t.userId === userId));
   saveDB(db);
 }
 
-function getTempbans(guildId) {
+async function getTempbans(guildId) {
+  if (supa.isAvailable()) return supa.getTempbans(guildId);
   const db = loadDB();
   return (db.tempbans || []).filter(t => t.guildId === guildId);
 }
 
-function addLog(guildId, type, moderatorId, targetId, reason, details) {
+async function addLog(guildId, type, moderatorId, targetId, reason, details) {
+  if (supa.isAvailable()) return supa.addLog(guildId, type, moderatorId, targetId, reason, details);
   const db = loadDB();
   if (!db.logs) db.logs = [];
   db.logs.push({ guildId, type, moderatorId, targetId, reason, details, timestamp: new Date().toISOString() });
@@ -349,7 +372,8 @@ function addLog(guildId, type, moderatorId, targetId, reason, details) {
   saveDB(db);
 }
 
-function getLogs(guildId, type, limit = 50) {
+async function getLogs(guildId, type, limit = 50) {
+  if (supa.isAvailable()) return supa.getLogs(guildId, type, limit);
   const db = loadDB();
   return (db.logs || [])
     .filter(l => l.guildId === guildId && (!type || l.type === type))
@@ -357,18 +381,21 @@ function getLogs(guildId, type, limit = 50) {
     .slice(0, limit);
 }
 
-function getStarboard(guildId, messageId) {
+async function getStarboard(guildId, messageId) {
+  if (supa.isAvailable()) return supa.getStarboard(guildId, messageId);
   const db = loadDB();
   return db.starboard.find(s => s.guildId === guildId && s.messageId === messageId);
 }
 
-function addStarboard(guildId, messageId, starboardMessageId, stars) {
+async function addStarboard(guildId, messageId, starboardMessageId, stars) {
+  if (supa.isAvailable()) return supa.addStarboard(guildId, messageId, starboardMessageId, stars);
   const db = loadDB();
   db.starboard.push({ guildId, messageId, starboardMessageId, stars });
   saveDB(db);
 }
 
-function addEmbed(guildId, name, embedData, createdBy) {
+async function addEmbed(guildId, name, embedData, createdBy) {
+  if (supa.isAvailable()) return supa.addEmbed(guildId, name, embedData, createdBy);
   const db = loadDB();
   if (!db.embeds) db.embeds = [];
   const idx = db.embeds.findIndex(e => e.guildId === guildId && e.name === name);
@@ -380,23 +407,27 @@ function addEmbed(guildId, name, embedData, createdBy) {
   saveDB(db);
 }
 
-function removeEmbed(guildId, name) {
+async function removeEmbed(guildId, name) {
+  if (supa.isAvailable()) return supa.removeEmbed(guildId, name);
   const db = loadDB();
   db.embeds = (db.embeds || []).filter(e => !(e.guildId === guildId && e.name === name));
   saveDB(db);
 }
 
-function getEmbeds(guildId) {
+async function getEmbeds(guildId) {
+  if (supa.isAvailable()) return supa.getEmbeds(guildId);
   const db = loadDB();
   return (db.embeds || []).filter(e => e.guildId === guildId);
 }
 
-function getEmbed(guildId, name) {
+async function getEmbed(guildId, name) {
+  if (supa.isAvailable()) return supa.getEmbed(guildId, name);
   const db = loadDB();
   return (db.embeds || []).find(e => e.guildId === guildId && e.name === name);
 }
 
-function getGuildStats(guildId) {
+async function getGuildStats(guildId) {
+  if (supa.isAvailable()) return supa.getGuildStats(guildId);
   const db = loadDB();
   return {
     warnings: db.warnings.filter(w => w.guildId === guildId).length,
@@ -409,7 +440,14 @@ function getGuildStats(guildId) {
 }
 
 // ============ ECONOMY ============
-function getEconomy(guildId, userId) {
+async function getEconomy(guildId, userId) {
+  if (supa.isAvailable()) {
+    const data = await supa.getEconomy(guildId, userId);
+    if (data) return data;
+    const entry = { guildId, userId, wallet: 0, bank: 0, lastDaily: 0, lastWork: 0, lastRob: 0 };
+    await supa.upsertEconomy(guildId, userId, entry);
+    return entry;
+  }
   const db = loadDB();
   if (!db.economy) db.economy = [];
   let entry = db.economy.find(e => e.guildId === guildId && e.userId === userId);
@@ -421,7 +459,13 @@ function getEconomy(guildId, userId) {
   return entry;
 }
 
-function updateEconomy(guildId, userId, updates) {
+async function updateEconomy(guildId, userId, updates) {
+  if (supa.isAvailable()) {
+    const existing = await supa.getEconomy(guildId, userId);
+    const merged = existing ? { ...existing, ...updates } : { guildId, userId, wallet: 0, bank: 0, lastDaily: 0, lastWork: 0, lastRob: 0, ...updates };
+    await supa.upsertEconomy(guildId, userId, merged);
+    return merged;
+  }
   const db = loadDB();
   if (!db.economy) db.economy = [];
   let entry = db.economy.find(e => e.guildId === guildId && e.userId === userId);
@@ -434,7 +478,8 @@ function updateEconomy(guildId, userId, updates) {
   return entry;
 }
 
-function getEconomyLeaderboard(guildId) {
+async function getEconomyLeaderboard(guildId) {
+  if (supa.isAvailable()) return supa.getEconomyLeaderboard(guildId);
   const db = loadDB();
   return (db.economy || [])
     .filter(e => e.guildId === guildId)
@@ -443,7 +488,14 @@ function getEconomyLeaderboard(guildId) {
 }
 
 // ============ INVENTORY ============
-function getInventory(guildId, userId) {
+async function getInventory(guildId, userId) {
+  if (supa.isAvailable()) {
+    const data = await supa.getInventory(guildId, userId);
+    if (data) return data;
+    const entry = { guildId, userId, items: {} };
+    await supa.upsertInventory(guildId, userId, {});
+    return entry;
+  }
   const db = loadDB();
   if (!db.inventories) db.inventories = [];
   let entry = db.inventories.find(e => e.guildId === guildId && e.userId === userId);
@@ -455,7 +507,11 @@ function getInventory(guildId, userId) {
   return entry;
 }
 
-function updateInventory(guildId, userId, items) {
+async function updateInventory(guildId, userId, items) {
+  if (supa.isAvailable()) {
+    await supa.upsertInventory(guildId, userId, items);
+    return { guildId, userId, items };
+  }
   const db = loadDB();
   if (!db.inventories) db.inventories = [];
   let entry = db.inventories.find(e => e.guildId === guildId && e.userId === userId);
@@ -469,7 +525,13 @@ function updateInventory(guildId, userId, items) {
 }
 
 // ============ PROFILES ============
-function getProfile(userId) {
+async function getProfile(userId) {
+  if (supa.isAvailable()) {
+    const data = await supa.getProfile(userId);
+    if (data) return data;
+    await supa.upsertProfile(userId, { bio: '', banner: '', color: '#8b5cf6' });
+    return { user_id: userId, bio: '', banner: '', color: '#8b5cf6' };
+  }
   const db = loadDB();
   if (!db.profiles) db.profiles = {};
   if (!db.profiles[userId]) {
@@ -479,7 +541,11 @@ function getProfile(userId) {
   return db.profiles[userId];
 }
 
-function updateProfile(userId, updates) {
+async function updateProfile(userId, updates) {
+  if (supa.isAvailable()) {
+    await supa.upsertProfile(userId, updates);
+    return;
+  }
   const db = loadDB();
   if (!db.profiles) db.profiles = {};
   if (!db.profiles[userId]) db.profiles[userId] = { bio: '', banner: '', color: '#8b5cf6' };
@@ -488,20 +554,23 @@ function updateProfile(userId, updates) {
 }
 
 // ============ MARRIAGES ============
-function getMarriage(userId) {
+async function getMarriage(userId) {
+  if (supa.isAvailable()) return supa.getMarriage(userId);
   const db = loadDB();
   if (!db.marriages) db.marriages = [];
   return db.marriages.find(m => m.user1 === userId || m.user2 === userId);
 }
 
-function addMarriage(user1, user2) {
+async function addMarriage(user1, user2) {
+  if (supa.isAvailable()) return supa.addMarriage(user1, user2);
   const db = loadDB();
   if (!db.marriages) db.marriages = [];
   db.marriages.push({ user1, user2, marriedAt: new Date().toISOString() });
   saveDB(db);
 }
 
-function removeMarriage(userId) {
+async function removeMarriage(userId) {
+  if (supa.isAvailable()) return supa.removeMarriage(userId);
   const db = loadDB();
   if (!db.marriages) db.marriages = [];
   db.marriages = db.marriages.filter(m => m.user1 !== userId && m.user2 !== userId);
@@ -509,47 +578,54 @@ function removeMarriage(userId) {
 }
 
 // ============ REPUTATION ============
-function getReputation(userId) {
+async function getReputation(userId) {
+  if (supa.isAvailable()) return supa.getReputation(userId);
   const db = loadDB();
   if (!db.reputation) db.reputation = [];
   return db.reputation.filter(r => r.userId === userId);
 }
 
-function addReputation(userId, fromUserId) {
+async function addReputation(userId, fromUserId) {
+  if (supa.isAvailable()) return supa.addReputation(userId, fromUserId);
   const db = loadDB();
   if (!db.reputation) db.reputation = [];
   db.reputation.push({ userId, fromUserId, timestamp: new Date().toISOString() });
   saveDB(db);
 }
 
-function hasGivenRep(userId, targetId) {
+async function hasGivenRep(userId, targetId) {
+  if (supa.isAvailable()) return supa.hasGivenRep(userId, targetId);
   const db = loadDB();
   if (!db.reputation) db.reputation = [];
   return db.reputation.some(r => r.userId === targetId && r.fromUserId === userId);
 }
 
 // ============ NOTES ============
-function getNotes(userId) {
+async function getNotes(userId) {
+  if (supa.isAvailable()) return supa.getNotes(userId);
   const db = loadDB();
   if (!db.notes) db.notes = [];
   return db.notes.filter(n => n.userId === userId);
 }
 
-function addNote(userId, title, content) {
+async function addNote(userId, title, content) {
+  if (supa.isAvailable()) return supa.addNote(userId, title, content);
   const db = loadDB();
   if (!db.notes) db.notes = [];
   db.notes.push({ userId, title, content, createdAt: new Date().toISOString() });
   saveDB(db);
 }
 
-function removeNote(userId, title) {
+async function removeNote(userId, title) {
+  if (supa.isAvailable()) return supa.removeNote(userId, title);
   const db = loadDB();
   if (!db.notes) db.notes = [];
   db.notes = db.notes.filter(n => !(n.userId === userId && n.title.toLowerCase() === title.toLowerCase()));
   saveDB(db);
 }
 
-function getNote(userId, title) {
+async function getNote(userId, title) {
+  if (supa.isAvailable()) return supa.getNote(userId, title);
   const db = loadDB();
   if (!db.notes) db.notes = [];
   return db.notes.find(n => n.userId === userId && n.title.toLowerCase() === title.toLowerCase());
