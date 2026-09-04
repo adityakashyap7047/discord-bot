@@ -280,12 +280,12 @@ function startDashboard(client) {
   });
 
   // ============ EMBEDS ============
-  app.get('/dashboard/:guildId/embeds', isAuthenticated, hasPermission, (req, res) => {
+  app.get('/dashboard/:guildId/embeds', isAuthenticated, hasPermission, async (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
-    const embeds = getEmbeds(g.id);
+    const embeds = await getEmbeds(g.id);
     const channels = g.channels.cache.filter(c => c.type === 0).map(c => ({ id: c.id, name: c.name }));
-    res.render('embeds', { user: req.user, guild: g, settings, embeds, channels, currentPage: 'embeds' });
+    res.render('embeds', { user: req.user, guild: g, settings, embeds, channels, currentPage: 'embeds', query: req.query });
   });
 
   app.post('/dashboard/:guildId/embeds/add', isAuthenticated, hasPermission, (req, res) => {
@@ -294,19 +294,40 @@ function startDashboard(client) {
     res.redirect(`/dashboard/${req.guild.id}/embeds?saved=true`);
   });
 
-  app.post('/dashboard/:guildId/embeds/send', isAuthenticated, hasPermission, (req, res) => {
+  app.post('/dashboard/:guildId/embeds/send', isAuthenticated, hasPermission, async (req, res) => {
     const { channel, title, description, color, thumbnail, image, footer, author } = req.body;
     const ch = req.guild.channels.cache.get(channel);
-    if (ch) {
-      const embed = new (require('discord.js').EmbedBuilder)()
-        .setTitle(title || '').setDescription(description || '').setColor(color || '#5865f2');
-      if (thumbnail) embed.setThumbnail(thumbnail);
-      if (image) embed.setImage(image);
-      if (footer) embed.setFooter({ text: footer });
-      if (author) embed.setAuthor({ name: author });
-      ch.send({ embeds: [embed] });
+    const redirect = (key, message) => res.redirect(`/dashboard/${req.guild.id}/embeds?${key}=${encodeURIComponent(message)}`);
+
+    if (!ch || !ch.isTextBased() || typeof ch.send !== 'function') {
+      return redirect('error', 'Select a valid text channel.');
     }
-    res.redirect(`/dashboard/${req.guild.id}/embeds?sent=true`);
+    if (!title?.trim() && !description?.trim() && !footer?.trim() && !author?.trim()) {
+      return redirect('error', 'Add a title, description, author, or footer before sending.');
+    }
+    for (const [label, url] of [['thumbnail', thumbnail], ['image', image]]) {
+      if (url?.trim() && !/^https?:\/\/\S+$/i.test(url.trim())) {
+        return redirect('error', `The ${label} URL must start with http:// or https://.`);
+      }
+    }
+
+    try {
+      const embed = new (require('discord.js').EmbedBuilder)()
+        .setColor(color || '#5865f2');
+      if (title?.trim()) embed.setTitle(title.trim());
+      if (description?.trim()) embed.setDescription(description.trim());
+      if (thumbnail?.trim()) embed.setThumbnail(thumbnail.trim());
+      if (image?.trim()) embed.setImage(image.trim());
+      if (footer?.trim()) embed.setFooter({ text: footer.trim() });
+      if (author?.trim()) embed.setAuthor({ name: author.trim() });
+      await ch.send({ embeds: [embed] });
+      return redirect('sent', 'Embed sent successfully.');
+    } catch (error) {
+      console.error('[DASHBOARD] Embed send failed:', error);
+      return redirect('error', error.code === 50013
+        ? 'The bot needs Send Messages and Embed Links permission in that channel.'
+        : 'Discord could not send this embed. Check the channel permissions and embed fields.');
+    }
   });
 
   app.post('/dashboard/:guildId/embeds/remove', isAuthenticated, hasPermission, (req, res) => {

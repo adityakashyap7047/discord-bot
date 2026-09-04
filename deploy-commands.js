@@ -18,21 +18,29 @@ for (const folder of commandFolders) {
   const commandFiles = fs.readdirSync(path.join(__dirname, 'commands', folder)).filter(f => f.endsWith('.js'));
   for (const file of commandFiles) {
     const command = require(path.join(__dirname, 'commands', folder, file));
-    if ('data' in command) {
+    if (command.data && typeof command.execute === 'function') {
       commands.push(command.data.toJSON());
     }
   }
 }
 
+if (!process.env.DISCORD_TOKEN || !process.env.CLIENT_ID) {
+  throw new Error('DISCORD_TOKEN and CLIENT_ID must be set before deploying commands.');
+}
+
+if (commands.length > 100) {
+  throw new Error(`Cannot register ${commands.length} global slash commands; Discord allows at most 100.`);
+}
+
 console.log(`📦 Found ${commands.length} commands:`);
 const categories = {};
-for (const cmd of commands) {
-  const folder = Object.keys(commandFolders).find(f => {
-    const files = fs.readdirSync(path.join(__dirname, 'commands', commandFolders[f]));
-    return files.includes(cmd.name + '.js');
-  }) || 'unknown';
-  if (!categories[commandFolders[folder] || 'unknown']) categories[commandFolders[folder] || 'unknown'] = [];
-  categories[commandFolders[folder] || 'unknown'].push(cmd.name);
+for (const folder of commandFolders) {
+  if (skipFolders.includes(folder)) continue;
+  const names = fs.readdirSync(path.join(__dirname, 'commands', folder))
+    .filter(file => file.endsWith('.js'))
+    .map(file => require(path.join(__dirname, 'commands', folder, file)).data?.name)
+    .filter(Boolean);
+  if (names.length) categories[folder] = names;
 }
 
 for (const [cat, cmds] of Object.entries(categories)) {

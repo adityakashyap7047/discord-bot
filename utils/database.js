@@ -90,6 +90,17 @@ function saveDB(data) {
   }
 }
 
+function flushDB() {
+  if (saveTimeout) {
+    clearTimeout(saveTimeout);
+    saveTimeout = null;
+  }
+  if (dirty && cache) {
+    writeDB(cache);
+    dirty = false;
+  }
+}
+
 const defaultSettings = {
   prefix: '!',
   welcomeEnabled: false,
@@ -662,7 +673,7 @@ async function getNote(userId, title) {
 }
 
 module.exports = {
-  loadDB, saveDB, getGuildSettings, updateGuildSetting, updateGuildSettings,
+  loadDB, saveDB, flushDB, getGuildSettings, updateGuildSetting, updateGuildSettings,
   addWarning, getWarnings, clearWarnings,
   addReactionRole, getReactionRoles, removeReactionRole, getReactionRole,
   addCustomCommand, removeCustomCommand, getCustomCommand, getCustomCommands,

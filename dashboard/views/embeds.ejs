@@ -13,6 +13,8 @@
     <div class="main">
       <h1>&#127912; Embed Builder</h1>
       <p class="sub">Create and send custom embeds.</p>
+      <% if (typeof query !== 'undefined' && query.error) { %><div class="alert alert-error"><%= query.error %></div><% } %>
+      <% if (typeof query !== 'undefined' && query.sent) { %><div class="alert alert-success"><%= query.sent %></div><% } %>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
         <div class="card">
           <div class="card-h"><h2>&#9999; Build</h2></div>

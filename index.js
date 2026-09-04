@@ -22,11 +22,7 @@ process.on('unhandledRejection', (reason) => {
 function gracefulShutdown(signal) {
   console.log(`[SHUTDOWN] Received ${signal}, shutting down gracefully...`);
   try {
-    const db = require('./utils/database');
-    if (db && typeof db.saveDB === 'function') {
-      const data = db.loadDB ? db.loadDB() : null;
-      if (data) db.saveDB(data);
-    }
+    db.flushDB();
   } catch (_) {}
   try {
     client.destroy();
@@ -66,6 +62,11 @@ client.config = {
   sessionSecret: process.env.SESSION_SECRET,
   port: process.env.PORT || 3000,
 };
+
+if (!client.config.token) {
+  console.error('[FATAL] DISCORD_TOKEN is missing. Add it to .env before starting the bot.');
+  process.exit(1);
+}
 
 const commandFolders = fs.readdirSync(path.join(__dirname, 'commands'));
 for (const folder of commandFolders) {

@@ -1,6 +1,67 @@
 const { Events, Collection, EmbedBuilder, AttachmentBuilder } = require('discord.js');
 const path = require('path');
 
+const NATIVE_SLASH_COMMANDS = new Set(['antiscam', 'raid', 'verification']);
+
+function flattenOptions(options, result = []) {
+  for (const option of options || []) {
+    if (option.options) flattenOptions(option.options, result);
+    else result.push(option);
+  }
+  return result;
+}
+
+function createMessageLikeInteraction(interaction, commandName) {
+  const users = new Collection();
+  const channels = new Collection();
+  const roles = new Collection();
+  const members = new Collection();
+  const args = [];
+
+  for (const option of flattenOptions(interaction.options.data)) {
+    const user = interaction.options.getUser(option.name, false);
+    const channel = interaction.options.getChannel(option.name, false);
+    const role = interaction.options.getRole(option.name, false);
+
+    if (user) {
+      users.set(user.id, user);
+      const member = interaction.options.getMember(option.name);
+      if (member) members.set(user.id, member);
+      args.push(`<@${user.id}>`);
+    } else if (channel) {
+      channels.set(channel.id, channel);
+      args.push(`<#${channel.id}>`);
+    } else if (role) {
+      roles.set(role.id, role);
+      args.push(`<@&${role.id}>`);
+    } else if (option.value !== undefined) {
+      args.push(String(option.value));
+    }
+  }
+
+  const message = {
+    author: interaction.user,
+    member: interaction.member,
+    guild: interaction.guild,
+    channel: interaction.channel,
+    createdTimestamp: interaction.createdTimestamp,
+    content: `!${commandName}${args.length ? ` ${args.join(' ')}` : ''}`,
+    mentions: { users, channels, roles, members },
+    // Prefix implementations use this to remove their invoking message. There is
+    // no user message to remove for a slash command, so this is intentionally a no-op.
+    delete: async () => null,
+    reply: async (payload) => {
+      if (interaction.replied || interaction.deferred) {
+        return interaction.followUp(payload);
+      }
+      await interaction.reply(payload);
+      return interaction.fetchReply();
+    },
+  };
+
+  return { message, args };
+}
+
 module.exports = {
   name: Events.InteractionCreate,
   once: false,
@@ -25,24 +86,17 @@ module.exports = {
       timestamps.set(interaction.user.id, now);
       setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
 
-      const args = (interaction.options.data || []).map(opt => {
-        if (opt.user) return `<@${opt.user.id}>`;
-        if (opt.channel) return `<#${opt.channel.id}>`;
-        if (opt.role) return `<@&${opt.role.id}>`;
-        if (opt.value !== undefined) return String(opt.value);
-        return '';
-      }).filter(Boolean);
-
-      const source = Object.create(interaction);
-      source.author = interaction.user;
-      source.mentions = {
-        users: {
-          first: () => interaction.options.getUser('user') || interaction.options.data.find(o => o.type === 6)?.user || null,
-        },
-      };
-
       try {
-        await command.execute(source, args, client);
+        // A few configuration commands are written as native interaction
+        // handlers. The rest are message-style commands; give those a small,
+        // compatible message facade instead of passing a partially cloned
+        // Interaction object with the wrong argument positions.
+        if (NATIVE_SLASH_COMMANDS.has(command.data.name)) {
+          await command.execute(interaction, client);
+        } else {
+          const { message, args } = createMessageLikeInteraction(interaction, command.data.name);
+          await command.execute(message, args, client);
+        }
       } catch (error) {
         console.error(`[SLASH COMMAND ERROR] ${command.data.name}:`, error);
         const reply = { content: 'There was an error executing this command!', ephemeral: true };
