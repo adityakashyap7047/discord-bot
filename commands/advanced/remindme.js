@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { addReminder } = require('../../utils/database');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -8,7 +9,6 @@ module.exports = {
     .addStringOption(opt => opt.setName('message').setDescription('Reminder message').setRequired(true)),
   cooldown: 5,
   async execute(message, args, client) {
-    const db = client.db;
     const timeStr = args[0];
     const reminderMsg = args.slice(1).join(' ');
 
@@ -23,19 +23,10 @@ module.exports = {
 
     const multipliers = { m: 60000, h: 3600000, d: 86400000 };
     const ms = parseInt(match[1]) * multipliers[match[2]];
-    const remindAt = new Date(Date.now() + ms);
+    const remindAt = Date.now() + ms;
     const timeDisplay = `${match[1]}${match[2]}`;
 
-    const reminders = db.get('reminders') || [];
-    const reminder = {
-      userId: message.author.id,
-      channelId: message.channel.id,
-      message: reminderMsg,
-      remindAt: remindAt.toISOString(),
-      createdAt: Date.now(),
-    };
-    reminders.push(reminder);
-    db.set('reminders', reminders);
+    addReminder(message.author.id, message.channel.id, reminderMsg, new Date(remindAt).toISOString());
 
     const embed = new EmbedBuilder()
       .setColor(0x22c55e)
@@ -43,7 +34,7 @@ module.exports = {
       .setDescription(`I'll DM you in **${timeDisplay}** with your reminder.`)
       .addFields(
         { name: '📝 Reminder', value: reminderMsg, inline: false },
-        { name: '🕐 Triggers At', value: `<t:${Math.floor(remindAt.getTime() / 1000)}:R>`, inline: true },
+        { name: '🕐 Triggers At', value: `<t:${Math.floor(remindAt / 1000)}:R>`, inline: true },
       )
       .setTimestamp();
 
@@ -68,13 +59,6 @@ module.exports = {
             .setTimestamp();
           channel.send({ embeds: [fallbackEmbed] });
         } catch {}
-      }
-
-      const currentReminders = db.get('reminders') || [];
-      const idx = currentReminders.findIndex(r => r.createdAt === reminder.createdAt);
-      if (idx !== -1) {
-        currentReminders.splice(idx, 1);
-        db.set('reminders', currentReminders);
       }
     }, ms);
   },

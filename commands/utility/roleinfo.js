@@ -6,8 +6,18 @@ module.exports = {
     .setDescription('Get information about a role')
     .addRoleOption(opt => opt.setName('role').setDescription('Role to inspect').setRequired(true)),
   cooldown: 3,
-  async execute(message) {
-    const role = message.options.getRole('role');
+  async execute(message, args, client) {
+    let role;
+    if (message.options && message.options.getRole) {
+      role = message.options.getRole('role');
+    } else {
+      const mention = message.mentions.roles.first();
+      if (!mention) {
+        return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription('Mention a role! Usage: `!roleinfo @Role`')] });
+      }
+      role = mention;
+    }
+
     const embed = new EmbedBuilder()
       .setColor(role.color || 0x8b5cf6)
       .setTitle(`📋 Role Info: ${role.name}`)
@@ -18,7 +28,7 @@ module.exports = {
         { name: 'Members', value: `${role.members.size}`, inline: true },
         { name: 'Mentionable', value: role.mentionable ? 'Yes' : 'No', inline: true },
         { name: 'Hoisted', value: role.hoist ? 'Yes' : 'No', inline: true },
-        { name: 'Created', value: `<t:${Math.floor(role.createdTimestamp / 1000)}:R>`, inline: true }
+        { name: 'Created', value: `<t:${Math.floor(role.createdTimestamp / 1000)}:R>`, inline: true },
       );
     message.reply({ embeds: [embed] });
   },

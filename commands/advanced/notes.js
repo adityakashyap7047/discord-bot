@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { getNotes, addNote, removeNote, getNote } = require('../../utils/database');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -26,15 +27,13 @@ module.exports = {
     ),
   cooldown: 3,
   async execute(message, args, client) {
-    const db = client.db;
     const sub = args[0];
 
     if (!sub || !['add', 'list', 'delete', 'view'].includes(sub)) {
       return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription('Subcommands: `add`, `list`, `delete`, `view`')] });
     }
 
-    const notes = db.get('notes') || {};
-    const userNotes = notes[message.author.id] || [];
+    const userNotes = getNotes(message.author.id);
 
     if (sub === 'add') {
       const title = args[1];
@@ -51,9 +50,7 @@ module.exports = {
         return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription('You can have a maximum of 25 notes!')] });
       }
 
-      userNotes.push({ title, content, createdAt: Date.now() });
-      notes[message.author.id] = userNotes;
-      db.set('notes', notes);
+      addNote(message.author.id, title, content);
 
       const embed = new EmbedBuilder()
         .setColor(0x22c55e)
@@ -70,7 +67,7 @@ module.exports = {
         return message.reply({ embeds: [new EmbedBuilder().setColor(0xf59e0b).setTitle('📝 Notes').setDescription('You have no notes yet! Use `notes add <title> <content>` to create one.')] });
       }
 
-      const noteList = userNotes.map((n, i) => `**${i + 1}.** ${n.title} — ${n.content.substring(0, 50)}${n.content.length > 50 ? '...' : ''}`).join('\n');
+      const noteList = userNotes.map((n, i) => `**${i + 1}.** ${n.title} — ${(n.content || '').substring(0, 50)}${(n.content || '').length > 50 ? '...' : ''}`).join('\n');
 
       const embed = new EmbedBuilder()
         .setColor(0x3b82f6)
@@ -85,14 +82,12 @@ module.exports = {
         return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription('Usage: `notes delete <title>`')] });
       }
 
-      const idx = userNotes.findIndex(n => n.title.toLowerCase() === title.toLowerCase());
-      if (idx === -1) {
+      const note = getNote(message.author.id, title);
+      if (!note) {
         return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription(`No note found with title "**${title}**".`)] });
       }
 
-      userNotes.splice(idx, 1);
-      notes[message.author.id] = userNotes;
-      db.set('notes', notes);
+      removeNote(message.author.id, title);
 
       const embed = new EmbedBuilder()
         .setColor(0x22c55e)
@@ -107,7 +102,7 @@ module.exports = {
         return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription('Usage: `notes view <title>`')] });
       }
 
-      const note = userNotes.find(n => n.title.toLowerCase() === title.toLowerCase());
+      const note = getNote(message.author.id, title);
       if (!note) {
         return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription(`No note found with title "**${title}**".`)] });
       }
@@ -116,8 +111,8 @@ module.exports = {
         .setColor(0x3b82f6)
         .setTitle(`📝 ${note.title}`)
         .setDescription(note.content)
-        .setFooter({ text: `Created` })
-        .setTimestamp(note.createdAt);
+        .setFooter({ text: 'Created' })
+        .setTimestamp(note.createdAt ? new Date(note.createdAt) : undefined);
 
       message.reply({ embeds: [embed] });
     }

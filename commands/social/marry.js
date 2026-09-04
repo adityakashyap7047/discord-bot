@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { getMarriage, addMarriage } = require('../../utils/database');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -7,7 +8,6 @@ module.exports = {
     .addUserOption(opt => opt.setName('user').setDescription('User to propose to').setRequired(true)),
   cooldown: 10,
   async execute(message, args, client) {
-    const db = client.db;
     const target = message.mentions.users.first();
     if (!target) {
       return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription('Mention someone to propose to!')] });
@@ -21,29 +21,20 @@ module.exports = {
       return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription('You cannot marry a bot!')] });
     }
 
-    const social = db.get('social') || {};
-    const proposerKey = `${message.guild.id}_${message.author.id}`;
-    const targetKey = `${message.guild.id}_${target.id}`;
-
-    const proposerData = social[proposerKey] || {};
-    const targetData = social[targetKey] || {};
-
-    if (proposerData.marriedTo) {
+    const existingMarriage = getMarriage(message.author.id);
+    if (existingMarriage) {
+      const spouseId = existingMarriage.user1 === message.author.id ? existingMarriage.user2 : existingMarriage.user1;
       try {
-        const spouse = await client.users.fetch(proposerData.marriedTo);
+        const spouse = await client.users.fetch(spouseId);
         return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Already Married').setDescription(`You are already married to ${spouse.username}!`)] });
       } catch {
         return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Already Married').setDescription('You are already married!')] });
       }
     }
 
-    if (targetData.marriedTo) {
-      try {
-        const spouse = await client.users.fetch(targetData.marriedTo);
-        return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Already Married').setDescription(`${target.username} is already married to ${spouse.username}!`)] });
-      } catch {
-        return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Already Married').setDescription(`${target.username} is already married!`)] });
-      }
+    const targetMarriage = getMarriage(target.id);
+    if (targetMarriage) {
+      return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Already Married').setDescription(`${target.username} is already married!`)] });
     }
 
     const embed = new EmbedBuilder()
@@ -65,26 +56,12 @@ module.exports = {
 
     collector.on('collect', async (interaction) => {
       if (interaction.customId.startsWith('marry_accept')) {
-        const socialData = db.get('social') || {};
-
-        const proposerUpdate = socialData[proposerKey] || { reputation: 0 };
-        proposerUpdate.marriedTo = target.id;
-        proposerUpdate.marriedAt = Date.now();
-        socialData[proposerKey] = proposerUpdate;
-
-        const targetUpdate = socialData[targetKey] || { reputation: 0 };
-        targetUpdate.marriedTo = message.author.id;
-        targetUpdate.marriedAt = Date.now();
-        socialData[targetKey] = targetUpdate;
-
-        db.set('social', socialData);
-
+        addMarriage(message.author.id, target.id);
         const acceptEmbed = new EmbedBuilder()
           .setColor(0xff69b4)
           .setTitle('💒 Marriage Accepted!')
           .setDescription(`🎉 **${message.author.username}** and **${target.username}** are now married! 🎉\n\nCongratulations to the happy couple! 🥂`)
           .setTimestamp();
-
         await interaction.update({ embeds: [acceptEmbed], components: [] });
       } else if (interaction.customId.startsWith('marry_decline')) {
         const declineEmbed = new EmbedBuilder()
@@ -92,7 +69,6 @@ module.exports = {
           .setTitle('💔 Proposal Declined')
           .setDescription(`${target.username} has declined the proposal from ${message.author}.`)
           .setTimestamp();
-
         await interaction.update({ embeds: [declineEmbed], components: [] });
       }
     });
@@ -104,7 +80,6 @@ module.exports = {
           .setTitle('💔 Proposal Expired')
           .setDescription(`${target.username} did not respond to the proposal in time.`)
           .setTimestamp();
-
         await response.edit({ embeds: [timeoutEmbed], components: [] }).catch(() => {});
       }
     });

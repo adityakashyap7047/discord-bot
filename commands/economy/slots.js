@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { getEconomy, updateEconomy } = require('../../utils/database');
 
 const symbols = ['🍒', '🍋', '🍊', '🍇', '💎', '7️⃣'];
 
@@ -9,13 +10,10 @@ module.exports = {
     .addIntegerOption(opt => opt.setName('bet').setDescription('Amount to bet').setRequired(true)),
   cooldown: 3,
   async execute(message, args, client) {
-    const db = client.db;
     const bet = parseInt(args[0]);
     if (!bet || bet <= 0) return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Invalid Bet').setDescription('Enter a valid bet amount.')] });
-    const key = `${message.guild.id}_${message.author.id}`;
-    const economy = db.get('economy') || {};
-    const userData = economy[key] || { balance: 0, bank: 0 };
-    if (userData.balance < bet) return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Insufficient Funds').setDescription(`You need **${bet.toLocaleString()}** in your wallet.`)] });
+    const eco = getEconomy(message.guild.id, message.author.id);
+    if ((eco.wallet || 0) < bet) return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Insufficient Funds').setDescription(`You need **${bet.toLocaleString()}** in your wallet.`)] });
     const s1 = symbols[Math.floor(Math.random() * symbols.length)];
     const s2 = symbols[Math.floor(Math.random() * symbols.length)];
     const s3 = symbols[Math.floor(Math.random() * symbols.length)];
@@ -23,9 +21,7 @@ module.exports = {
     if (s1 === s2 && s2 === s3) multiplier = s1 === '💎' ? 10 : s1 === '7️⃣' ? 7 : 5;
     else if (s1 === s2 || s2 === s3 || s1 === s3) multiplier = 2;
     const winnings = bet * multiplier;
-    userData.balance += winnings - bet;
-    economy[key] = userData;
-    db.set('economy', economy);
+    updateEconomy(message.guild.id, message.author.id, { wallet: (eco.wallet || 0) + winnings - bet });
     const result = `**[ ${s1} | ${s2} | ${s3} ]**`;
     const embed = new EmbedBuilder()
       .setColor(multiplier > 0 ? 0x22c55e : 0xff0000)
