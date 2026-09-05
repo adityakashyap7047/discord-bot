@@ -22,9 +22,9 @@
     <%- include('partials/sidebar') %>
     <div class="main">
       <h1>&#9881; General Settings</h1>
-      <p class="sub">Changes save automatically when you toggle them.</p>
+<p class="sub">Toggle settings below, then click the <strong>Save to Supabase</strong> button in the top nav to push changes to cloud.</p>
 
-      <div class="stats">
+       <div class="stats">
         <div class="stat reveal"><div class="n"><%= guild.memberCount %></div><div class="l">Members</div></div>
         <div class="stat reveal"><div class="n"><%= guild.channels.cache.size %></div><div class="l">Channels</div></div>
         <div class="stat reveal"><div class="n"><%= guild.roles.cache.size %></div><div class="l">Roles</div></div>
@@ -34,7 +34,7 @@
       </div>
 
       <div class="card reveal">
-        <div class="card-h"><h2>&#128295; General</h2><span class="badge b-neon">Auto-saves</span></div>
+        <div class="card-h"><h2>&#128295; General</h2><span class="badge b-yellow">Manual Save</span></div>
         <div class="field">
           <label>Bot Prefix</label>
           <input type="text" value="<%= settings.prefix || '!' %>" style="width:80px;" data-auto="prefix">

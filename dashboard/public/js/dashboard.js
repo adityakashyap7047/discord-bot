@@ -6,24 +6,81 @@ function showToast(msg, type = 'success') {
   setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 2500);
 }
 
-function autoSave(guildId, data) {
-  fetch(`/dashboard/${guildId}/update`, {
+function saveToSupabase(guildId) {
+  fetch(`/api/guilds/${guildId}/supabase-save`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  }).then(r => {
-    if (r.ok) showToast('Saved!');
-    else showToast('Error saving', 'error');
+    body: JSON.stringify({}),
+  }).then(r => r.json()).then(data => {
+    if (data.success) showToast('Settings synced to Supabase!');
+    else showToast('Error syncing to Supabase', 'error');
   }).catch(() => showToast('Network error', 'error'));
 }
 
-document.querySelectorAll('[data-auto]').forEach(el => {
-  const guildId = el.closest('[data-guild]')?.dataset.guild;
-  if (!guildId) return;
-  const key = el.dataset.auto;
-  el.addEventListener('change', () => {
-    let val = el.type === 'checkbox' ? (el.checked ? 'on' : 'off') : el.value;
-    autoSave(guildId, { [key]: val });
+const pendingChanges = new Map();
+
+document.querySelectorAll('[data-guild]').forEach(container => {
+  const guildId = container.dataset.guild;
+  const settingsArea = container.querySelector('.main');
+  if (!settingsArea) return;
+
+  const autoFields = settingsArea.querySelectorAll('[data-auto]');
+  const formGroups = new Map();
+
+  autoFields.forEach(el => {
+    const key = el.dataset.auto;
+    const eventType = el.type === 'checkbox' ? 'change' : 'input';
+    el.addEventListener(eventType, () => {
+      let val = el.type === 'checkbox' ? (el.checked ? 'on' : 'off') : el.value;
+      if (!pendingChanges.has(guildId)) pendingChanges.set(guildId, new Map());
+      const guildChanges = pendingChanges.get(guildId);
+      guildChanges.set(key, val);
+      updateSaveButton(guildId);
+    });
+  });
+});
+
+function updateSaveButton(guildId) {
+  const existing = document.getElementById(`save-btn-${guildId}`);
+  if (!existing) return;
+  const count = pendingChanges.get(guildId)?.size || 0;
+  existing.style.display = count > 0 ? 'inline-flex' : 'none';
+  if (count > 0) {
+    existing.textContent = `Save to Supabase (${count} changes)`;
+  } else {
+    existing.textContent = 'Save to Supabase';
+  }
+}
+
+function showSavePopup(guildId) {
+  const changes = pendingChanges.get(guildId);
+  if (!changes || changes.size === 0) {
+    showToast('No changes to save', 'error');
+    return;
+  }
+  const changeList = Array.from(changes.entries()).map(([k, v]) => `${k}: ${v}`).join('\n');
+  const confirmed = confirm(`You have ${changes.size} unsaved changes:\n\n${changeList}\n\nClick OK to sync to Supabase, or Cancel to discard.`);
+  if (confirmed) {
+    saveToSupabase(guildId);
+    pendingChanges.delete(guildId);
+    const btn = document.getElementById(`save-btn-${guildId}`);
+    if (btn) btn.style.display = 'none';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('[data-guild]').forEach(container => {
+    const guildId = container.dataset.guild;
+    const navBar = container.querySelector('.nav');
+    if (!navBar) return;
+    const saveBtn = document.createElement('button');
+    saveBtn.id = `save-btn-${guildId}`;
+    saveBtn.className = 'btn btn-p';
+    saveBtn.style.cssText = 'display:none;margin-left:1rem;padding:0.4rem 1rem;font-size:0.75rem;';
+    saveBtn.textContent = 'Save to Supabase';
+    saveBtn.onclick = () => showSavePopup(guildId);
+    navBar.querySelector('.nav-r').appendChild(saveBtn);
+    updateSaveButton(guildId);
   });
 });
 
@@ -58,7 +115,6 @@ const observer = new IntersectionObserver(entries => {
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-// Particle effect for cards
 document.querySelectorAll('.card, .stat, .sc').forEach(el => {
   el.addEventListener('mouseenter', () => {
     el.style.boxShadow = '0 0 40px rgba(0,240,255,0.15), 0 0 80px rgba(255,0,255,0.05)';
@@ -68,7 +124,6 @@ document.querySelectorAll('.card, .stat, .sc').forEach(el => {
   });
 });
 
-// Smooth page transitions
 document.querySelectorAll('.sb-link').forEach(link => {
   link.addEventListener('click', function(e) {
     const href = this.getAttribute('href');

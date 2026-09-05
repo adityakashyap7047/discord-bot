@@ -211,10 +211,19 @@ function startDashboard(client) {
       }
     }
     await updateGuildSettings(req.guild.id, updates);
-    if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
-      return res.json({ success: true });
-    }
     res.redirect(`/dashboard/${req.guild.id}?saved=true`);
+  });
+
+  // Save settings to Supabase (manual save button)
+  app.post('/api/guilds/:guildId/supabase-save', isAuthenticated, hasPermission, async (req, res) => {
+    try {
+      const settings = await getGuildSettings(req.params.guildId);
+      await persistGuildSettings(req.params.guildId, settings);
+      res.json({ success: true, message: 'Settings synced to Supabase' });
+    } catch (e) {
+      console.error('[SUPABASE SAVE] Error:', e.message);
+      res.status(500).json({ success: false, error: e.message });
+    }
   });
 
   // ============ WELCOME ============

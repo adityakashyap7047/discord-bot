@@ -225,22 +225,18 @@ async function getGuildSettings(guildId) {
  }
 
 async function updateGuildSetting(guildId, key, value) {
-  const db = loadDB();
-  if (!db.guild_settings[guildId]) await getGuildSettings(guildId);
-  db.guild_settings[guildId][key] = value;
-  saveDB(db);
-  // Persist to Supabase
-  await persistGuildSettings(guildId, db.guild_settings[guildId]);
-}
+   const db = loadDB();
+   if (!db.guild_settings[guildId]) await getGuildSettings(guildId);
+   db.guild_settings[guildId][key] = value;
+   saveDB(db);
+ }
 
-async function updateGuildSettings(guildId, updates) {
-  const db = loadDB();
-  if (!db.guild_settings[guildId]) await getGuildSettings(guildId);
-  Object.assign(db.guild_settings[guildId], updates);
-  saveDB(db);
-  // Persist to Supabase
-  await persistGuildSettings(guildId, db.guild_settings[guildId]);
-}
+ async function updateGuildSettings(guildId, updates) {
+   const db = loadDB();
+   if (!db.guild_settings[guildId]) await getGuildSettings(guildId);
+   Object.assign(db.guild_settings[guildId], updates);
+   saveDB(db);
+ }
 
 async function addWarning(guildId, userId, moderatorId, reason) {
   if (supa.isAvailable()) return supa.addWarning(guildId, userId, moderatorId, reason);

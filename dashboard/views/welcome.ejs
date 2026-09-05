@@ -15,9 +15,9 @@
     <%- include('partials/sidebar') %>
     <div class="main">
       <h1>&#128075; Welcome & Goodbye</h1>
-      <p class="sub">Configure welcome and goodbye messages. All changes auto-save.</p>
-      <% if (typeof query !== 'undefined' && query.error) { %><p class="sub" style="color:#f87171"><%= query.error %></p><% } %>
-      <% if (typeof query !== 'undefined' && query.sent) { %><p class="sub" style="color:#4ade80"><%= query.sent %></p><% } %>
+<p class="sub">Configure welcome and goodbye messages. Click <strong>Save to Supabase</strong> in the top nav to push changes to cloud.</p>
+       <% if (typeof query !== 'undefined' && query.error) { %><p class="sub" style="color:#f87171"><%= query.error %></p><% } %>
+       <% if (typeof query !== 'undefined' && query.sent) { %><p class="sub" style="color:#4ade80"><%= query.sent %></p><% } %>
 
       <div class="card">
         <div class="card-h"><h2>&#128075; Welcome</h2><span class="badge <%= settings.welcomeEnabled ? 'b-green' : 'b-red' %>"><%= settings.welcomeEnabled ? 'ON' : 'OFF' %></span></div>

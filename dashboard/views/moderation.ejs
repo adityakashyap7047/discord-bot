@@ -12,9 +12,9 @@
     <%- include('partials/sidebar') %>
     <div class="main">
       <h1>&#128737; Moderation</h1>
-      <p class="sub">Auto-moderation and moderation tools. Toggle features on/off instantly.</p>
-      <% if (typeof query !== 'undefined' && query.error) { %><p class="sub" style="color:#f87171"><%= query.error %></p><% } %>
-      <% if (typeof query !== 'undefined' && query.sent) { %><p class="sub" style="color:#4ade80"><%= query.sent %></p><% } %>
+<p class="sub">Auto-moderation and moderation tools. Toggle features below, then click <strong>Save to Supabase</strong> in the top nav.</p>
+       <% if (typeof query !== 'undefined' && query.error) { %><p class="sub" style="color:#f87171"><%= query.error %></p><% } %>
+       <% if (typeof query !== 'undefined' && query.sent) { %><p class="sub" style="color:#4ade80"><%= query.sent %></p><% } %>
       <div class="card">
         <div class="card-h"><h2>&#128293; Auto-Moderation</h2><span class="badge <%= settings.autoMod || settings.antiSpam || settings.antiLink ? 'b-green' : 'b-red' %>"><%= settings.autoMod || settings.antiSpam || settings.antiLink ? 'Active' : 'Off' %></span></div>
         <div class="sw"><div class="info"><div class="t">&#128172; Bad Word Filter</div><div class="d">Delete messages with banned words</div></div><label class="toggle"><input type="checkbox" <%= settings.autoMod ? 'checked' : '' %> data-auto="autoMod"><span class="sl"></span></label></div>
