@@ -495,9 +495,18 @@ function startDashboard(client) {
         .replace('{user}', `<@${req.user.id}>`)
         .replace('{server}', req.guild.name)
         .replace('{memberCount}', req.guild.memberCount);
-      payload = settings.welcomeEmbed
-        ? { embeds: [new EmbedBuilder().setColor(settings.welcomeColor || '#00ff00').setDescription(message).setFooter({ text: 'Welcome message test' })] }
-        : { content: `🧪 **Welcome message test**\n${message}` };
+      if (settings.welcomeEmbed) {
+        const embed = new EmbedBuilder()
+          .setColor(settings.welcomeColor || '#00ff00')
+          .setDescription(message)
+          .setFooter({ text: 'Welcome message test' });
+        if (settings.welcomeImage && /^https?:\/\/.+\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(settings.welcomeImage)) {
+          embed.setImage(settings.welcomeImage);
+        }
+        payload = { embeds: [embed] };
+      } else {
+        payload = { content: `🧪 **Welcome message test**\n${message}` };
+      }
     } else if (type === 'level') {
       channelId = settings.levelChannel;
       if (!channelId) return res.redirect(`/dashboard/${req.guild.id}/levels?error=${encodeURIComponent('Choose a level-up channel before testing.')}`);
