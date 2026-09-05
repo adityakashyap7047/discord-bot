@@ -81,7 +81,7 @@ function startDashboard(client) {
     secret: client.config.sessionSecret || 'discord-bot-secret',
     store: new FileSessionStore(path.join(__dirname, '..', 'data', 'sessions')),
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     rolling: true,
     cookie: {
       maxAge: 30 * 24 * 60 * 60 * 1000,
@@ -136,7 +136,7 @@ function startDashboard(client) {
   }
 
   // ============ AUTH ============
-  app.get('/auth/login', passport.authenticate('discord', { prompt: 'consent' }));
+  app.get('/auth/login', passport.authenticate('discord'));
   app.get('/auth/callback', (req, res, next) => {
     passport.authenticate('discord', (err, user, info) => {
       if (err) {
