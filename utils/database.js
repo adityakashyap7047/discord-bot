@@ -199,36 +199,26 @@ const defaultSettings = {
 };
 
 async function getGuildSettings(guildId) {
-  const db = loadDB();
-
-  // The in-memory value is the newest value during this process. Reading a
-  // slower remote copy here could otherwise make dashboard toggles appear to
-  // switch themselves off immediately after they are saved.
-  if (db.guild_settings[guildId]) return db.guild_settings[guildId];
-
-  // Try Supabase first
-  if (supa.isAvailable()) {
-    try {
-      const supaSettings = await supa.getGuildSettingsSupabase(guildId);
-      if (supaSettings) {
-        // Merge with defaults so new keys are always present
-        const merged = { guildId, ...defaultSettings, ...supaSettings };
-        db.guild_settings[guildId] = merged;
-        return merged;
-      }
-    } catch (error) {
-      console.error('[DB] Supabase settings read error:', error.message);
-    }
-  }
-
-  // Fall back to local JSON
-  if (!db.guild_settings[guildId]) {
-    db.guild_settings[guildId] = { guildId, ...defaultSettings };
-    saveDB(db);
-    // Save to Supabase if available
-    await persistGuildSettings(guildId, db.guild_settings[guildId]);
-  }
-  return db.guild_settings[guildId];
+   const db = loadDB();
+   if (db.guild_settings[guildId]) return db.guild_settings[guildId];
+   if (!db.guild_settings[guildId]) {
+     db.guild_settings[guildId] = { guildId, ...defaultSettings };
+     saveDB(db);
+   }
+   if (supa.isAvailable()) {
+     try {
+       const supaSettings = await supa.getGuildSettingsSupabase(guildId);
+       if (supaSettings) {
+         const merged = { guildId, ...defaultSettings, ...supaSettings };
+         db.guild_settings[guildId] = merged;
+         saveDB(db);
+         return merged;
+       }
+     } catch (error) {
+       console.error('[DB] Supabase settings read error:', error.message);
+     }
+   }
+   return db.guild_settings[guildId];
 }
 
 async function updateGuildSetting(guildId, key, value) {

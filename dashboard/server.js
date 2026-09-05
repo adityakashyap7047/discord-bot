@@ -87,6 +87,8 @@ function startDashboard(client) {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       secure: usesSecureCookies,
       sameSite: usesSecureCookies ? 'none' : 'lax',
+      httpOnly: true,
+      path: '/',
     }
   }));
 
