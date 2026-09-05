@@ -761,10 +761,8 @@
           { n: 'help', s: '/help', p: '!help' },
           { n: 'avatar', s: '/avatar user:@user', p: '!avatar @user' },
           { n: 'userinfo', s: '/userinfo user:@user', p: '!userinfo @user' },
-          { n: 'serverinfo', s: '/serverinfo', p: '!serverinfo' },
-          { n: 'botinfo', s: '/botinfo', p: '!botinfo' },
-          { n: 'uptime', s: '/uptime', p: '!uptime' },
-          { n: 'poll', s: '/poll question:Best lang? options:JS,Python', p: '!poll Best lang? JS Python' },
+{ n: 'serverinfo', s: '/serverinfo', p: '!serverinfo' },
+           { n: 'poll', s: '/poll question:Best lang? options:JS,Python', p: '!poll Best lang? JS Python' },
           { n: 'remind', s: '/remind time:30m message:Check oven', p: '!remind 30m Check oven' },
           { n: 'msg', s: '/msg channel:#channel message:Hello!', p: '!msg #channel Hello!' },
           { n: 'weather', s: '/weather city:Tokyo', p: '!weather Tokyo' },
@@ -903,8 +901,7 @@
           <span class="pg-hint" data-cmd="/balance">/balance</span>
           <span class="pg-hint" data-cmd="/work">/work</span>
           <span class="pg-hint" data-cmd="/stats">/stats</span>
-          <span class="pg-hint" data-cmd="/uptime">/uptime</span>
-          <span class="pg-hint" data-cmd="/8ball Will I be rich?">/8ball</span>
+<span class="pg-hint" data-cmd="/8ball Will I be rich?">/8ball</span>
           <span class="pg-hint" data-cmd="/meme">/meme</span>
           <span class="pg-hint" data-cmd="/cat">/cat</span>
         </div>
@@ -1165,8 +1162,7 @@
       {n:'automod',d:'Configure auto-moderation',c:'Setup'},
       {n:'ping',d:'Check bot latency',c:'Utility'},{n:'help',d:'Show all commands',c:'Utility'},
       {n:'avatar',d:'Get user avatar',c:'Utility'},{n:'userinfo',d:'Get user information',c:'Utility'},
-      {n:'serverinfo',d:'Get server information',c:'Utility'},{n:'botinfo',d:'Get bot information',c:'Utility'},
-      {n:'uptime',d:'Check bot uptime',c:'Utility'},{n:'poll',d:'Create a poll',c:'Utility'},
+{n:'serverinfo',d:'Get server information',c:'Utility'},{n:'poll',d:'Create a poll',c:'Utility'},
       {n:'remind',d:'Set a reminder',c:'Utility'},{n:'msg',d:'Send message to a channel',c:'Utility'},
       {n:'weather',d:'Get weather info',c:'Utility'},{n:'base64',d:'Encode/decode base64',c:'Utility'},
       {n:'8ball',d:'Ask the magic 8-ball',c:'Fun'},{n:'roll',d:'Roll a dice',c:'Fun'},
@@ -1357,13 +1353,12 @@
     var pgInput = document.getElementById('pgInput');
     var pgOutput = document.getElementById('pgOutput');
     var cmdResponses = {
-      '/help': '<span class="pg-ok">&#10003;</span> <span class="pg-info">VARUNASTRA Commands:</span>\n  <span class="pg-dim">Moderation:</span> ban, kick, mute, warn, purge, tempban, nuke\n  <span class="pg-dim">Economy:</span> daily, balance, work, shop, buy, rob, slots\n  <span class="pg-dim">Social:</span> profile, rep, marry, ship\n  <span class="pg-dim">Fun:</span> meme, cat, dog, trivia, 8ball, joke\n  <span class="pg-dim">Utility:</span> ping, help, avatar, userinfo, serverinfo\n  <span class="pg-dim">Security:</span> antiscam, raid, verification',
+      '/help': '<span class="pg-ok">&#10003;</span> <span class="pg-info">VARUNASTRA Commands:</span>\n  <span class="pg-dim">Moderation:</span> ban, kick, mute, warn, purge, tempban, nuke\n  <span class="pg-dim">Economy:</span> daily, balance, work, shop, buy, rob, slots\n  <span class="pg-dim">Social:</span> profile, rep, marry\n  <span class="pg-dim">Fun:</span> meme, cat, dog, trivia, 8ball, joke\n  <span class="pg-dim">Utility:</span> ping, help, avatar, userinfo, serverinfo\n  <span class="pg-dim">Security:</span> antiscam, raid, verification',
       '/ping': '<span class="pg-ok">&#10003;</span> Pong! Latency: <span class="pg-cmd">42ms</span> | WebSocket: <span class="pg-cmd">38ms</span>',
       '/daily': '<span class="pg-ok">&#10003;</span> You claimed <span class="pg-cmd">847 coins</span>! Come back in 24h for more.',
       '/balance': '<span class="pg-ok">&#10003;</span> Wallet: <span class="pg-cmd">12,450</span> | Bank: <span class="pg-cmd">45,200</span> | Total: <span class="pg-cmd">57,650</span>',
       '/work': '<span class="pg-ok">&#10003;</span> You worked as a <span class="pg-cmd">Cyber Hacker</span> and earned <span class="pg-cmd">320 coins</span>!',
       '/stats': '<span class="pg-ok">&#10003;</span> Servers: <span class="pg-cmd">150+</span> | Users: <span class="pg-cmd">50K+</span> | Commands: <span class="pg-cmd">120+</span> | Uptime: <span class="pg-cmd">99.9%</span>',
-      '/uptime': '<span class="pg-ok">&#10003;</span> Bot has been running for <span class="pg-cmd">14d 7h 32m 18s</span>',
       '/8ball Will I be rich?': '<span class="pg-ok">&#10003;</span> &#127922; The ball says: <span class="pg-cmd">It is certain.</span>',
       '/meme': '<span class="pg-ok">&#10003;</span> Fetching meme from r/memes... <span class="pg-dim">[Image loaded]</span>',
       '/cat': '<span class="pg-ok">&#10003;</span> Here\'s a random cat! <span class="pg-dim">[meow.jpg loaded]</span>',

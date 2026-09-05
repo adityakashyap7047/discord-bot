@@ -65,7 +65,7 @@
   </nav>
   <div class="container">
     <h1><span class="cyan">COMMAND</span> <span class="magenta">ARSENAL</span></h1>
-    <p class="sub">Complete list of all <strong>60+</strong> commands. Use <code style="color:var(--cyan);background:rgba(0,212,255,0.08);padding:0.15rem 0.4rem;border-radius:5px;font-family:'JetBrains Mono',monospace">/</code> on mobile for easy access!</p>
+    <p class="sub">Complete list of all <strong>40+</strong> commands. Use <code style="color:var(--cyan);background:rgba(0,212,255,0.08);padding:0.15rem 0.4rem;border-radius:5px;font-family:'JetBrains Mono',monospace">/</code> on mobile for easy access!</p>
     <div class="mobile-tip">
       <div class="tip-icon">📱</div>
       <div class="tip-text">
@@ -118,25 +118,18 @@
           { name: 'setautorole', slash: '/setautorole role:@Member', prefix: '!setautorole @Member' },
           { name: 'automod', slash: '/automod feature:antispam toggle:on', prefix: '!automod antispam on' },
         ]},
-        { cat: 'Utility', icon: '🔍', desc: '12 info and utility commands', cmds: [
-          { name: 'ping', slash: '/ping', prefix: '!ping' },
-          { name: 'help', slash: '/help', prefix: '!help' },
-          { name: 'avatar', slash: '/avatar user:@user', prefix: '!avatar @user' },
-          { name: 'userinfo', slash: '/userinfo user:@user', prefix: '!userinfo @user' },
-          { name: 'serverinfo', slash: '/serverinfo', prefix: '!serverinfo' },
-          { name: 'membercount', slash: '/membercount', prefix: '!membercount' },
-          { name: 'rolelist', slash: '/rolelist', prefix: '!rolelist' },
-          { name: 'invitecount', slash: '/invitecount @user', prefix: '!invitecount @user' },
-          { name: 'poll', slash: '/poll question:Best language? options:JS,Python', prefix: '!poll Best language? JS Python' },
-          { name: 'remind', slash: '/remind time:30m message:Check oven', prefix: '!remind 30m Check oven' },
-          { name: 'msg', slash: '/msg channel:#channel message:Hello!', prefix: '!msg #channel Hello!' },
-          { name: 'level', slash: '/level user:@user', prefix: '!level @user' },
-        ]},
-        { cat: 'Info', icon: 'ℹ️', desc: 'Bot information commands', cmds: [
-          { name: 'botinfo', slash: '/botinfo', prefix: '!botinfo' },
-          { name: 'uptime', slash: '/uptime', prefix: '!uptime' },
-        ]},
-        { cat: 'Fun & Games', icon: '🎮', desc: '14 entertainment commands', cmds: [
+{ cat: 'Utility', icon: '🔍', desc: '9 info and utility commands', cmds: [
+           { name: 'ping', slash: '/ping', prefix: '!ping' },
+           { name: 'help', slash: '/help', prefix: '!help' },
+           { name: 'avatar', slash: '/avatar user:@user', prefix: '!avatar @user' },
+           { name: 'userinfo', slash: '/userinfo user:@user', prefix: '!userinfo @user' },
+           { name: 'serverinfo', slash: '/serverinfo', prefix: '!serverinfo' },
+           { name: 'poll', slash: '/poll question:Best language? options:JS,Python', prefix: '!poll Best language? JS Python' },
+           { name: 'remind', slash: '/remind time:30m message:Check oven', prefix: '!remind 30m Check oven' },
+           { name: 'msg', slash: '/msg channel:#channel message:Hello!', prefix: '!msg #channel Hello!' },
+           { name: 'level', slash: '/level user:@user', prefix: '!level @user' },
+         ]},
+         { cat: 'Fun & Games', icon: '🎮', desc: '13 entertainment commands', cmds: [
           { name: '8ball', slash: '/8ball question:Will I win?', prefix: '!8ball Will I win?' },
           { name: 'roll', slash: '/roll sides:20', prefix: '!roll 20' },
           { name: 'decide', slash: '/decide options:Pizza,Pasta', prefix: '!decide Pizza Pasta' },
@@ -145,8 +138,7 @@
           { name: 'coinflip', slash: '/coinflip', prefix: '!coinflip' },
           { name: 'joke', slash: '/joke', prefix: '!joke' },
           { name: 'quote', slash: '/quote', prefix: '!quote' },
-          { name: 'ship', slash: '/ship @user1 @user2', prefix: '!ship @user1 @user2' },
-          { name: 'rate', slash: '/rate thing:This bot', prefix: '!rate This bot' },
+{ name: 'rate', slash: '/rate thing:This bot', prefix: '!rate This bot' },
           { name: 'choose', slash: '/choose options:Pizza,Pasta,Burger', prefix: '!choose Pizza Pasta Burger' },
           { name: 'ascii', slash: '/ascii text:Hello font:bubbles', prefix: '' },
           { name: 'wouldyourather', slash: '/wouldyourather', prefix: '!wouldyourather' },
