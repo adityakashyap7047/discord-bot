@@ -115,6 +115,17 @@ function flushDB() {
   }
 }
 
+// Auto-flush every 60 seconds as a safety net against crashes
+const autoFlushInterval = setInterval(() => {
+  if (dirty && cache) {
+    writeDB(cache);
+    dirty = false;
+  }
+}, 60000);
+// Don't let the interval keep the process alive
+if (autoFlushInterval.unref) autoFlushInterval.unref();
+
+
 const defaultSettings = {
   prefix: '!',
   welcomeEnabled: false,

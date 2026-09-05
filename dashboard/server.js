@@ -3,6 +3,8 @@ const session = require('express-session');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
 const {
   getGuildSettings, updateGuildSetting, updateGuildSettings,
   getWarnings, clearWarnings, addWarning,
@@ -15,6 +17,48 @@ const {
   getEconomy, updateEconomy, getEconomyLeaderboard,
   getInventory,
 } = require('../utils/database');
+
+class FileSessionStore extends session.Store {
+  constructor(directory) {
+    super();
+    this.directory = directory;
+    fs.mkdirSync(directory, { recursive: true });
+  }
+
+  fileFor(sessionId) {
+    const name = crypto.createHash('sha256').update(sessionId).digest('hex');
+    return path.join(this.directory, `${name}.json`);
+  }
+
+  get(sessionId, callback) {
+    fs.readFile(this.fileFor(sessionId), 'utf8', (error, raw) => {
+      if (error?.code === 'ENOENT') return callback(null, null);
+      if (error) return callback(error);
+      try {
+        const data = JSON.parse(raw);
+        const expiresAt = data.cookie?.expires && new Date(data.cookie.expires).getTime();
+        if (expiresAt && expiresAt <= Date.now()) {
+          return this.destroy(sessionId, () => callback(null, null));
+        }
+        return callback(null, data);
+      } catch (parseError) {
+        return callback(parseError);
+      }
+    });
+  }
+
+  set(sessionId, data, callback = () => {}) {
+    fs.writeFile(this.fileFor(sessionId), JSON.stringify(data), 'utf8', callback);
+  }
+
+  destroy(sessionId, callback = () => {}) {
+    fs.unlink(this.fileFor(sessionId), error => callback(error?.code === 'ENOENT' ? null : error));
+  }
+
+  touch(sessionId, data, callback = () => {}) {
+    this.set(sessionId, data, callback);
+  }
+}
 
 function startDashboard(client) {
   const app = express();
@@ -35,10 +79,12 @@ function startDashboard(client) {
 
   app.use(session({
     secret: client.config.sessionSecret || 'discord-bot-secret',
+    store: new FileSessionStore(path.join(__dirname, '..', 'data', 'sessions')),
     resave: false,
     saveUninitialized: false,
+    rolling: true,
     cookie: {
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
       secure: usesSecureCookies,
       sameSite: usesSecureCookies ? 'none' : 'lax',
     }
@@ -176,26 +222,30 @@ function startDashboard(client) {
     res.render('welcome', { user: req.user, guild: g, settings, channels, roles, currentPage: 'welcome', query: req.query });
   });
 
-  app.post('/dashboard/:guildId/welcome', isAuthenticated, hasPermission, (req, res) => {
+  app.post('/dashboard/:guildId/welcome', isAuthenticated, hasPermission, async (req, res) => {
     const s = req.body;
     const isValidImage = (url) => url && /^https?:\/\/.+\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(url);
-    updateGuildSettings(req.guild.id, {
-      welcomeEnabled: s.welcomeEnabled === 'on',
-      welcomeChannel: s.welcomeChannel || null,
-      welcomeMessage: s.welcomeMessage || 'Welcome {user} to {server}!',
-      welcomeEmbed: s.welcomeEmbed === 'on',
-      welcomeColor: s.welcomeColor || '#00ff00',
-      welcomeImage: isValidImage(s.welcomeImage) ? s.welcomeImage : '',
-      goodbyeEnabled: s.goodbyeEnabled === 'on',
-      goodbyeChannel: s.goodbyeChannel || null,
-      goodbyeMessage: s.goodbyeMessage || 'Goodbye {user}!',
-      goodbyeEmbed: s.goodbyeEmbed === 'on',
-      goodbyeColor: s.goodbyeColor || '#ff0000',
-      goodbyeImage: isValidImage(s.goodbyeImage) ? s.goodbyeImage : '',
-      boostMessage: s.boostMessage || '',
-      boostChannel: s.boostChannel || null,
-      welcomeRoles: s.welcomeRoles ? (Array.isArray(s.welcomeRoles) ? s.welcomeRoles : [s.welcomeRoles]) : [],
-    });
+    try {
+      await updateGuildSettings(req.guild.id, {
+        welcomeEnabled: s.welcomeEnabled === 'on',
+        welcomeChannel: s.welcomeChannel || null,
+        welcomeMessage: s.welcomeMessage || 'Welcome {user} to {server}!',
+        welcomeEmbed: s.welcomeEmbed === 'on',
+        welcomeColor: s.welcomeColor || '#00ff00',
+        welcomeImage: isValidImage(s.welcomeImage) ? s.welcomeImage : '',
+        goodbyeEnabled: s.goodbyeEnabled === 'on',
+        goodbyeChannel: s.goodbyeChannel || null,
+        goodbyeMessage: s.goodbyeMessage || 'Goodbye {user}!',
+        goodbyeEmbed: s.goodbyeEmbed === 'on',
+        goodbyeColor: s.goodbyeColor || '#ff0000',
+        goodbyeImage: isValidImage(s.goodbyeImage) ? s.goodbyeImage : '',
+        boostMessage: s.boostMessage || '',
+        boostChannel: s.boostChannel || null,
+        welcomeRoles: s.welcomeRoles ? (Array.isArray(s.welcomeRoles) ? s.welcomeRoles : [s.welcomeRoles]) : [],
+      });
+    } catch (err) {
+      console.error('[DASHBOARD] Welcome save error:', err.message);
+    }
     res.redirect(`/dashboard/${req.guild.id}/welcome?saved=true`);
   });
 
@@ -208,19 +258,23 @@ function startDashboard(client) {
     res.render('moderation', { user: req.user, guild: g, settings, channels, roles, currentPage: 'moderation', query: req.query });
   });
 
-  app.post('/dashboard/:guildId/moderation', isAuthenticated, hasPermission, (req, res) => {
+  app.post('/dashboard/:guildId/moderation', isAuthenticated, hasPermission, async (req, res) => {
     const s = req.body;
-    updateGuildSettings(req.guild.id, {
-      modLogEnabled: s.modLogEnabled === 'on',
-      modLogChannel: s.modLogChannel || null,
-      autoMod: s.autoMod === 'on',
-      antiSpam: s.antiSpam === 'on',
-      antiLink: s.antiLink === 'on',
-      antiRaid: s.antiRaid === 'on',
-      mutedRole: s.mutedRole || null,
-      floodLimit: parseInt(s.floodLimit) || 5,
-      floodTimeframe: parseInt(s.floodTimeframe) || 5,
-    });
+    try {
+      await updateGuildSettings(req.guild.id, {
+        modLogEnabled: s.modLogEnabled === 'on',
+        modLogChannel: s.modLogChannel || null,
+        autoMod: s.autoMod === 'on',
+        antiSpam: s.antiSpam === 'on',
+        antiLink: s.antiLink === 'on',
+        antiRaid: s.antiRaid === 'on',
+        mutedRole: s.mutedRole || null,
+        floodLimit: parseInt(s.floodLimit) || 5,
+        floodTimeframe: parseInt(s.floodTimeframe) || 5,
+      });
+    } catch (err) {
+      console.error('[DASHBOARD] Moderation save error:', err.message);
+    }
     res.redirect(`/dashboard/${req.guild.id}/moderation?saved=true`);
   });
 
@@ -233,16 +287,20 @@ function startDashboard(client) {
     res.render('logging', { user: req.user, guild: g, settings, channels, logs, currentPage: 'logging', query: req.query });
   });
 
-  app.post('/dashboard/:guildId/logging', isAuthenticated, hasPermission, (req, res) => {
+  app.post('/dashboard/:guildId/logging', isAuthenticated, hasPermission, async (req, res) => {
     const s = req.body;
-    updateGuildSettings(req.guild.id, {
-      logChannel: s.logChannel || null,
-      logMessages: s.logMessages === 'on',
-      logJoins: s.logJoins === 'on',
-      logBans: s.logBans === 'on',
-      logEdits: s.logEdits === 'on',
-      voiceChannelLog: s.voiceChannelLog === 'on',
-    });
+    try {
+      await updateGuildSettings(req.guild.id, {
+        logChannel: s.logChannel || null,
+        logMessages: s.logMessages === 'on',
+        logJoins: s.logJoins === 'on',
+        logBans: s.logBans === 'on',
+        logEdits: s.logEdits === 'on',
+        voiceChannelLog: s.voiceChannelLog === 'on',
+      });
+    } catch (err) {
+      console.error('[DASHBOARD] Logging save error:', err.message);
+    }
     res.redirect(`/dashboard/${req.guild.id}/logging?saved=true`);
   });
 
@@ -277,11 +335,15 @@ function startDashboard(client) {
     res.render('roles', { user: req.user, guild: g, settings, roles, currentPage: 'roles' });
   });
 
-  app.post('/dashboard/:guildId/roles/autorole', isAuthenticated, hasPermission, (req, res) => {
-    updateGuildSettings(req.guild.id, {
-      autoroleEnabled: req.body.autoroleEnabled === 'on',
-      autoroleId: req.body.autoroleId || null,
-    });
+  app.post('/dashboard/:guildId/roles/autorole', isAuthenticated, hasPermission, async (req, res) => {
+    try {
+      await updateGuildSettings(req.guild.id, {
+        autoroleEnabled: req.body.autoroleEnabled === 'on',
+        autoroleId: req.body.autoroleId || null,
+      });
+    } catch (err) {
+      console.error('[DASHBOARD] Autorole save error:', err.message);
+    }
     res.redirect(`/dashboard/${req.guild.id}/roles?saved=true`);
   });
 
@@ -293,13 +355,21 @@ function startDashboard(client) {
     res.render('commands', { user: req.user, guild: g, settings, customCommands: customCmds, currentPage: 'commands' });
   });
 
-  app.post('/dashboard/:guildId/commands/add', isAuthenticated, hasPermission, (req, res) => {
-    addCustomCommand(req.guild.id, req.body.name, req.body.response, req.user.id);
+  app.post('/dashboard/:guildId/commands/add', isAuthenticated, hasPermission, async (req, res) => {
+    try {
+      await addCustomCommand(req.guild.id, req.body.name, req.body.response, req.user.id);
+    } catch (err) {
+      console.error('[DASHBOARD] Add command error:', err.message);
+    }
     res.redirect(`/dashboard/${req.guild.id}/commands?saved=true`);
   });
 
-  app.post('/dashboard/:guildId/commands/remove', isAuthenticated, hasPermission, (req, res) => {
-    removeCustomCommand(req.guild.id, req.body.name);
+  app.post('/dashboard/:guildId/commands/remove', isAuthenticated, hasPermission, async (req, res) => {
+    try {
+      await removeCustomCommand(req.guild.id, req.body.name);
+    } catch (err) {
+      console.error('[DASHBOARD] Remove command error:', err.message);
+    }
     res.redirect(`/dashboard/${req.guild.id}/commands?saved=true`);
   });
 
@@ -312,9 +382,13 @@ function startDashboard(client) {
     res.render('embeds', { user: req.user, guild: g, settings, embeds, channels, currentPage: 'embeds', query: req.query });
   });
 
-  app.post('/dashboard/:guildId/embeds/add', isAuthenticated, hasPermission, (req, res) => {
+  app.post('/dashboard/:guildId/embeds/add', isAuthenticated, hasPermission, async (req, res) => {
     const { name, title, description, color, footer } = req.body;
-    addEmbed(req.guild.id, name, { title, description, color, footer }, req.user.id);
+    try {
+      await addEmbed(req.guild.id, name, { title, description, color, footer }, req.user.id);
+    } catch (err) {
+      console.error('[DASHBOARD] Add embed error:', err.message);
+    }
     res.redirect(`/dashboard/${req.guild.id}/embeds?saved=true`);
   });
 
@@ -354,8 +428,12 @@ function startDashboard(client) {
     }
   });
 
-  app.post('/dashboard/:guildId/embeds/remove', isAuthenticated, hasPermission, (req, res) => {
-    removeEmbed(req.guild.id, req.body.name);
+  app.post('/dashboard/:guildId/embeds/remove', isAuthenticated, hasPermission, async (req, res) => {
+    try {
+      await removeEmbed(req.guild.id, req.body.name);
+    } catch (err) {
+      console.error('[DASHBOARD] Remove embed error:', err.message);
+    }
     res.redirect(`/dashboard/${req.guild.id}/embeds?saved=true`);
   });
 
@@ -369,11 +447,15 @@ function startDashboard(client) {
     res.render('invites', { user: req.user, guild: g, settings, invites, leaderboard, channels, currentPage: 'invites' });
   });
 
-  app.post('/dashboard/:guildId/invites', isAuthenticated, hasPermission, (req, res) => {
-    updateGuildSettings(req.guild.id, {
-      inviteTracker: req.body.inviteTracker === 'on',
-      inviteLogChannel: req.body.inviteLogChannel || null,
-    });
+  app.post('/dashboard/:guildId/invites', isAuthenticated, hasPermission, async (req, res) => {
+    try {
+      await updateGuildSettings(req.guild.id, {
+        inviteTracker: req.body.inviteTracker === 'on',
+        inviteLogChannel: req.body.inviteLogChannel || null,
+      });
+    } catch (err) {
+      console.error('[DASHBOARD] Invites save error:', err.message);
+    }
     res.redirect(`/dashboard/${req.guild.id}/invites?saved=true`);
   });
 
@@ -386,12 +468,16 @@ function startDashboard(client) {
     res.render('levels', { user: req.user, guild: g, settings, leaderboard, channels, currentPage: 'levels', query: req.query });
   });
 
-  app.post('/dashboard/:guildId/levels', isAuthenticated, hasPermission, (req, res) => {
-    updateGuildSettings(req.guild.id, {
-      levelSystem: req.body.levelSystem === 'on',
-      levelChannel: req.body.levelChannel || null,
-      levelUpMessage: req.body.levelUpMessage || '🎉 {user} leveled up to **Level {level}**!',
-    });
+  app.post('/dashboard/:guildId/levels', isAuthenticated, hasPermission, async (req, res) => {
+    try {
+      await updateGuildSettings(req.guild.id, {
+        levelSystem: req.body.levelSystem === 'on',
+        levelChannel: req.body.levelChannel || null,
+        levelUpMessage: req.body.levelUpMessage || '🎉 {user} leveled up to **Level {level}**!',
+      });
+    } catch (err) {
+      console.error('[DASHBOARD] Levels save error:', err.message);
+    }
     res.redirect(`/dashboard/${req.guild.id}/levels?saved=true`);
   });
 
@@ -448,12 +534,16 @@ function startDashboard(client) {
     res.render('starboard', { user: req.user, guild: g, settings, channels, currentPage: 'starboard' });
   });
 
-  app.post('/dashboard/:guildId/starboard', isAuthenticated, hasPermission, (req, res) => {
-    updateGuildSettings(req.guild.id, {
-      starboardEnabled: req.body.starboardEnabled === 'on',
-      starboardChannel: req.body.starboardChannel || null,
-      starboardThreshold: parseInt(req.body.starboardThreshold) || 3,
-    });
+  app.post('/dashboard/:guildId/starboard', isAuthenticated, hasPermission, async (req, res) => {
+    try {
+      await updateGuildSettings(req.guild.id, {
+        starboardEnabled: req.body.starboardEnabled === 'on',
+        starboardChannel: req.body.starboardChannel || null,
+        starboardThreshold: parseInt(req.body.starboardThreshold) || 3,
+      });
+    } catch (err) {
+      console.error('[DASHBOARD] Starboard save error:', err.message);
+    }
     res.redirect(`/dashboard/${req.guild.id}/starboard?saved=true`);
   });
 
@@ -481,23 +571,27 @@ function startDashboard(client) {
     res.render('antiscam', { user: req.user, guild: g, settings, channels, roles, currentPage: 'antiscam' });
   });
 
-  app.post('/dashboard/:guildId/antiscam', isAuthenticated, hasPermission, (req, res) => {
+  app.post('/dashboard/:guildId/antiscam', isAuthenticated, hasPermission, async (req, res) => {
     const s = req.body;
-    updateGuildSettings(req.guild.id, {
-      antiScam: s.antiScam === 'on',
-      scamLogChannel: s.scamLogChannel || null,
-      scamAction: s.scamAction || 'delete',
-      accountAgeGate: s.accountAgeGate === 'on',
-      minAccountAge: parseInt(s.minAccountAge) || 7,
-      newMemberRestriction: s.newMemberRestriction === 'on',
-      duplicateDetection: s.duplicateDetection === 'on',
-      raidProtection: s.raidProtection === 'on',
-      raidThreshold: parseInt(s.raidThreshold) || 10,
-      raidTimeframe: parseInt(s.raidTimeframe) || 60,
-      verificationEnabled: s.verificationEnabled === 'on',
-      verificationChannel: s.verificationChannel || null,
-      verificationRole: s.verificationRole || null,
-    });
+    try {
+      await updateGuildSettings(req.guild.id, {
+        antiScam: s.antiScam === 'on',
+        scamLogChannel: s.scamLogChannel || null,
+        scamAction: s.scamAction || 'delete',
+        accountAgeGate: s.accountAgeGate === 'on',
+        minAccountAge: parseInt(s.minAccountAge) || 7,
+        newMemberRestriction: s.newMemberRestriction === 'on',
+        duplicateDetection: s.duplicateDetection === 'on',
+        raidProtection: s.raidProtection === 'on',
+        raidThreshold: parseInt(s.raidThreshold) || 10,
+        raidTimeframe: parseInt(s.raidTimeframe) || 60,
+        verificationEnabled: s.verificationEnabled === 'on',
+        verificationChannel: s.verificationChannel || null,
+        verificationRole: s.verificationRole || null,
+      });
+    } catch (err) {
+      console.error('[DASHBOARD] Anti-scam save error:', err.message);
+    }
     res.redirect(`/dashboard/${req.guild.id}/antiscam?saved=true`);
   });
 
