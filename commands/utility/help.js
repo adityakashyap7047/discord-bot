@@ -21,15 +21,11 @@ module.exports = {
         desc: 'Scam detection, verification, raid protection',
       },
       'Utility': {
-        cmds: ['ping', 'help', 'avatar', 'userinfo', 'serverinfo', 'membercount', 'rolelist', 'invitecount', 'poll', 'remind', 'level', 'msg'],
+        cmds: ['ping', 'help', 'avatar', 'userinfo', 'serverinfo', 'poll', 'remind', 'level', 'msg'],
         desc: 'Info, tools, and server utilities',
       },
-      'Info': {
-        cmds: ['botinfo', 'uptime'],
-        desc: 'Bot status and information',
-      },
       'Fun & Games': {
-        cmds: ['8ball', 'roll', 'decide', 'say', 'reverse', 'coinflip', 'joke', 'quote', 'ship', 'rate', 'choose', 'ascii', 'wouldyourather', 'trivia'],
+        cmds: ['8ball', 'roll', 'decide', 'say', 'reverse', 'coinflip', 'joke', 'quote', 'rate', 'choose', 'ascii', 'wouldyourather', 'trivia'],
         desc: 'Games, jokes, and entertainment',
       },
       'Setup': {

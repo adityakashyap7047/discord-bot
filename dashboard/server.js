@@ -889,14 +889,14 @@ function startDashboard(client) {
     res.json({
       moderation: ['ban', 'kick', 'mute', 'unmute', 'warn', 'warnings', 'purge', 'tempban', 'softban', 'unban', 'massban', 'nuke', 'prune', 'nick', 'slowmode', 'lock', 'unlock', 'serverlock', 'antiscam', 'raid', 'verification', 'ticket', 'giveaway'],
       economy: ['balance', 'daily', 'work', 'shop', 'buy', 'inventory', 'pay', 'coinflip', 'leaderboard', 'deposit', 'withdraw', 'rob', 'slots', 'beg', 'give', 'economyboard'],
-      social: ['profile', 'rep', 'marry', 'ship'],
-      advanced: ['calc', 'translate', 'remindme', 'notes', 'stats', 'uptime', 'serverlist', 'whois'],
+      social: ['profile', 'rep', 'marry'],
+      advanced: ['translate', 'remindme', 'notes', 'stats', 'serverlist', 'whois'],
       image: ['meme', 'cat', 'dog', 'waifu', 'drink', 'howgay', 'rate', 'simprate'],
-      utility: ['ping', 'help', 'avatar', 'userinfo', 'serverinfo', 'membercount', 'rolelist', 'invitecount', 'poll', 'remind', 'msg', 'afk', 'base64', 'snipe', 'editsnipe', 'weather', 'channelinfo', 'boosters', 'level', 'members'],
+      utility: ['ping', 'help', 'avatar', 'userinfo', 'serverinfo', 'poll', 'remind', 'msg', 'afk', 'base64', 'snipe', 'editsnipe', 'weather', 'channelinfo', 'boosters', 'level', 'members'],
       fun: ['8ball', 'roll', 'decide', 'say', 'reverse', 'choose', 'ascii', 'wouldyourather', 'trivia', 'joke', 'quote', 'hug', 'slap', 'clap', 'roast', 'rps', 'hack', 'guy'],
       setup: ['setup', 'setwelcome', 'setgoodbye', 'setlog', 'setprefix', 'setautorole', 'automod'],
       custom: ['addcommand', 'removecommand', 'listcommands', 'reactionrole'],
-      info: ['botinfo', 'uptime'],
+      info: [],
       totalCommands: client.commands.size,
     });
   });
