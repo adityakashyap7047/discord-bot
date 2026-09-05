@@ -38,7 +38,7 @@ document.querySelectorAll('[data-guild]').forEach(container => {
 
   autoFields.forEach(el => {
     const key = el.dataset.auto;
-    const eventType = el.type === 'checkbox' ? 'change' : 'input';
+    const eventType = (el.type === 'checkbox' || el.tagName === 'SELECT') ? 'change' : 'input';
     el.addEventListener(eventType, () => {
       let val = el.type === 'checkbox' ? (el.checked ? 'on' : 'off') : el.value;
       if (!pendingChanges.has(guildId)) pendingChanges.set(guildId, new Map());
