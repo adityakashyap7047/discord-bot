@@ -93,15 +93,14 @@ function writeDB(data) {
 function saveDB(data) {
   cache = data;
   dirty = true;
-  if (!saveTimeout) {
-    saveTimeout = setTimeout(() => {
-      if (dirty && cache) {
-        writeDB(cache);
-        dirty = false;
-      }
-      saveTimeout = null;
-    }, 1000);
-  }
+  if (saveTimeout) clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    if (dirty && cache) {
+      writeDB(cache);
+      dirty = false;
+    }
+    saveTimeout = null;
+  }, 500);
 }
 
 function flushDB() {
@@ -209,17 +208,21 @@ async function getGuildSettings(guildId) {
      try {
        const supaSettings = await supa.getGuildSettingsSupabase(guildId);
        if (supaSettings) {
-         const merged = { guildId, ...defaultSettings, ...supaSettings };
-         db.guild_settings[guildId] = merged;
-         saveDB(db);
-         return merged;
+         const localSettings = db.guild_settings[guildId];
+         const isDefault = JSON.stringify(localSettings) === JSON.stringify({ guildId, ...defaultSettings });
+         if (isDefault) {
+           const merged = { guildId, ...defaultSettings, ...supaSettings };
+           db.guild_settings[guildId] = merged;
+           saveDB(db);
+           return merged;
+         }
        }
      } catch (error) {
        console.error('[DB] Supabase settings read error:', error.message);
      }
    }
    return db.guild_settings[guildId];
-}
+ }
 
 async function updateGuildSetting(guildId, key, value) {
   const db = loadDB();

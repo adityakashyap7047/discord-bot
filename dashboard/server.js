@@ -30,6 +30,9 @@ class FileSessionStore extends session.Store {
     return path.join(this.directory, `${name}.json`);
   }
 
+touch(sessionId, data, callback = () => {}) {
+    this.set(sessionId, data, callback);
+  }
   get(sessionId, callback) {
     fs.readFile(this.fileFor(sessionId), 'utf8', (error, raw) => {
       if (error?.code === 'ENOENT') return callback(null, null);
@@ -46,7 +49,6 @@ class FileSessionStore extends session.Store {
       }
     });
   }
-
   set(sessionId, data, callback = () => {}) {
     fs.writeFile(this.fileFor(sessionId), JSON.stringify(data), 'utf8', callback);
   }
