@@ -318,7 +318,7 @@ function startDashboard(client) {
     const settings = await getGuildSettings(req.guild.id);
     const channel = req.guild.channels.cache.get(settings.logChannel) || await req.guild.channels.fetch(settings.logChannel).catch(() => null);
     if (!settings.logChannel) {
-      return res.redirect(`/dashboard/${req.guild.id}/logging?error=${encodeURIComponent('No log channel configured. Please select a channel in settings first.')}`);
+      return res.redirect(`/dashboard/${req.guild.id}/logging?error=${encodeURIComponent('Set a Log Channel first in the settings above.')}`);
     }
     if (!channel || !channel.isTextBased() || typeof channel.send !== 'function') {
       return res.redirect(`/dashboard/${req.guild.id}/logging?error=${encodeURIComponent('Log channel not found or not a text channel. Please re-select the channel in settings.')}`);
@@ -504,6 +504,7 @@ function startDashboard(client) {
 
     if (type === 'welcome') {
       channelId = settings.welcomeChannel;
+      if (!channelId) return res.redirect(`/dashboard/${req.guild.id}/welcome?error=${encodeURIComponent('Set a Welcome Channel first in the settings above.')}`);
       const message = (settings.welcomeMessage || 'Welcome {user} to {server}!')
         .replace('{user}', `<@${req.user.id}>`)
         .replace('{server}', req.guild.name)
@@ -522,13 +523,14 @@ function startDashboard(client) {
       }
     } else if (type === 'level') {
       channelId = settings.levelChannel;
-      if (!channelId) return res.redirect(`/dashboard/${req.guild.id}/levels?error=${encodeURIComponent('Choose a level-up channel before testing.')}`);
+      if (!channelId) return res.redirect(`/dashboard/${req.guild.id}/levels?error=${encodeURIComponent('Set a Level-Up Channel first in the settings above.')}`);
       const message = (settings.levelUpMessage || '🎉 {user} leveled up to **Level {level}**!')
         .replace('{user}', `<@${req.user.id}>`)
         .replace('{level}', '1');
       payload = { content: `🧪 **Level-up message test**\n${message}` };
     } else if (type === 'moderation') {
       channelId = settings.scamLogChannel || settings.logChannel;
+      if (!channelId) return res.redirect(`/dashboard/${req.guild.id}/moderation?error=${encodeURIComponent('Set a Log Channel or Scam Log Channel first in the settings above.')}`);
       payload = { embeds: [new EmbedBuilder().setColor('#f59e0b').setTitle('Auto-Moderation Test').setDescription('🧪 Your moderation alert channel is working correctly.').setFooter({ text: 'Dashboard test message' }).setTimestamp()] };
     } else {
       return res.status(400).send('Unknown test message type.');

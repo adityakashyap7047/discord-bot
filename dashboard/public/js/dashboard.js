@@ -41,14 +41,13 @@ document.querySelectorAll('[data-guild]').forEach(container => {
 });
 
 function updateSaveButton(guildId) {
-  const existing = document.getElementById(`save-btn-${guildId}`);
-  if (!existing) return;
+  const bar = document.getElementById(`save-bar-${guildId}`);
+  if (!bar) return;
   const count = pendingChanges.get(guildId)?.size || 0;
-  existing.style.display = count > 0 ? 'inline-flex' : 'none';
-  if (count > 0) {
-    existing.textContent = `Save to Supabase (${count} changes)`;
-  } else {
-    existing.textContent = 'Save to Supabase';
+  bar.style.display = count > 0 ? 'block' : 'none';
+  const status = document.getElementById(`save-status-${guildId}`);
+  if (status) {
+    status.textContent = count > 0 ? `${count} unsaved change${count > 1 ? 's' : ''}` : 'No changes';
   }
 }
 
@@ -63,28 +62,36 @@ function showSavePopup(guildId) {
   if (confirmed) {
     saveToSupabase(guildId);
     pendingChanges.delete(guildId);
-    const btn = document.getElementById(`save-btn-${guildId}`);
-    if (btn) btn.style.display = 'none';
+    const bar = document.getElementById(`save-bar-${guildId}`);
+    if (bar) bar.style.display = 'none';
   }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-guild]').forEach(container => {
     const guildId = container.dataset.guild;
-    const navBar = document.querySelector('.nav');
-    if (!navBar) return;
-    const navR = navBar.querySelector('.nav-r');
-    if (!navR) return;
-    const saveBtn = document.createElement('button');
-    saveBtn.id = `save-btn-${guildId}`;
-    saveBtn.className = 'btn btn-p';
-    saveBtn.style.cssText = 'display:none;margin-left:1rem;padding:0.4rem 1rem;font-size:0.75rem;';
-    saveBtn.textContent = 'Save to Supabase';
-    saveBtn.onclick = () => showSavePopup(guildId);
-    navR.appendChild(saveBtn);
+    const main = container.querySelector('.main');
+    if (!main) return;
+
+    const saveBar = document.createElement('div');
+    saveBar.id = `save-bar-${guildId}`;
+    saveBar.style.cssText = 'display:none;position:sticky;bottom:0;z-index:50;padding:1rem 0;margin-top:1.5rem;';
+    saveBar.innerHTML = `<div style="display:flex;align-items:center;gap:1rem;background:rgba(5,2,15,0.9);border:1px solid var(--neon-blue);border-radius:var(--r);padding:1rem 1.5rem;backdrop-filter:blur(20px);box-shadow:0 -4px 30px rgba(0,212,255,0.15);">
+      <span style="flex:1;font-weight:600;font-size:0.9rem;" id="save-status-${guildId}">Unsaved changes</span>
+      <button class="btn btn-s" onclick="discardChanges('${guildId}')" style="font-size:0.8rem;">Discard</button>
+      <button class="btn btn-p" onclick="showSavePopup('${guildId}')" style="font-size:0.8rem;">Save to Supabase</button>
+    </div>`;
+    main.appendChild(saveBar);
     updateSaveButton(guildId);
   });
 });
+
+function discardChanges(guildId) {
+  pendingChanges.delete(guildId);
+  const bar = document.getElementById(`save-bar-${guildId}`);
+  if (bar) bar.style.display = 'none';
+  showToast('Changes discarded');
+}
 
 document.querySelectorAll('[data-preview]').forEach(el => {
   el.addEventListener('input', () => {
