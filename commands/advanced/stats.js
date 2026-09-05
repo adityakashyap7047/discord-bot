@@ -14,7 +14,7 @@ module.exports = {
     const channels = client.channels.cache.size;
     const commands = client.commands.size;
 
-    const dbSize = client.db ? Object.keys(client.db.data || {}).length : 0;
+    const dbSize = client.db ? Object.keys(client.db.loadDB ? client.db.loadDB() : {}).length : 0;
 
     const embed = new EmbedBuilder()
       .setColor(0x8b5cf6)

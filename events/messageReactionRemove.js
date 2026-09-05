@@ -14,7 +14,7 @@ module.exports = {
     }
 
     try {
-      const rr = getReactionRole(reaction.message.guild.id, reaction.message.id, reaction.emoji.name);
+      const rr = await getReactionRole(reaction.message.guild.id, reaction.message.id, reaction.emoji.name);
       if (rr) {
         const member = reaction.message.guild.members.cache.get(user.id);
         if (member) await member.roles.remove(rr.roleId).catch(() => {});

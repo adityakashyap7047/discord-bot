@@ -10,7 +10,7 @@ module.exports = {
     if (!message.member.permissions.has('ManageGuild')) return message.reply({ embeds: [errorEmbed('No Permission', 'Need Manage Server.')] });
     const prefix = args[0];
     if (!prefix) return message.reply({ embeds: [errorEmbed('Error', 'Provide a prefix.')] });
-    updateGuildSetting(client.db, message.guild.id, 'prefix', prefix);
+    await updateGuildSetting(client.db, message.guild.id, 'prefix', prefix);
     message.reply({ embeds: [successEmbed('Prefix Set', `Prefix changed to \`${prefix}\``)] });
   },
 };

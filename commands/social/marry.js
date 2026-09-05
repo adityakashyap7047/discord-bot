@@ -56,7 +56,7 @@ module.exports = {
 
     collector.on('collect', async (interaction) => {
       if (interaction.customId.startsWith('marry_accept')) {
-        addMarriage(message.author.id, target.id);
+        await addMarriage(message.author.id, target.id);
         const acceptEmbed = new EmbedBuilder()
           .setColor(0xff69b4)
           .setTitle('💒 Marriage Accepted!')

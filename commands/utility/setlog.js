@@ -10,8 +10,8 @@ module.exports = {
     if (!message.member.permissions.has('ManageGuild')) return message.reply({ embeds: [errorEmbed('No Permission', 'Need Manage Server.')] });
     const channel = message.mentions.channels.first();
     if (!channel) return message.reply({ embeds: [errorEmbed('Error', 'Mention a channel.')] });
-    updateGuildSetting(client.db, message.guild.id, 'logChannel', channel.id);
-    updateGuildSetting(client.db, message.guild.id, 'modLogChannel', channel.id);
+    await updateGuildSetting(client.db, message.guild.id, 'logChannel', channel.id);
+    await updateGuildSetting(client.db, message.guild.id, 'modLogChannel', channel.id);
     message.reply({ embeds: [successEmbed('Log Set', `Log channel set to ${channel}`)] });
   },
 };

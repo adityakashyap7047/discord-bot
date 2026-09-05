@@ -39,8 +39,8 @@ module.exports = {
         const role = message.mentions.roles.first();
         if (!channel || !role) return message.reply('Usage: `!ticket setup #category @support-role`');
 
-        updateGuildSetting(message.guild.id, 'ticketCategory', channel.id);
-        updateGuildSetting(message.guild.id, 'ticketSupportRole', role.id);
+        await updateGuildSetting(message.guild.id, 'ticketCategory', channel.id);
+        await updateGuildSetting(message.guild.id, 'ticketSupportRole', role.id);
         return message.reply(`Ticket system configured!\nCategory: ${channel}\nSupport Role: ${role}`);
       }
 

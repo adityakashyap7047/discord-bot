@@ -50,7 +50,8 @@ async function getCustomCommand(guildId, name) {
 async function getProfile(userId) {
   if (!available) return null;
   const { data } = await supabase.from('profiles').select('*').eq('user_id', userId).maybeSingle();
-  return data;
+  if (!data) return null;
+  return { userId: data.user_id, ...data };
 }
 
 async function upsertProfile(userId, updates) {
@@ -62,7 +63,8 @@ async function upsertProfile(userId, updates) {
 async function getEconomy(guildId, userId) {
   if (!available) return null;
   const { data } = await supabase.from('economy').select('*').eq('guild_id', guildId).eq('user_id', userId).maybeSingle();
-  return data;
+  if (!data) return null;
+  return { guildId: data.guild_id, userId: data.user_id, wallet: data.wallet, bank: data.bank, lastDaily: data.last_daily, lastWork: data.last_work, lastRob: data.last_rob, lastBeg: data.last_beg };
 }
 
 async function upsertEconomy(guildId, userId, updates) {
@@ -81,7 +83,8 @@ async function getEconomyLeaderboard(guildId) {
 async function getInventory(guildId, userId) {
   if (!available) return null;
   const { data } = await supabase.from('inventories').select('*').eq('guild_id', guildId).eq('user_id', userId).maybeSingle();
-  return data;
+  if (!data) return null;
+  return { guildId: data.guild_id, userId: data.user_id, items: data.items };
 }
 
 async function upsertInventory(guildId, userId, items) {
@@ -93,7 +96,8 @@ async function upsertInventory(guildId, userId, items) {
 async function getMarriage(userId) {
   if (!available) return null;
   const { data } = await supabase.from('marriages').select('*').or(`user1.eq.${userId},user2.eq.${userId}`).maybeSingle();
-  return data;
+  if (!data) return null;
+  return { user1: data.user1, user2: data.user2 };
 }
 
 async function addMarriage(user1, user2) {
@@ -110,7 +114,8 @@ async function removeMarriage(userId) {
 async function getReputation(userId) {
   if (!available) return [];
   const { data } = await supabase.from('reputation').select('*').eq('user_id', userId);
-  return data || [];
+  if (!data) return [];
+  return data.map(r => ({ userId: r.user_id, fromUserId: r.from_user_id }));
 }
 
 async function addReputation(userId, fromUserId) {
@@ -128,7 +133,8 @@ async function hasGivenRep(userId, targetId) {
 async function getNotes(userId) {
   if (!available) return [];
   const { data } = await supabase.from('notes').select('*').eq('user_id', userId).order('created_at', { ascending: false });
-  return data || [];
+  if (!data) return [];
+  return data.map(n => ({ userId: n.user_id, title: n.title, content: n.content, createdAt: n.created_at }));
 }
 
 async function addNote(userId, title, content) {
@@ -241,14 +247,16 @@ async function getReactionRoles(guildId) {
 async function getReactionRole(guildId, messageId, emoji) {
   if (!available) return null;
   const { data } = await supabase.from('reaction_roles').select('*').eq('guild_id', guildId).eq('message_id', messageId).eq('emoji', emoji).maybeSingle();
-  return data;
+  if (!data) return null;
+  return { guildId: data.guild_id, channelId: data.channel_id, messageId: data.message_id, emoji: data.emoji, roleId: data.role_id };
 }
 
 // ============ STARBOARD ============
 async function getStarboard(guildId, messageId) {
   if (!available) return null;
   const { data } = await supabase.from('starboard').select('*').eq('guild_id', guildId).eq('message_id', messageId).maybeSingle();
-  return data;
+  if (!data) return null;
+  return { guildId: data.guild_id, messageId: data.message_id, starboardMessageId: data.starboard_message_id, stars: data.stars };
 }
 
 async function addStarboard(guildId, messageId, starboardMessageId, stars) {
@@ -277,7 +285,8 @@ async function getEmbeds(guildId) {
 async function getEmbed(guildId, name) {
   if (!available) return null;
   const { data } = await supabase.from('embeds').select('*').eq('guild_id', guildId).eq('name', name).maybeSingle();
-  return data;
+  if (!data) return null;
+  return { guildId: data.guild_id, name: data.name, embedData: data.embed_data, createdBy: data.created_by };
 }
 
 // ============ REMINDERS ============
@@ -327,7 +336,8 @@ async function removeTempban(guildId, userId) {
 async function getTempbans(guildId) {
   if (!available) return [];
   const { data } = await supabase.from('tempbans').select('*').eq('guild_id', guildId);
-  return data || [];
+  if (!data) return [];
+  return data.map(t => ({ guildId: t.guild_id, userId: t.user_id, expiresAt: t.expires_at }));
 }
 
 // ============ GUILD STATS ============

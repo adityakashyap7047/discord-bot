@@ -60,7 +60,7 @@ module.exports = {
     const sub = src.sub;
 
     if (sub === 'enable') {
-      updateGuildSetting(src.guild.id, 'raidProtection', true);
+      await updateGuildSetting(src.guild.id, 'raidProtection', true);
       return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
@@ -70,7 +70,7 @@ module.exports = {
     }
 
     if (sub === 'disable') {
-      updateGuildSetting(src.guild.id, 'raidProtection', false);
+      await updateGuildSetting(src.guild.id, 'raidProtection', false);
       return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#ff0000')
@@ -81,7 +81,7 @@ module.exports = {
 
     if (sub === 'threshold') {
       const count = src.getInteger('count');
-      updateGuildSetting(src.guild.id, 'raidThreshold', count);
+      await updateGuildSetting(src.guild.id, 'raidThreshold', count);
       return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
@@ -92,7 +92,7 @@ module.exports = {
 
     if (sub === 'timeframe') {
       const seconds = src.getInteger('seconds');
-      updateGuildSetting(src.guild.id, 'raidTimeframe', seconds);
+      await updateGuildSetting(src.guild.id, 'raidTimeframe', seconds);
       return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
@@ -103,7 +103,7 @@ module.exports = {
 
     if (sub === 'lockdown') {
       const minutes = src.getInteger('minutes');
-      updateGuildSetting(src.guild.id, 'raidLockdownDuration', minutes * 60000);
+      await updateGuildSetting(src.guild.id, 'raidLockdownDuration', minutes * 60000);
       return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')

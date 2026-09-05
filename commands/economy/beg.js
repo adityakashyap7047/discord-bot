@@ -20,11 +20,11 @@ module.exports = {
     }
     const chance = Math.random();
     if (chance < 0.3) {
-      updateEconomy(message.guild.id, message.author.id, { lastBeg: now });
+      await updateEconomy(message.guild.id, message.author.id, { lastBeg: now });
       return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('😢 Nobody cares...').setDescription('You beg but nobody gives you anything. Try again later!')] });
     }
     const earned = Math.floor(Math.random() * 200) + 10;
-    updateEconomy(message.guild.id, message.author.id, { wallet: (eco.wallet || 0) + earned, lastBeg: now });
+    await updateEconomy(message.guild.id, message.author.id, { wallet: (eco.wallet || 0) + earned, lastBeg: now });
     const resp = responses[Math.floor(Math.random() * responses.length)];
     const embed = new EmbedBuilder()
       .setColor(0xeab308)

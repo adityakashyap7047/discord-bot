@@ -110,8 +110,8 @@ input[type="color"]{width:40px;height:38px;padding:3px;cursor:pointer;border:1px
 .empty{text-align:center;padding:3.5rem;color:var(--text3)}.empty .ic{font-size:3.5rem;margin-bottom:0.8rem;opacity:0.3}.empty h3{color:var(--text2);margin-bottom:0.5rem;font-weight:700}
 
 .toast{position:fixed;bottom:2rem;right:2rem;padding:0.8rem 1.4rem;border-radius:var(--rs);font-weight:600;font-size:0.85rem;z-index:300;animation:toastIn .3s;display:flex;align-items:center;gap:0.5rem;box-shadow:0 10px 40px rgba(0,0,0,0.5);backdrop-filter:blur(20px)}
-.toast-ok{background:rgba(34,197,94,0.95);color:#fff}
-.toast-err{background:rgba(239,68,68,0.95);color:#fff}
+.toast-success{background:rgba(34,197,94,0.95);color:#fff}
+.toast-error{background:rgba(239,68,68,0.95);color:#fff}
 @keyframes toastIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 
 /* ─── SERVER CARDS ─── */

@@ -16,7 +16,7 @@ module.exports = {
     }
 
     try {
-      const rr = getReactionRole(reaction.message.guild.id, reaction.message.id, reaction.emoji.name);
+      const rr = await getReactionRole(reaction.message.guild.id, reaction.message.id, reaction.emoji.name);
       if (rr) {
         const member = reaction.message.guild.members.cache.get(user.id);
         if (member) await member.roles.add(rr.roleId).catch(() => {});
@@ -27,7 +27,7 @@ module.exports = {
 
     if (reaction.emoji.name === '⭐' && reaction.count >= 3) {
       try {
-        const existing = getStarboard(reaction.message.guild.id, reaction.message.id);
+        const existing = await getStarboard(reaction.message.guild.id, reaction.message.id);
         if (!existing) {
           const embed = new EmbedBuilder()
             .setColor(0xffd700)
@@ -45,7 +45,7 @@ module.exports = {
             const starChannel = reaction.message.guild.channels.cache.get(starChannelId);
             if (starChannel) {
               const msg = await starChannel.send({ embeds: [embed] });
-              addStarboard(reaction.message.guild.id, reaction.message.id, msg.id, reaction.count);
+              await addStarboard(reaction.message.guild.id, reaction.message.id, msg.id, reaction.count);
             }
           }
         }

@@ -21,7 +21,7 @@ module.exports = {
     try {
       const targetMsg = await channel.messages.fetch(messageId);
       await targetMsg.react(emoji);
-      addReactionRole(message.guild.id, channel.id, messageId, emoji, role.id);
+      await addReactionRole(message.guild.id, channel.id, messageId, emoji, role.id);
       message.reply({ embeds: [successEmbed('Reaction Role', `Reaction role created: ${emoji} → ${role}`)] });
     } catch (e) {
       message.reply({ embeds: [errorEmbed('Error', 'Could not set up reaction role. Check the message ID and emoji.')] });

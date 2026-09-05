@@ -11,7 +11,7 @@ module.exports = {
     if (!message.member.permissions.has('ManageGuild')) return message.reply({ embeds: [errorEmbed('No Permission', 'Need Manage Server.')] });
     const name = args[0]?.toLowerCase();
     if (!name) return message.reply({ embeds: [errorEmbed('Error', 'Provide a command name.')] });
-    removeCustomCommand(message.guild.id, name);
+    await removeCustomCommand(message.guild.id, name);
     message.reply({ embeds: [successEmbed('Command Removed', `\`${name}\` command deleted.`)] });
   },
 };

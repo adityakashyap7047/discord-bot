@@ -21,7 +21,7 @@ module.exports = {
     if (s1 === s2 && s2 === s3) multiplier = s1 === '💎' ? 10 : s1 === '7️⃣' ? 7 : 5;
     else if (s1 === s2 || s2 === s3 || s1 === s3) multiplier = 2;
     const winnings = bet * multiplier;
-    updateEconomy(message.guild.id, message.author.id, { wallet: (eco.wallet || 0) + winnings - bet });
+    await updateEconomy(message.guild.id, message.author.id, { wallet: (eco.wallet || 0) + winnings - bet });
     const result = `**[ ${s1} | ${s2} | ${s3} ]**`;
     const embed = new EmbedBuilder()
       .setColor(multiplier > 0 ? 0x22c55e : 0xff0000)

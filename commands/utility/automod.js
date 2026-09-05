@@ -53,9 +53,9 @@ module.exports = {
 
     const key = features[feature];
     if (key === 'massMentionLimit') {
-      updateGuildSetting(message.guild.id, key, toggle === 'on' ? 5 : 0);
+      await updateGuildSetting(message.guild.id, key, toggle === 'on' ? 5 : 0);
     } else {
-      updateGuildSetting(message.guild.id, key, toggle === 'on');
+      await updateGuildSetting(message.guild.id, key, toggle === 'on');
     }
 
     return message.reply({

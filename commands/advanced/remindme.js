@@ -26,7 +26,7 @@ module.exports = {
     const remindAt = Date.now() + ms;
     const timeDisplay = `${match[1]}${match[2]}`;
 
-    addReminder(message.author.id, message.channel.id, reminderMsg, new Date(remindAt).toISOString());
+    await addReminder(message.author.id, message.channel.id, reminderMsg, new Date(remindAt).toISOString());
 
     const embed = new EmbedBuilder()
       .setColor(0x22c55e)

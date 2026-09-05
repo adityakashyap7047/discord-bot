@@ -70,7 +70,7 @@ module.exports = {
           ephemeral: true,
         });
       }
-      updateGuildSetting(src.guild.id, 'verificationEnabled', true);
+      await updateGuildSetting(src.guild.id, 'verificationEnabled', true);
       return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
@@ -80,7 +80,7 @@ module.exports = {
     }
 
     if (sub === 'disable') {
-      updateGuildSetting(src.guild.id, 'verificationEnabled', false);
+      await updateGuildSetting(src.guild.id, 'verificationEnabled', false);
       return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#ff0000')
@@ -91,7 +91,7 @@ module.exports = {
 
     if (sub === 'channel') {
       const channel = src.getChannel('channel');
-      updateGuildSetting(src.guild.id, 'verificationChannel', channel.id);
+      await updateGuildSetting(src.guild.id, 'verificationChannel', channel.id);
       return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
@@ -102,7 +102,7 @@ module.exports = {
 
     if (sub === 'role') {
       const role = src.getRole('role');
-      updateGuildSetting(src.guild.id, 'verificationRole', role.id);
+      await updateGuildSetting(src.guild.id, 'verificationRole', role.id);
       return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
@@ -113,7 +113,7 @@ module.exports = {
 
     if (sub === 'message') {
       const msg = src.getString('message');
-      updateGuildSetting(src.guild.id, 'verificationMessage', msg);
+      await updateGuildSetting(src.guild.id, 'verificationMessage', msg);
       return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')

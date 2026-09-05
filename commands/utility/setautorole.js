@@ -10,8 +10,8 @@ module.exports = {
     if (!message.member.permissions.has('ManageGuild')) return message.reply({ embeds: [errorEmbed('No Permission', 'Need Manage Server.')] });
     const role = message.mentions.roles.first();
     if (!role) return message.reply({ embeds: [errorEmbed('Error', 'Mention a role.')] });
-    updateGuildSetting(client.db, message.guild.id, 'autoroleId', role.id);
-    updateGuildSetting(client.db, message.guild.id, 'autoroleEnabled', true);
+    await updateGuildSetting(client.db, message.guild.id, 'autoroleId', role.id);
+    await updateGuildSetting(client.db, message.guild.id, 'autoroleEnabled', true);
     message.reply({ embeds: [successEmbed('Auto Role Set', `Auto role set to ${role}`)] });
   },
 };

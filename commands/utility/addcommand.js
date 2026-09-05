@@ -14,7 +14,7 @@ module.exports = {
     const response = args.slice(1).join(' ');
     if (!name || !response) return message.reply({ embeds: [errorEmbed('Error', 'Usage: `addcommand hello Hello {user}!`')] });
 
-    addCustomCommand(message.guild.id, name, response, message.author.id);
+    await addCustomCommand(message.guild.id, name, response, message.author.id);
     message.reply({ embeds: [successEmbed('Command Added', `\`${name}\` command created/updated.`)] });
   },
 };

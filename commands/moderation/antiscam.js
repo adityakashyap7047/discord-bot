@@ -83,7 +83,7 @@ module.exports = {
     const sub = src.sub;
 
     if (sub === 'enable') {
-      updateGuildSetting(src.guild.id, 'antiScam', true);
+      await updateGuildSetting(src.guild.id, 'antiScam', true);
       return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
@@ -94,7 +94,7 @@ module.exports = {
     }
 
     if (sub === 'disable') {
-      updateGuildSetting(src.guild.id, 'antiScam', false);
+      await updateGuildSetting(src.guild.id, 'antiScam', false);
       return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#ff0000')
@@ -106,7 +106,7 @@ module.exports = {
 
     if (sub === 'action') {
       const type = src.getString('type');
-      updateGuildSetting(src.guild.id, 'scamAction', type);
+      await updateGuildSetting(src.guild.id, 'scamAction', type);
       return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
@@ -118,7 +118,7 @@ module.exports = {
 
     if (sub === 'logchannel') {
       const channel = src.getChannel('channel');
-      updateGuildSetting(src.guild.id, 'scamLogChannel', channel.id);
+      await updateGuildSetting(src.guild.id, 'scamLogChannel', channel.id);
       return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#00ff00')
@@ -133,7 +133,7 @@ module.exports = {
       const whitelist = settings.scamWhitelist || [];
       if (!whitelist.includes(user.id)) {
         whitelist.push(user.id);
-        updateGuildSetting(src.guild.id, 'scamWhitelist', whitelist);
+        await updateGuildSetting(src.guild.id, 'scamWhitelist', whitelist);
       }
       return src.reply({
         embeds: [new EmbedBuilder()
@@ -147,7 +147,7 @@ module.exports = {
     if (sub === 'unwhitelist') {
       const user = src.getUser('user');
       const whitelist = (settings.scamWhitelist || []).filter(id => id !== user.id);
-      updateGuildSetting(src.guild.id, 'scamWhitelist', whitelist);
+      await updateGuildSetting(src.guild.id, 'scamWhitelist', whitelist);
       return src.reply({
         embeds: [new EmbedBuilder()
           .setColor('#ff0000')

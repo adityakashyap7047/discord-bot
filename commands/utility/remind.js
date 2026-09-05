@@ -19,7 +19,7 @@ module.exports = {
     const ms = parseInt(match[1]) * multipliers[match[2]];
     const remindAt = new Date(Date.now() + ms);
 
-    addReminder(message.author.id, message.channel.id, reminder, remindAt.toISOString());
+    await addReminder(message.author.id, message.channel.id, reminder, remindAt.toISOString());
 
     message.reply({ embeds: [successEmbed('Reminder Set', `I'll remind you in ${timeStr}.`)] });
 

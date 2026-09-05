@@ -23,7 +23,7 @@ module.exports = {
         return message.reply({ embeds: [errorEmbed('Error', 'Cannot modify a role higher than my highest role.')] });
       }
 
-      await message.reply({ embeds: [infoEmbed('Processing', `Starting mass ${action === 'add' ? 'adding' : 'removing'} role ${role}. This may take a while...`)] });
+      const statusMsg = await message.reply({ embeds: [infoEmbed('Processing', `Starting mass ${action === 'add' ? 'adding' : 'removing'} role ${role}. This may take a while...`)] });
 
       const members = await message.guild.members.fetch();
       let success = 0, failed = 0;
@@ -41,7 +41,7 @@ module.exports = {
         } catch (e) { failed++; }
       }
 
-      message.edit({ embeds: [successEmbed('Mass Role Complete', `**${success}** members ${action === 'add' ? 'received' : 'had'} the ${role} role.\n${failed ? `**${failed}** failed.` : ''}`)] });
+      statusMsg.edit({ embeds: [successEmbed('Mass Role Complete', `**${success}** members ${action === 'add' ? 'received' : 'had'} the ${role} role.\n${failed ? `**${failed}** failed.` : ''}`)] });
     } catch (e) {
       console.error('[MASSROLE ERROR]', e);
       message.reply({ embeds: [errorEmbed('Error', e.message || 'Failed.')] }).catch(() => {});

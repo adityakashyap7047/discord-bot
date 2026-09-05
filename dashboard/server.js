@@ -842,7 +842,7 @@ function startDashboard(client) {
     }
     res.json(await getGuildSettings(req.params.guildId));
   });
-  app.get('/api/guilds/:guildId/stats', isAuthenticated, (req, res) => {
+  app.get('/api/guilds/:guildId/stats', isAuthenticated, async (req, res) => {
     const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);
     if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
       return res.status(403).json({ error: 'No permission' });
