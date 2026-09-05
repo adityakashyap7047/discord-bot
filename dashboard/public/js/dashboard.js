@@ -7,13 +7,22 @@ function showToast(msg, type = 'success') {
 }
 
 function saveToSupabase(guildId) {
+  const changes = pendingChanges.get(guildId);
+  const payload = {};
+  if (changes) {
+    changes.forEach((val, key) => { payload[key] = val; });
+  }
   fetch(`/api/guilds/${guildId}/supabase-save`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({}),
+    body: JSON.stringify(payload),
   }).then(r => r.json()).then(data => {
-    if (data.success) showToast('Settings synced to Supabase!');
-    else showToast('Error syncing to Supabase', 'error');
+    if (data.success) {
+      showToast('Settings saved locally & synced to Supabase!');
+      pendingChanges.delete(guildId);
+    } else {
+      showToast('Error saving: ' + (data.error || 'Unknown'), 'error');
+    }
   }).catch(() => showToast('Network error', 'error'));
 }
 

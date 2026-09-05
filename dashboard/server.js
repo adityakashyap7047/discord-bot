@@ -214,9 +214,15 @@ function startDashboard(client) {
   // Save settings to Supabase (manual save button)
   app.post('/api/guilds/:guildId/supabase-save', isAuthenticated, hasPermission, async (req, res) => {
     try {
-      const settings = await getGuildSettings(req.params.guildId);
-      await persistGuildSettings(req.params.guildId, settings);
-      res.json({ success: true, message: 'Settings synced to Supabase' });
+      const changes = req.body || {};
+      const guildId = req.params.guildId;
+      const currentSettings = await getGuildSettings(guildId);
+      const updatedSettings = { ...currentSettings, ...changes };
+      await updateGuildSettings(guildId, updatedSettings);
+      if (require('../utils/supabase').isAvailable()) {
+        await persistGuildSettings(guildId, updatedSettings);
+      }
+      res.json({ success: true, message: 'Settings saved' });
     } catch (e) {
       console.error('[SUPABASE SAVE] Error:', e.message);
       res.status(500).json({ success: false, error: e.message });
