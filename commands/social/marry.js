@@ -21,7 +21,7 @@ module.exports = {
       return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription('You cannot marry a bot!')] });
     }
 
-    const existingMarriage = getMarriage(message.author.id);
+    const existingMarriage = await getMarriage(message.author.id);
     if (existingMarriage) {
       const spouseId = existingMarriage.user1 === message.author.id ? existingMarriage.user2 : existingMarriage.user1;
       try {
@@ -32,7 +32,7 @@ module.exports = {
       }
     }
 
-    const targetMarriage = getMarriage(target.id);
+    const targetMarriage = await getMarriage(target.id);
     if (targetMarriage) {
       return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Already Married').setDescription(`${target.username} is already married!`)] });
     }

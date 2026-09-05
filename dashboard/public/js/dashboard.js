@@ -71,15 +71,17 @@ function showSavePopup(guildId) {
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-guild]').forEach(container => {
     const guildId = container.dataset.guild;
-    const navBar = container.querySelector('.nav');
+    const navBar = document.querySelector('.nav');
     if (!navBar) return;
+    const navR = navBar.querySelector('.nav-r');
+    if (!navR) return;
     const saveBtn = document.createElement('button');
     saveBtn.id = `save-btn-${guildId}`;
     saveBtn.className = 'btn btn-p';
     saveBtn.style.cssText = 'display:none;margin-left:1rem;padding:0.4rem 1rem;font-size:0.75rem;';
     saveBtn.textContent = 'Save to Supabase';
     saveBtn.onclick = () => showSavePopup(guildId);
-    navBar.querySelector('.nav-r').appendChild(saveBtn);
+    navR.appendChild(saveBtn);
     updateSaveButton(guildId);
   });
 });

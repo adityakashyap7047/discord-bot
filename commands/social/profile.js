@@ -11,13 +11,13 @@ module.exports = {
     const target = message.mentions.users.first() || message.author;
     const member = message.guild.members.cache.get(target.id);
 
-    const eco = getEconomy(message.guild.id, target.id);
+    const eco = await getEconomy(message.guild.id, target.id);
     const totalBalance = (eco.wallet || 0) + (eco.bank || 0);
 
-    const repData = getReputation(target.id);
+    const repData = await getReputation(target.id);
     const reputation = repData.length;
 
-    const marriage = getMarriage(target.id);
+    const marriage = await getMarriage(target.id);
     let marriageText = 'Single';
     if (marriage) {
       const spouseId = marriage.user1 === target.id ? marriage.user2 : marriage.user1;
@@ -29,7 +29,7 @@ module.exports = {
       }
     }
 
-    const levelData = getLevel(message.guild.id, target.id);
+    const levelData = await getLevel(message.guild.id, target.id);
     const level = levelData ? levelData.level : 1;
     const xp = levelData ? levelData.xp : 0;
 

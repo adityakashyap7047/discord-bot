@@ -12,7 +12,7 @@ module.exports = {
   async execute(message, args, client) {
     const user = message.mentions.users.first();
     if (!user) return message.reply({ embeds: [errorEmbed('Error', 'Mention a user.')] });
-    const warns = getWarnings(message.guild.id, user.id);
+    const warns = await getWarnings(message.guild.id, user.id);
     if (!warns.length) return message.reply({ embeds: [infoEmbed('Warnings', `${user.tag} has no warnings.`)] });
 
     const list = warns.map((w, i) => `**${i + 1}.** ${w.reason} - <@${w.moderatorId}> (${w.timestamp})`).join('\n');

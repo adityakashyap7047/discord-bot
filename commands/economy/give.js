@@ -15,8 +15,8 @@ module.exports = {
     if (target.bot) return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Bots').setDescription('You cannot give coins to bots!')] });
     const amount = parseInt(args[1]);
     if (!amount || amount <= 0) return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Invalid Amount').setDescription('Enter a valid number.')] });
-    const sender = getEconomy(message.guild.id, message.author.id);
-    const receiver = getEconomy(message.guild.id, target.id);
+    const sender = await getEconomy(message.guild.id, message.author.id);
+    const receiver = await getEconomy(message.guild.id, target.id);
     if ((sender.wallet || 0) < amount) return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Insufficient Funds').setDescription(`You only have **${(sender.wallet || 0).toLocaleString()}** in your wallet.`)] });
     updateEconomy(message.guild.id, message.author.id, { wallet: (sender.wallet || 0) - amount });
     updateEconomy(message.guild.id, target.id, { wallet: (receiver.wallet || 0) + amount });

@@ -33,7 +33,7 @@ module.exports = {
       return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription('Subcommands: `add`, `list`, `delete`, `view`')] });
     }
 
-    const userNotes = getNotes(message.author.id);
+    const userNotes = await getNotes(message.author.id);
 
     if (sub === 'add') {
       const title = args[1];
@@ -50,7 +50,7 @@ module.exports = {
         return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription('You can have a maximum of 25 notes!')] });
       }
 
-      addNote(message.author.id, title, content);
+      await addNote(message.author.id, title, content);
 
       const embed = new EmbedBuilder()
         .setColor(0x22c55e)
@@ -82,12 +82,12 @@ module.exports = {
         return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription('Usage: `notes delete <title>`')] });
       }
 
-      const note = getNote(message.author.id, title);
+      const note = await getNote(message.author.id, title);
       if (!note) {
         return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription(`No note found with title "**${title}**".`)] });
       }
 
-      removeNote(message.author.id, title);
+      await removeNote(message.author.id, title);
 
       const embed = new EmbedBuilder()
         .setColor(0x22c55e)
@@ -102,7 +102,7 @@ module.exports = {
         return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription('Usage: `notes view <title>`')] });
       }
 
-      const note = getNote(message.author.id, title);
+      const note = await getNote(message.author.id, title);
       if (!note) {
         return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription(`No note found with title "**${title}**".`)] });
       }

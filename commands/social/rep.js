@@ -21,15 +21,15 @@ module.exports = {
       return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Error').setDescription('You cannot give reputation to bots!')] });
     }
 
-    if (hasGivenRep(message.author.id, target.id)) {
+    if (await hasGivenRep(message.author.id, target.id)) {
       return message.reply({
         embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Already Given').setDescription(`You have already given reputation to ${target} before!`)],
       });
     }
 
-    addReputation(target.id, message.author.id);
+    await addReputation(target.id, message.author.id);
 
-    const repData = getReputation(target.id);
+    const repData = await getReputation(target.id);
     const reputation = repData.length;
     const repBar = generateRepBar(reputation);
 

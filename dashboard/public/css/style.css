@@ -129,3 +129,25 @@ input[type="color"]{width:40px;height:38px;padding:3px;cursor:pointer;border:1px
 
 ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.2);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:rgba(0,212,255,0.35)}
 @media(max-width:768px){.sidebar{display:none}.main{padding:1.2rem}.r2,.r3{grid-template-columns:1fr}}
+
+/* ─── PULSE DOT ─── */
+.pulse-dot{width:10px;height:10px;border-radius:50%;background:var(--neon-green);box-shadow:0 0 12px var(--neon-green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+
+/* ─── ALERTS ─── */
+.alert{padding:0.8rem 1.2rem;border-radius:var(--rs);margin-bottom:1rem;font-size:0.88rem;font-weight:500}
+.alert-success{background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.2)}
+.alert-error{background:rgba(239,68,68,0.1);color:var(--red);border:1px solid rgba(239,68,68,0.2)}
+
+/* ─── BADGES ─── */
+.b-yellow{background:rgba(234,179,8,0.1);color:var(--yellow);border:1px solid rgba(234,179,8,0.2)}
+.b-neon{background:rgba(0,212,255,0.1);color:var(--neon-blue);border:1px solid rgba(0,212,255,0.2)}
+
+/* ─── SERVER CARD META ─── */
+.sc-meta{font-size:0.72rem;color:var(--text3);margin-top:0.3rem}
+
+/* ─── CYBER GRID ─── */
+.cyber-grid{position:fixed;top:0;left:0;width:100%;height:100%;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0}
+
+/* ─── SCANLINES ─── */
+.scanlines{position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;z-index:0}

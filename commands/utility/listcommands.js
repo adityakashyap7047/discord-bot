@@ -7,7 +7,7 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
   cooldown: 5,
   async execute(message, args, client) {
-    const cmds = getCustomCommands(message.guild.id);
+    const cmds = await getCustomCommands(message.guild.id);
     if (!cmds.length) return message.reply({ embeds: [infoEmbed('Custom Commands', 'No custom commands set.')] });
     const list = cmds.map(c => `\`${c.name}\` - ${c.response.slice(0, 50)}...`).join('\n');
     message.reply({ embeds: [infoEmbed('Custom Commands', list)] });

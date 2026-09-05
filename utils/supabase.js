@@ -73,7 +73,8 @@ async function upsertEconomy(guildId, userId, updates) {
 async function getEconomyLeaderboard(guildId) {
   if (!available) return [];
   const { data } = await supabase.from('economy').select('*').eq('guild_id', guildId).order('wallet', { ascending: false }).order('bank', { ascending: false }).limit(10);
-  return data || [];
+  if (!data) return [];
+  return data.map(e => ({ guildId: e.guild_id, userId: e.user_id, wallet: e.wallet, bank: e.bank }));
 }
 
 // ============ INVENTORY ============
@@ -161,7 +162,8 @@ async function upsertLevel(guildId, userId, xp, level) {
 async function getLeaderboard(guildId) {
   if (!available) return [];
   const { data } = await supabase.from('levels').select('*').eq('guild_id', guildId).order('level', { ascending: false }).order('xp', { ascending: false }).limit(20);
-  return data || [];
+  if (!data) return [];
+  return data.map(l => ({ guildId: l.guild_id, userId: l.user_id, xp: l.xp, level: l.level }));
 }
 
 // ============ WARNINGS ============
@@ -172,8 +174,12 @@ async function addWarning(guildId, userId, moderatorId, reason) {
 
 async function getWarnings(guildId, userId) {
   if (!available) return [];
-  const { data } = await supabase.from('warnings').select('*').eq('guild_id', guildId).eq('user_id', userId).order('created_at', { ascending: false });
-  return data || [];
+  let query = supabase.from('warnings').select('*').eq('guild_id', guildId);
+  if (userId) query = query.eq('user_id', userId);
+  query = query.order('created_at', { ascending: false });
+  const { data } = await query;
+  if (!data) return [];
+  return data.map(w => ({ guildId: w.guild_id, userId: w.user_id, moderatorId: w.moderator_id, reason: w.reason, timestamp: w.created_at }));
 }
 
 async function clearWarnings(guildId, userId) {
@@ -192,7 +198,8 @@ async function getLogs(guildId, type, limit = 50) {
   let query = supabase.from('mod_logs').select('*').eq('guild_id', guildId).order('created_at', { ascending: false }).limit(limit);
   if (type) query = query.eq('type', type);
   const { data } = await query;
-  return data || [];
+  if (!data) return [];
+  return data.map(l => ({ guildId: l.guild_id, type: l.type, moderatorId: l.moderator_id, targetId: l.target_id, reason: l.reason, details: l.details, timestamp: l.created_at }));
 }
 
 // ============ CUSTOM COMMANDS ============
@@ -209,7 +216,8 @@ async function removeCustomCommand(guildId, name) {
 async function getCustomCommands(guildId) {
   if (!available) return [];
   const { data } = await supabase.from('custom_commands').select('*').eq('guild_id', guildId);
-  return data || [];
+  if (!data) return [];
+  return data.map(c => ({ guildId: c.guild_id, name: c.name, response: c.response, createdBy: c.created_by }));
 }
 
 // ============ REACTION ROLES ============
@@ -226,7 +234,8 @@ async function removeReactionRole(guildId, messageId, emoji) {
 async function getReactionRoles(guildId) {
   if (!available) return [];
   const { data } = await supabase.from('reaction_roles').select('*').eq('guild_id', guildId);
-  return data || [];
+  if (!data) return [];
+  return data.map(r => ({ guildId: r.guild_id, channelId: r.channel_id, messageId: r.message_id, emoji: r.emoji, roleId: r.role_id }));
 }
 
 async function getReactionRole(guildId, messageId, emoji) {
@@ -261,7 +270,8 @@ async function removeEmbed(guildId, name) {
 async function getEmbeds(guildId) {
   if (!available) return [];
   const { data } = await supabase.from('embeds').select('*').eq('guild_id', guildId);
-  return data || [];
+  if (!data) return [];
+  return data.map(e => ({ guildId: e.guild_id, name: e.name, embedData: e.embed_data, createdBy: e.created_by }));
 }
 
 async function getEmbed(guildId, name) {
@@ -293,9 +303,14 @@ async function updateInvite(guildId, code, uses) {
 }
 
 async function getInvites(guildId) {
-  if (!available) return [];
+  if (!available) return {};
   const { data } = await supabase.from('invites').select('*').eq('guild_id', guildId);
-  return data || [];
+  if (!data) return {};
+  const result = {};
+  for (const inv of data) {
+    if (!result[inv.code]) result[inv.code] = { inviterId: inv.inviter_id, uses: inv.uses, created: inv.created_at };
+  }
+  return result;
 }
 
 // ============ TEMPBANS ============

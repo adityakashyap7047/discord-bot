@@ -7,7 +7,7 @@ module.exports = {
   cooldown: 3,
   async execute(message, args, client) {
     const user = message.mentions.users.first() || message.author;
-    const data = getLevel(message.guild.id, user.id);
+    const data = await getLevel(message.guild.id, user.id);
     if (!data) return message.reply({ embeds: [infoEmbed('Level', `${user.tag} has no level data yet.`)] });
 
     const xpNeeded = data.level * 100;

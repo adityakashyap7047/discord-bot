@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const {
-  getGuildSettings, updateGuildSetting, updateGuildSettings,
+  getGuildSettings, updateGuildSetting, updateGuildSettings, persistGuildSettings,
   getWarnings, clearWarnings, addWarning,
   getCustomCommands, addCustomCommand, removeCustomCommand,
   getReactionRoles, addReactionRole, removeReactionRole,
@@ -30,9 +30,6 @@ class FileSessionStore extends session.Store {
     return path.join(this.directory, `${name}.json`);
   }
 
-touch(sessionId, data, callback = () => {}) {
-    this.set(sessionId, data, callback);
-  }
   get(sessionId, callback) {
     fs.readFile(this.fileFor(sessionId), 'utf8', (error, raw) => {
       if (error?.code === 'ENOENT') return callback(null, null);
@@ -187,12 +184,12 @@ function startDashboard(client) {
   });
 
   // ============ SETTINGS ============
-  app.get('/dashboard/:guildId', isAuthenticated, hasPermission, (req, res) => {
+  app.get('/dashboard/:guildId', isAuthenticated, hasPermission, async (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
     const channels = g.channels.cache.filter(c => c.type === 0).sort((a, b) => a.position - b.position).map(c => ({ id: c.id, name: c.name }));
     const roles = g.roles.cache.filter(r => r.id !== g.id && !r.managed).sort((a, b) => b.position - a.position).map(r => ({ id: r.id, name: r.name, color: r.hexColor }));
-    const stats = getGuildStats(g.id);
+    const stats = await getGuildStats(g.id);
     res.render('server', { user: req.user, guild: g, settings, channels, roles, stats, currentPage: 'settings' });
   });
 
@@ -364,10 +361,10 @@ function startDashboard(client) {
   });
 
   // ============ COMMANDS ============
-  app.get('/dashboard/:guildId/commands', isAuthenticated, hasPermission, (req, res) => {
+  app.get('/dashboard/:guildId/commands', isAuthenticated, hasPermission, async (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
-    const customCmds = getCustomCommands(g.id);
+    const customCmds = await getCustomCommands(g.id);
     res.render('commands', { user: req.user, guild: g, settings, customCommands: customCmds, currentPage: 'commands' });
   });
 
@@ -454,10 +451,10 @@ function startDashboard(client) {
   });
 
   // ============ INVITES ============
-  app.get('/dashboard/:guildId/invites', isAuthenticated, hasPermission, (req, res) => {
+  app.get('/dashboard/:guildId/invites', isAuthenticated, hasPermission, async (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
-    const invites = getInvites(g.id);
+    const invites = await getInvites(g.id);
     const leaderboard = getInviteLeaderboard(g.id);
     const channels = g.channels.cache.filter(c => c.type === 0).map(c => ({ id: c.id, name: c.name }));
     res.render('invites', { user: req.user, guild: g, settings, invites, leaderboard, channels, currentPage: 'invites' });
@@ -476,10 +473,10 @@ function startDashboard(client) {
   });
 
   // ============ LEVELS ============
-  app.get('/dashboard/:guildId/levels', isAuthenticated, hasPermission, (req, res) => {
+  app.get('/dashboard/:guildId/levels', isAuthenticated, hasPermission, async (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
-    const leaderboard = getLeaderboard(g.id);
+    const leaderboard = await getLeaderboard(g.id);
     const channels = g.channels.cache.filter(c => c.type === 0).map(c => ({ id: c.id, name: c.name }));
     res.render('levels', { user: req.user, guild: g, settings, leaderboard, channels, currentPage: 'levels', query: req.query });
   });
@@ -576,10 +573,10 @@ function startDashboard(client) {
   });
 
   // ============ REACTION ROLES ============
-  app.get('/dashboard/:guildId/reactionroles', isAuthenticated, hasPermission, (req, res) => {
+  app.get('/dashboard/:guildId/reactionroles', isAuthenticated, hasPermission, async (req, res) => {
     const g = req.guild;
     const settings = req.guildSettings;
-    const rr = getReactionRoles(g.id);
+    const rr = await getReactionRoles(g.id);
     const channels = g.channels.cache.filter(c => c.type === 0).map(c => ({ id: c.id, name: c.name }));
     const roles = g.roles.cache.filter(r => r.id !== g.id).map(r => ({ id: r.id, name: r.name }));
     res.render('reactionroles', { user: req.user, guild: g, settings, reactionRoles: rr, channels, roles, currentPage: 'reactionroles' });
@@ -628,6 +625,7 @@ function startDashboard(client) {
     const g = req.guild;
     const settings = req.guildSettings;
     const channels = g.channels.cache.filter(c => c.type === 0).map(c => ({ id: c.id, name: c.name }));
+    const categories = g.channels.cache.filter(c => c.type === 4).map(c => ({ id: c.id, name: c.name }));
     const roles = g.roles.cache.filter(r => r.id !== g.id).map(r => ({ id: r.id, name: r.name }));
 
     const ticketCache = require('../commands/moderation/ticket').ticketCache;
@@ -646,7 +644,7 @@ function startDashboard(client) {
       }
     });
 
-    res.render('tickets', { user: req.user, guild: g, settings, channels, roles, activeTickets, currentPage: 'tickets' });
+    res.render('tickets', { user: req.user, guild: g, settings, channels, categories, roles, activeTickets, currentPage: 'tickets' });
   });
 
   app.post('/api/guilds/:guildId/tickets/panel', isAuthenticated, hasPermission, async (req, res) => {
@@ -849,55 +847,55 @@ function startDashboard(client) {
     if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
       return res.status(403).json({ error: 'No permission' });
     }
-    res.json(getGuildStats(req.params.guildId));
+    res.json(await getGuildStats(req.params.guildId));
   });
 
-  app.get('/api/guilds/:guildId/logs', isAuthenticated, (req, res) => {
+  app.get('/api/guilds/:guildId/logs', isAuthenticated, async (req, res) => {
     const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);
     if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
       return res.status(403).json({ error: 'No permission' });
     }
     const limit = parseInt(req.query.limit) || 50;
-    res.json(getLogs(req.params.guildId, null, limit));
+    res.json(await getLogs(req.params.guildId, null, limit));
   });
 
-  app.get('/api/guilds/:guildId/leaderboard', isAuthenticated, (req, res) => {
+  app.get('/api/guilds/:guildId/leaderboard', isAuthenticated, async (req, res) => {
     const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);
     if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
       return res.status(403).json({ error: 'No permission' });
     }
-    res.json(getLeaderboard(req.params.guildId));
+    res.json(await getLeaderboard(req.params.guildId));
   });
 
-  app.get('/api/guilds/:guildId/warnings', isAuthenticated, (req, res) => {
+  app.get('/api/guilds/:guildId/warnings', isAuthenticated, async (req, res) => {
     const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);
     if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
       return res.status(403).json({ error: 'No permission' });
     }
     const targetId = req.query.userId;
     if (targetId) {
-      res.json(getWarnings(req.params.guildId, targetId));
+      res.json(await getWarnings(req.params.guildId, targetId));
     } else {
-      res.json(getWarnings(req.params.guildId, null));
+      res.json(await getWarnings(req.params.guildId, null));
     }
   });
 
   // ============ ECONOMY API ============
-  app.get('/api/guilds/:guildId/economy', isAuthenticated, (req, res) => {
+  app.get('/api/guilds/:guildId/economy', isAuthenticated, async (req, res) => {
     const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);
     if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
       return res.status(403).json({ error: 'No permission' });
     }
-    const entries = getEconomyLeaderboard(req.params.guildId);
-    res.json(entries.map(e => ({ userId: e.userId, wallet: e.wallet, bank: e.bank, total: (e.wallet || 0) + (e.bank || 0) })));
+    const entries = await getEconomyLeaderboard(req.params.guildId);
+    res.json(entries.map(e => ({ userId: e.userId || e.user_id, wallet: e.wallet, bank: e.bank, total: (e.wallet || 0) + (e.bank || 0) })));
   });
 
-  app.get('/api/guilds/:guildId/economy/:userId', isAuthenticated, (req, res) => {
+  app.get('/api/guilds/:guildId/economy/:userId', isAuthenticated, async (req, res) => {
     const userGuild = req.user.guilds?.find(g => g.id === req.params.guildId);
     if (!userGuild || (parseInt(userGuild.permissions) & 0x20) !== 0x20) {
       return res.status(403).json({ error: 'No permission' });
     }
-    const entry = getEconomy(req.params.guildId, req.params.userId);
+    const entry = await getEconomy(req.params.guildId, req.params.userId);
     res.json(entry);
   });
 

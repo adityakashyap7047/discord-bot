@@ -701,7 +701,7 @@ async function getNote(userId, title) {
 }
 
 module.exports = {
-  loadDB, saveDB, flushDB, getGuildSettings, updateGuildSetting, updateGuildSettings,
+  loadDB, saveDB, flushDB, getGuildSettings, updateGuildSetting, updateGuildSettings, persistGuildSettings,
   addWarning, getWarnings, clearWarnings,
   addReactionRole, getReactionRoles, removeReactionRole, getReactionRole,
   addCustomCommand, removeCustomCommand, getCustomCommand, getCustomCommands,

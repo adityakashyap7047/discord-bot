@@ -11,7 +11,7 @@ module.exports = {
   data: new SlashCommandBuilder().setName('beg').setDescription('Beg for coins'),
   cooldown: 5,
   async execute(message, args, client) {
-    const eco = getEconomy(message.guild.id, message.author.id);
+    const eco = await getEconomy(message.guild.id, message.author.id);
     const now = Date.now();
     const cooldown = 15 * 60 * 1000;
     if (eco.lastBeg && now - eco.lastBeg < cooldown) {

@@ -12,7 +12,7 @@ module.exports = {
   async execute(message, args, client) {
     const bet = parseInt(args[0]);
     if (!bet || bet <= 0) return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Invalid Bet').setDescription('Enter a valid bet amount.')] });
-    const eco = getEconomy(message.guild.id, message.author.id);
+    const eco = await getEconomy(message.guild.id, message.author.id);
     if ((eco.wallet || 0) < bet) return message.reply({ embeds: [new EmbedBuilder().setColor(0xff0000).setTitle('❌ Insufficient Funds').setDescription(`You need **${bet.toLocaleString()}** in your wallet.`)] });
     const s1 = symbols[Math.floor(Math.random() * symbols.length)];
     const s2 = symbols[Math.floor(Math.random() * symbols.length)];
