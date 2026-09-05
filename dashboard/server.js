@@ -319,9 +319,12 @@ function startDashboard(client) {
 
   app.post('/dashboard/:guildId/test-message/logging', isAuthenticated, hasPermission, async (req, res) => {
     const settings = await getGuildSettings(req.guild.id);
-    const channel = req.guild.channels.cache.get(settings.logChannel);
+    const channel = req.guild.channels.cache.get(settings.logChannel) || await req.guild.channels.fetch(settings.logChannel).catch(() => null);
+    if (!settings.logChannel) {
+      return res.redirect(`/dashboard/${req.guild.id}/logging?error=${encodeURIComponent('No log channel configured. Please select a channel in settings first.')}`);
+    }
     if (!channel || !channel.isTextBased() || typeof channel.send !== 'function') {
-      return res.redirect(`/dashboard/${req.guild.id}/logging?error=${encodeURIComponent('Choose a valid log channel before testing.')}`);
+      return res.redirect(`/dashboard/${req.guild.id}/logging?error=${encodeURIComponent('Log channel not found or not a text channel. Please re-select the channel in settings.')}`);
     }
     try {
       const { EmbedBuilder } = require('discord.js');
@@ -534,10 +537,13 @@ function startDashboard(client) {
       return res.status(400).send('Unknown test message type.');
     }
 
-    const channel = req.guild.channels.cache.get(channelId);
+    const channel = req.guild.channels.cache.get(channelId) || await req.guild.channels.fetch(channelId).catch(() => null);
     const page = type === 'level' ? 'levels' : type === 'welcome' ? 'welcome' : 'moderation';
+    if (!channelId) {
+      return res.redirect(`/dashboard/${req.guild.id}/${page}?error=${encodeURIComponent('No channel configured. Please select a channel in settings first.')}`);
+    }
     if (!channel || !channel.isTextBased() || typeof channel.send !== 'function') {
-      return res.redirect(`/dashboard/${req.guild.id}/${page}?error=${encodeURIComponent('Configure a valid text channel before testing.')}`);
+      return res.redirect(`/dashboard/${req.guild.id}/${page}?error=${encodeURIComponent('Channel not found or not a text channel. Please re-select the channel in settings.')}`);
     }
     try {
       await channel.send(payload);
