@@ -432,16 +432,7 @@ async function addLog(guildId, type, moderatorId, targetId, reason, details) {
 
 async function getLogs(guildId, type, limit = 50) {
   if (supa.isAvailable()) {
-    const logs = await supa.getLogs(guildId, type, limit);
-    return logs.map(log => ({
-      guildId: log.guild_id,
-      type: log.type,
-      moderatorId: log.moderator_id,
-      targetId: log.target_id,
-      reason: log.reason,
-      details: log.details,
-      timestamp: log.created_at,
-    }));
+    return await supa.getLogs(guildId, type, limit);
   }
   const db = loadDB();
   return (db.logs || [])
